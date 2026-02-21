@@ -2,7 +2,6 @@
 
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
 import { DocumentViewer } from "@/components/document-viewer";
 import type { DocumentResult } from "./wizard-shell";
 
