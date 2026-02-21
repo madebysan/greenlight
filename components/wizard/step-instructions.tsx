@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { STAGE_0_PROMPT } from "@/lib/prompts/stage-0";
 
 type StepInstructionsProps = {
@@ -19,59 +18,106 @@ export function StepInstructions({ onNext }: StepInstructionsProps) {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
+      {/* Hero */}
       <div>
-        <h2 className="text-2xl font-semibold mb-2">Step 1: Extract Screenplay Data</h2>
-        <p className="text-muted-foreground">
-          Before the app can generate your documents, you need to extract structured data from your screenplay.
-          This is a one-time manual step that will be automated in a future version.
+        <h2 className="text-2xl font-semibold mb-2">
+          Extract Screenplay Data
+        </h2>
+        <p className="text-[15px] text-muted-foreground max-w-[60ch]">
+          Before the app can generate your documents, you need to extract
+          structured data from your screenplay using an AI chat.
         </p>
       </div>
 
-      <Card>
-        <CardContent className="pt-6 space-y-4">
-          <h3 className="font-medium text-lg">How it works</h3>
-          <ol className="list-decimal list-inside space-y-3 text-sm text-muted-foreground">
-            <li>
-              <span className="text-foreground font-medium">Open your screenplay PDF</span> in{" "}
-              <a href="https://claude.ai" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 text-primary hover:text-primary/80">
-                Claude.ai
-              </a>{" "}
-              or{" "}
-              <a href="https://chat.openai.com" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 text-primary hover:text-primary/80">
-                ChatGPT
-              </a>
-            </li>
-            <li>
-              <span className="text-foreground font-medium">Copy the extraction prompt below</span> and paste it along with your PDF
-            </li>
-            <li>
-              <span className="text-foreground font-medium">Copy the JSON response</span> — the entire output
-            </li>
-            <li>
-              <span className="text-foreground font-medium">Come back here</span> and paste it in Step 2
-            </li>
-          </ol>
-        </CardContent>
-      </Card>
+      {/* Steps as horizontal cards */}
+      <div className="grid grid-cols-4 gap-3">
+        {[
+          {
+            num: "1",
+            title: "Upload PDF",
+            desc: (
+              <>
+                Open your screenplay in{" "}
+                <a
+                  href="https://claude.ai"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline text-primary"
+                >
+                  Claude.ai
+                </a>{" "}
+                or{" "}
+                <a
+                  href="https://chat.openai.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline text-primary"
+                >
+                  ChatGPT
+                </a>
+              </>
+            ),
+          },
+          {
+            num: "2",
+            title: "Paste Prompt",
+            desc: "Copy the extraction prompt below and paste it with your PDF",
+          },
+          {
+            num: "3",
+            title: "Generate",
+            desc: "Paste the JSON here and generate your production bible — scene breakdowns, matrices, marketing brief, and more",
+          },
+          {
+            num: "4",
+            title: "Review & Use",
+            desc: "Review your production bible and use it to guide every stage of making your film",
+          },
+        ].map((step) => (
+          <div
+            key={step.num}
+            className="rounded-xl border bg-card p-4 space-y-2"
+          >
+            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-bold">
+              {step.num}
+            </div>
+            <div className="text-sm font-semibold">{step.title}</div>
+            <div className="text-[12px] leading-[1.6] text-muted-foreground">
+              {step.desc}
+            </div>
+          </div>
+        ))}
+      </div>
 
+      {/* Extraction prompt with copy button */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <h3 className="font-medium">Extraction Prompt</h3>
-          <Button variant="outline" size="sm" onClick={handleCopy}>
+          <h3 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">
+            Extraction Prompt
+          </h3>
+          <Button
+            variant={copied ? "outline" : "default"}
+            size="sm"
+            onClick={handleCopy}
+            className="min-w-[120px]"
+          >
             {copied ? "Copied!" : "Copy Prompt"}
           </Button>
         </div>
         <div className="relative">
-          <pre className="rounded-lg border bg-muted/50 p-4 text-xs leading-relaxed overflow-auto max-h-80 whitespace-pre-wrap">
+          <pre className="rounded-xl border bg-muted/40 p-4 text-xs leading-relaxed overflow-auto max-h-64 whitespace-pre-wrap font-mono">
             {STAGE_0_PROMPT}
           </pre>
+          {/* Scroll fade hint */}
+          <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-10 rounded-b-xl bg-gradient-to-t from-background/80 to-transparent" />
         </div>
       </div>
 
-      <div className="flex justify-end pt-4">
-        <Button onClick={onNext} size="lg">
-          I have my JSON — Next
+      {/* Next button */}
+      <div className="flex justify-end">
+        <Button onClick={onNext} size="lg" className="px-8">
+          I have my JSON &rarr;
         </Button>
       </div>
     </div>

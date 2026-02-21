@@ -11,6 +11,14 @@ type StepJsonInputProps = {
   onBack: () => void;
 };
 
+const OUTPUT_DOCS = [
+  { name: "Scene Breakdown", desc: "Scene-by-scene analysis with locations, cast & props" },
+  { name: "Production Matrices", desc: "Cross-referenced schedules, budgets & logistics" },
+  { name: "Marketing Brief", desc: "Logline, audience, tone & visual identity" },
+  { name: "Storyboard Prompts", desc: "AI-ready image prompts for each scene" },
+  { name: "Poster Concepts", desc: "Visual directions for marketing artwork" },
+];
+
 export function StepJsonInput({ onSubmit, onBack }: StepJsonInputProps) {
   const [input, setInput] = useState("");
   const [errors, setErrors] = useState<string[]>([]);
@@ -33,24 +41,31 @@ export function StepJsonInput({ onSubmit, onBack }: StepJsonInputProps) {
     onSubmit(trimmed);
   };
 
+  const hasContent = input.trim().length > 0;
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
+      {/* Hero */}
       <div>
-        <h2 className="text-2xl font-semibold mb-2">Step 2: Paste Your JSON</h2>
-        <p className="text-muted-foreground">
-          Paste the JSON output from the extraction prompt. The app will validate it before generating your documents.
+        <h2 className="text-2xl font-semibold mb-2">
+          Paste Your Screenplay Data
+        </h2>
+        <p className="text-[15px] text-muted-foreground max-w-[60ch]">
+          Paste the JSON output from your AI extraction. The app will validate
+          the structure before generating your production documents.
         </p>
       </div>
 
+      {/* JSON input area */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <label htmlFor="json-input" className="text-sm font-medium">
             Screenplay JSON
           </label>
           <Button
-            variant="ghost"
+            variant="outline"
             size="sm"
-            className="text-xs"
+            className="text-xs h-7 px-3"
             onClick={() => setShowExample(!showExample)}
           >
             {showExample ? "Hide example" : "Show example"}
@@ -58,9 +73,9 @@ export function StepJsonInput({ onSubmit, onBack }: StepJsonInputProps) {
         </div>
 
         {showExample && (
-          <Card className="bg-muted/30">
+          <Card className="bg-muted/30 border-dashed">
             <CardContent className="pt-4">
-              <pre className="text-xs overflow-auto max-h-48 whitespace-pre-wrap text-muted-foreground">
+              <pre className="text-xs overflow-auto max-h-48 whitespace-pre-wrap text-muted-foreground font-mono">
 {`{
   "title": "The Last Light",
   "genre": ["Drama", "Thriller"],
@@ -105,7 +120,7 @@ export function StepJsonInput({ onSubmit, onBack }: StepJsonInputProps) {
             if (errors.length > 0) setErrors([]);
           }}
           rows={16}
-          className="font-mono text-sm"
+          className="font-mono text-sm h-[300px] resize-none overflow-y-auto"
         />
 
         {errors.length > 0 && (
@@ -124,12 +139,38 @@ export function StepJsonInput({ onSubmit, onBack }: StepJsonInputProps) {
         )}
       </div>
 
-      <div className="flex justify-between pt-4">
+      {/* What you'll get */}
+      <div className="space-y-3">
+        <h3 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">
+          Documents You&apos;ll Get
+        </h3>
+        <div className="grid grid-cols-5 gap-2">
+          {OUTPUT_DOCS.map((doc, i) => (
+            <div
+              key={doc.name}
+              className="rounded-lg border bg-muted/20 px-3 py-2.5"
+            >
+              <div className="flex items-center gap-2 mb-1">
+                <span className="flex h-5 w-5 items-center justify-center rounded bg-primary/10 text-primary text-[11px] font-bold shrink-0">
+                  {i + 1}
+                </span>
+                <span className="text-xs font-semibold truncate">{doc.name}</span>
+              </div>
+              <p className="text-[11px] leading-[1.5] text-muted-foreground">
+                {doc.desc}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Actions */}
+      <div className="flex justify-between">
         <Button variant="outline" onClick={onBack}>
-          Back
+          &larr; Back
         </Button>
-        <Button onClick={handleSubmit} size="lg">
-          Generate Documents
+        <Button onClick={handleSubmit} size="lg" className="px-8" disabled={!hasContent}>
+          Generate &rarr;
         </Button>
       </div>
     </div>

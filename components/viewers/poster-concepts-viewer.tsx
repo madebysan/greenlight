@@ -1,0 +1,285 @@
+"use client";
+
+import { useState, useMemo } from "react";
+
+type PosterConcept = {
+  number: number;
+  name: string;
+  category: string;
+  style: string;
+  composition: string;
+  colors: { hex: string; name?: string }[];
+  typography: string;
+  tagline: string;
+  mood: string;
+  targetAppeal: string;
+  aiPrompt: string;
+};
+
+function parsePosterConcepts(md: string): { title: string; intro: string; concepts: PosterConcept[] } {
+  const lines = md.split("\n");
+  let title = "";
+  let intro = "";
+  const concepts: PosterConcept[] = [];
+  let currentCategory = "";
+  let current: PosterConcept | null = null;
+  let conceptNum = 0;
+
+  const flushConcept = () => {
+    if (current) concepts.push(current);
+    current = null;
+  };
+
+  for (const line of lines) {
+    if (/^# /.test(line) && !title) {
+      title = line.replace(/^# (Poster Concepts:\s*)?/, "").trim();
+      continue;
+    }
+
+    // Intro section
+    if (/^## About/.test(line)) continue;
+    if (!currentCategory && !line.startsWith("##") && !line.startsWith("**Concept") && line.trim() && !line.startsWith("---")) {
+      intro += line.trim() + " ";
+      continue;
+    }
+
+    // Category heading: ## Category: Name
+    const catMatch = line.match(/^## Category:\s*(.+)/);
+    if (catMatch) {
+      flushConcept();
+      currentCategory = catMatch[1].trim();
+      continue;
+    }
+
+    // Concept heading: **Concept N: Name**
+    const conceptMatch = line.match(/\*\*Concept (\d+):\s*(.+?)\*\*/);
+    if (conceptMatch) {
+      flushConcept();
+      conceptNum = parseInt(conceptMatch[1]);
+      current = {
+        number: conceptNum,
+        name: conceptMatch[2].trim(),
+        category: currentCategory,
+        style: "",
+        composition: "",
+        colors: [],
+        typography: "",
+        tagline: "",
+        mood: "",
+        targetAppeal: "",
+        aiPrompt: "",
+      };
+      continue;
+    }
+
+    if (!current) continue;
+
+    // Fields: - **Field:** Value
+    const fieldMatch = line.match(/^- \*\*(.+?):\*\*\s*(.+)/);
+    if (fieldMatch) {
+      const key = fieldMatch[1].toLowerCase();
+      const val = fieldMatch[2].trim();
+
+      if (key === "style") current.style = val;
+      else if (key === "composition") current.composition = val;
+      else if (key.includes("color")) {
+        // Parse color palette: #hex (name), #hex (name)
+        const hexMatches = val.matchAll(/(#[0-9a-fA-F]{6})\s*(?:\(([^)]+)\))?/g);
+        for (const m of hexMatches) {
+          current.colors.push({ hex: m[1], name: m[2] || undefined });
+        }
+      } else if (key.includes("typograph")) current.typography = val;
+      else if (key === "tagline") current.tagline = val.replace(/^[""]|[""]$/g, "");
+      else if (key === "mood") current.mood = val;
+      else if (key.includes("target")) current.targetAppeal = val;
+      else if (key.includes("ai prompt")) current.aiPrompt = val.replace(/^[""]|[""]$/g, "");
+    }
+  }
+  flushConcept();
+
+  return { title, intro: intro.trim(), concepts };
+}
+
+export function PosterConceptsViewer({ content }: { content: string }) {
+  const { title, intro, concepts } = useMemo(() => parsePosterConcepts(content), [content]);
+  const [copiedId, setCopiedId] = useState<number | null>(null);
+  const [expandedConcepts, setExpandedConcepts] = useState<Set<number>>(() => new Set([1]));
+
+  const categories = [...new Set(concepts.map((c) => c.category))];
+
+  const copyAIPrompt = async (concept: PosterConcept) => {
+    await navigator.clipboard.writeText(concept.aiPrompt);
+    setCopiedId(concept.number);
+    setTimeout(() => setCopiedId(null), 2000);
+  };
+
+  const toggleConcept = (num: number) => {
+    setExpandedConcepts((prev) => {
+      const next = new Set(prev);
+      if (next.has(num)) next.delete(num);
+      else next.add(num);
+      return next;
+    });
+  };
+
+  return (
+    <div>
+      {intro && (
+        <p className="text-[13px] text-muted-foreground leading-relaxed mb-6">
+          {intro}
+        </p>
+      )}
+
+      {categories.map((category) => {
+        const categoryConcepts = concepts.filter((c) => c.category === category);
+        return (
+          <section key={category} className="mb-8">
+            <div className="flex items-center gap-3 mb-4">
+              <h2 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">
+                {category}
+              </h2>
+              <div className="flex-1 h-px bg-border" />
+              <span className="text-[11px] text-muted-foreground">{categoryConcepts.length} concepts</span>
+            </div>
+
+            <div className="space-y-3">
+              {categoryConcepts.map((concept) => {
+                const isExpanded = expandedConcepts.has(concept.number);
+                const isCopied = copiedId === concept.number;
+
+                return (
+                  <div key={concept.number} className="rounded-xl border overflow-hidden">
+                    {/* Header */}
+                    <button
+                      onClick={() => toggleConcept(concept.number)}
+                      className="w-full flex items-center gap-3 px-4 py-3 text-left bg-muted/10 hover:bg-muted/20 transition-colors"
+                    >
+                      <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-foreground/5 text-xs font-bold shrink-0">
+                        {concept.number}
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        <span className="text-sm font-semibold">{concept.name}</span>
+                        {concept.mood && (
+                          <span className="text-[11px] text-muted-foreground ml-2">
+                            {concept.mood}
+                          </span>
+                        )}
+                      </div>
+                      {/* Color strip mini */}
+                      {concept.colors.length > 0 && (
+                        <div className="flex rounded overflow-hidden h-5 w-20 shrink-0">
+                          {concept.colors.map((c, i) => (
+                            <div key={i} className="flex-1" style={{ backgroundColor: c.hex }} />
+                          ))}
+                        </div>
+                      )}
+                      <svg
+                        width="16" height="16" viewBox="0 0 16 16" fill="none"
+                        className={`shrink-0 text-muted-foreground transition-transform ${isExpanded ? "rotate-180" : ""}`}
+                      >
+                        <path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </button>
+
+                    {isExpanded && (
+                      <div className="px-4 pb-4 space-y-4">
+                        {/* Color palette strip */}
+                        {concept.colors.length > 0 && (
+                          <div className="flex rounded-lg overflow-hidden h-10 mt-3">
+                            {concept.colors.map((c, i) => (
+                              <div
+                                key={i}
+                                className="flex-1 relative group cursor-default flex items-center justify-center"
+                                style={{ backgroundColor: c.hex }}
+                                title={`${c.name || ""} ${c.hex}`}
+                              >
+                                <span className="text-white text-[10px] font-mono font-semibold drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]">{c.hex}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Tagline */}
+                        {concept.tagline && (
+                          <blockquote className="text-[15px] font-medium italic border-l-2 border-primary/30 pl-3 text-foreground/85">
+                            &ldquo;{concept.tagline}&rdquo;
+                          </blockquote>
+                        )}
+
+                        {/* Style */}
+                        {concept.style && (
+                          <div>
+                            <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-1">Style</div>
+                            <p className="text-[13px] text-foreground/75 leading-relaxed">{concept.style}</p>
+                          </div>
+                        )}
+
+                        {/* Composition */}
+                        {concept.composition && (
+                          <div>
+                            <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-1">Composition</div>
+                            <p className="text-[13px] text-foreground/75 leading-relaxed">{concept.composition}</p>
+                          </div>
+                        )}
+
+                        {/* Typography */}
+                        {concept.typography && (
+                          <div>
+                            <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-1">Typography</div>
+                            <p className="text-[13px] text-foreground/75 leading-relaxed">{concept.typography}</p>
+                          </div>
+                        )}
+
+                        {/* Target Appeal */}
+                        {concept.targetAppeal && (
+                          <div className="flex items-start gap-2">
+                            <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold shrink-0 pt-0.5">Audience</span>
+                            <span className="text-[12px] text-foreground/60">{concept.targetAppeal}</span>
+                          </div>
+                        )}
+
+                        {/* AI Prompt with copy */}
+                        {concept.aiPrompt && (
+                          <div className="rounded-lg border bg-muted/20 p-3">
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">
+                                AI Image Prompt
+                              </span>
+                              <button
+                                onClick={(e) => { e.stopPropagation(); copyAIPrompt(concept); }}
+                                className={`inline-flex items-center gap-1 text-[11px] font-medium px-2 py-1 rounded-md transition-colors ${
+                                  isCopied
+                                    ? "bg-green-50 text-green-700"
+                                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                                }`}
+                              >
+                                {isCopied ? (
+                                  <>
+                                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
+                                    Copied
+                                  </>
+                                ) : (
+                                  <>
+                                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" /></svg>
+                                    Copy
+                                  </>
+                                )}
+                              </button>
+                            </div>
+                            <p className="text-[12px] font-mono text-foreground/60 leading-relaxed">
+                              {concept.aiPrompt}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        );
+      })}
+    </div>
+  );
+}

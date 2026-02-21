@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { generateDocument } from "@/lib/claude";
 import { POSTER_CONCEPTS_PROMPT } from "@/lib/prompts/poster-concepts";
+import { trimForPosterConcepts } from "@/lib/json-trimmer";
+import { getCached, setCache } from "@/lib/response-cache";
+
+const SLUG = "poster-concepts";
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,7 +17,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const markdown = await generateDocument(POSTER_CONCEPTS_PROMPT, jsonData);
+    const cached = getCached(SLUG);
+    if (cached) {
+      return NextResponse.json({ content: cached });
+    }
+
+    const trimmed = trimForPosterConcepts(jsonData);
+    const markdown = await generateDocument(POSTER_CONCEPTS_PROMPT, trimmed);
+    setCache(SLUG, markdown);
 
     return NextResponse.json({ content: markdown });
   } catch (error) {
