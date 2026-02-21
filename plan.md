@@ -162,14 +162,17 @@ script-to-production/
 
 ## Competitive Context
 
-Key competitors in AI pre-production tools:
+| Competitor | Overlap | Differentiator | Weakness | Pricing |
+|---|---|---|---|---|
+| **Filmustage** | Scene breakdown, element tagging, storyboard prompts | Full project workspace: scheduling, budgeting, Movie Magic export. Ingests PDF directly. | Free tier capped at 10 scenes. Exports paywalled. Trustpilot flagged review bias. | $50-200/mo |
+| **StudioBinder** | Script breakdown, shot lists, storyboard support | Full production suite: call sheets, crew mgmt, photo catalogs. Strong team collaboration. | Scheduling upload bugs. No weekend support. Free plan severely limited. | From $19/mo |
+| **Rivet AI** | Script breakdown, coverage reports, schedule, budget | Enterprise encryption, zero data sharing with external AI. Auto tax incentive qualification. | Studio-focused, not indie. Opaque pricing. Low community awareness. | Enterprise |
+| **Studiovity** | AI breakdown, storyboard generation, production planning | Mobile-first (iOS/Android), 385+ languages, on-set collaboration, real-time expense tracking. | $26/mo. Learning curve. Overwhelming for solo productions. | From $26/mo |
+| **Dramatify** | AI-assisted breakdown, 59 languages, scene element extraction | TV/drama production focus: wardrobe tracking, catering, timesheets, daily reports. Multi-camera. | $29/mo. No narrative/marketing docs. Skews episodic TV, not indie features. | From $29/mo |
 
-- **Filmustage** — Full AI pre-production suite (breakdown, scheduling, budgeting). $50-200/mo. Our differentiator: free/cheap, focused on document generation, LLM-powered creative output (marketing brief, poster concepts) that Filmustage doesn't do.
-- **StudioBinder** — Collaborative production management. Heavy, team-oriented. We're a lightweight single-user tool.
-- **RivetAI** — Enterprise-focused, budgeting/scheduling. Expensive, closed. We're open and cheap.
-- **Studiovity** — Storyboarding + writing. Overlaps on storyboard prompts but doesn't generate marketing material.
+**Our structural differentiator:** Every competitor requires (1) account creation, (2) subscription payment, (3) direct PDF upload. None generate narrative/marketing documents — they all produce operational docs (schedules, budgets, call sheets). Our marketing brief, poster concepts, and storyboard prompts have zero equivalent. The "paste JSON from your own LLM" workflow also means zero PDF parsing infrastructure to build or maintain.
 
-**Gap we exploit:** None of these tools generate marketing/creative pre-production documents (poster concepts, marketing briefs, taglines, visual direction). They focus on operational pre-production (schedules, budgets, breakdowns). We do both.
+**User complaints about competitors:** Free tiers useless for full screenplays (10-scene caps). Exports locked behind paywalls. Tools overbuilt for solo use. Subscription fatigue across 3-4 separate tools.
 
 ---
 
