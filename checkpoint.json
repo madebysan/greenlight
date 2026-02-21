@@ -1,0 +1,37 @@
+{
+  "project": "script-to-production",
+  "type": "react-web",
+  "started_at": "2026-02-21T18:10:00.000Z",
+  "current_phase": 1,
+  "current_phase_step": "scaffolding",
+  "iteration": 1,
+  "last_clean_commit": null,
+  "phases": {
+    "1_implement": {
+      "status": "in_progress",
+      "features": [
+        { "name": "Wizard Shell & Navigation", "status": "pending", "approach": "useState with step number, no router", "commit": null, "attempts": 0, "files_created": [], "files_modified": [] },
+        { "name": "Stage 0 Extraction Prompt", "status": "pending", "approach": "hardcoded constant in lib/prompts/stage-0.ts", "commit": null, "attempts": 0, "files_created": [], "files_modified": [] },
+        { "name": "Step 1 Instructions Screen", "status": "pending", "approach": "static content with copy-to-clipboard", "commit": null, "attempts": 0, "files_created": [], "files_modified": [] },
+        { "name": "Step 2 JSON Input", "status": "pending", "approach": "textarea with JSON.parse validation + schema check", "commit": null, "attempts": 0, "files_created": [], "files_modified": [] },
+        { "name": "API Route - Scene Breakdown", "status": "pending", "approach": "Claude API, single prompt, markdown output", "commit": null, "attempts": 0, "files_created": [], "files_modified": [] },
+        { "name": "API Route - Production Matrices", "status": "pending", "approach": "Claude API, single prompt, 5 tables in one response", "commit": null, "attempts": 0, "files_created": [], "files_modified": [] },
+        { "name": "API Route - Marketing Brief", "status": "pending", "approach": "Claude API, single prompt, narrative markdown", "commit": null, "attempts": 0, "files_created": [], "files_modified": [] },
+        { "name": "API Route - Storyboard Prompts", "status": "pending", "approach": "Claude API, single prompt, per-scene prompt blocks", "commit": null, "attempts": 0, "files_created": [], "files_modified": [] },
+        { "name": "API Route - Poster Concepts", "status": "pending", "approach": "Claude API, single prompt, 10-15 diverse concepts", "commit": null, "attempts": 0, "files_created": [], "files_modified": [] },
+        { "name": "Step 3 Generation", "status": "pending", "approach": "Promise.allSettled for 5 parallel API calls", "commit": null, "attempts": 0, "files_created": [], "files_modified": [] },
+        { "name": "Step 4 Results Viewer", "status": "pending", "approach": "shadcn Tabs, react-markdown, blob download", "commit": null, "attempts": 0, "files_created": [], "files_modified": [] },
+        { "name": "Error Handling", "status": "pending", "approach": "try/catch per API route, graceful degradation", "commit": null, "attempts": 0, "files_created": [], "files_modified": [] }
+      ]
+    },
+    "2_test": { "status": "pending", "tests_passed": 0, "tests_failed": 0 },
+    "3_qa": { "status": "pending", "issues_found": 0, "issues_fixed": 0 },
+    "4_visual": { "status": "pending" },
+    "5_security": { "status": "pending" },
+    "6_verify": { "status": "pending" }
+  },
+  "decisions_made": [],
+  "regressions_caught": [],
+  "deferred_to_v1": [],
+  "blocked": []
+}
