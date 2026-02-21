@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { generateDocument } from "@/lib/claude";
 import { STORYBOARD_PROMPTS_PROMPT } from "@/lib/prompts/storyboard-prompts";
+import { trimForStoryboardPrompts } from "@/lib/json-trimmer";
+import { getCached, setCache } from "@/lib/response-cache";
+
+const SLUG = "storyboard-prompts";
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,7 +17,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const markdown = await generateDocument(STORYBOARD_PROMPTS_PROMPT, jsonData);
+    const cached = getCached(SLUG);
+    if (cached) {
+      return NextResponse.json({ content: cached });
+    }
+
+    const trimmed = trimForStoryboardPrompts(jsonData);
+    const markdown = await generateDocument(STORYBOARD_PROMPTS_PROMPT, trimmed);
+    setCache(SLUG, markdown);
 
     return NextResponse.json({ content: markdown });
   } catch (error) {

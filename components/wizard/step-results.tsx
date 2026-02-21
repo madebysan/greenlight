@@ -1,60 +1,54 @@
 "use client";
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DocumentViewer } from "@/components/document-viewer";
+import { Download } from "lucide-react";
+import { SceneBreakdownViewer } from "@/components/viewers/scene-breakdown-viewer";
+import { ProductionMatricesViewer } from "@/components/viewers/production-matrices-viewer";
+import { MarketingBriefViewer } from "@/components/viewers/marketing-brief-viewer";
+import { StoryboardViewer } from "@/components/viewers/storyboard-viewer";
+import { PosterConceptsViewer } from "@/components/viewers/poster-concepts-viewer";
 import type { DocumentResult } from "./wizard-shell";
+
+const DOC_META: Record<string, { desc: string }> = {
+  "scene-breakdown": { desc: "Scene-by-scene analysis" },
+  "production-matrices": { desc: "Cast, locations, props & schedules" },
+  "marketing-brief": { desc: "Logline, palette & audience" },
+  "storyboard-prompts": { desc: "Per-scene image prompts" },
+  "poster-concepts": { desc: "Visual poster directions" },
+};
 
 type StepResultsProps = {
   documents: DocumentResult[];
   onStartOver: () => void;
+  onDocumentUpdate?: (slug: string, newContent: string) => void;
+  onDocumentRewrite?: (slug: string) => Promise<void>;
 };
 
-export function StepResults({ documents, onStartOver }: StepResultsProps) {
+export function StepResults({ documents, onStartOver, onDocumentUpdate, onDocumentRewrite }: StepResultsProps) {
   const completedDocs = documents.filter((doc) => doc.status === "done");
   const failedDocs = documents.filter((doc) => doc.status === "error");
+  const [activeSlug, setActiveSlug] = useState(
+    completedDocs.length > 0 ? completedDocs[0].slug : ""
+  );
 
-  const handleDownloadAll = () => {
-    completedDocs.forEach((doc) => {
-      if (!doc.content) return;
-      const blob = new Blob([doc.content], { type: "text/markdown" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `${doc.slug}.md`;
-      a.click();
-      URL.revokeObjectURL(url);
-    });
+  const activeDoc = completedDocs.find((d) => d.slug === activeSlug);
+
+  const handleDownloadOne = (doc: DocumentResult) => {
+    if (!doc.content) return;
+    const blob = new Blob([doc.content], { type: "text/markdown" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${doc.slug}.md`;
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
-  const defaultTab = completedDocs.length > 0 ? completedDocs[0].slug : "";
-
   return (
-    <div className="space-y-6">
-      <div className="flex items-start justify-between">
-        <div>
-          <h2 className="text-2xl font-semibold mb-2">Your Documents</h2>
-          <p className="text-muted-foreground">
-            {completedDocs.length} of {documents.length} documents generated
-            {failedDocs.length > 0 && (
-              <span className="text-destructive">
-                {" "} ({failedDocs.length} failed)
-              </span>
-            )}
-          </p>
-        </div>
-        <div className="flex gap-2">
-          {completedDocs.length > 1 && (
-            <Button variant="outline" size="sm" onClick={handleDownloadAll}>
-              Download All
-            </Button>
-          )}
-          <Button variant="outline" size="sm" onClick={onStartOver}>
-            Start Over
-          </Button>
-        </div>
-      </div>
-
+    <div className="space-y-4">
+      {/* Error banner */}
       {failedDocs.length > 0 && (
         <div className="rounded-lg border border-destructive/50 bg-destructive/5 p-4">
           <p className="text-sm font-medium text-destructive mb-2">
@@ -70,29 +64,70 @@ export function StepResults({ documents, onStartOver }: StepResultsProps) {
         </div>
       )}
 
+      {/* Horizontal tabs + content */}
       {completedDocs.length > 0 && (
-        <Tabs defaultValue={defaultTab} className="w-full">
-          <TabsList className="w-full justify-start flex-wrap h-auto gap-1 bg-transparent p-0">
-            {completedDocs.map((doc) => (
-              <TabsTrigger
-                key={doc.slug}
-                value={doc.slug}
-                className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full px-4 py-1.5 text-sm border"
+        <div className="min-h-[600px]">
+          {/* Horizontal tab navigation */}
+          <div className="flex items-center gap-1 border-b mb-0">
+            {completedDocs.map((doc) => {
+              const isActive = doc.slug === activeSlug;
+              return (
+                <button
+                  key={doc.slug}
+                  onClick={() => setActiveSlug(doc.slug)}
+                  className={`relative px-4 py-2.5 text-[13px] font-medium transition-colors rounded-t-lg ${
+                    isActive
+                      ? "text-foreground bg-muted/50"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted/30"
+                  }`}
+                >
+                  {doc.name}
+                  {isActive && (
+                    <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-full" />
+                  )}
+                </button>
+              );
+            })}
+            {/* Download button aligned right */}
+            {activeDoc && (
+              <button
+                onClick={() => handleDownloadOne(activeDoc)}
+                className="ml-auto flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground hover:bg-muted rounded-md px-2 py-1 transition-colors"
               >
-                {doc.name}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-          {completedDocs.map((doc) => (
-            <TabsContent key={doc.slug} value={doc.slug} className="mt-6">
-              <div className="rounded-lg border p-6">
-                {doc.content && (
-                  <DocumentViewer content={doc.content} name={doc.name} />
-                )}
-              </div>
-            </TabsContent>
-          ))}
-        </Tabs>
+                <Download size={14} />
+                Download
+              </button>
+            )}
+          </div>
+
+          {/* Document content */}
+          <div className="rounded-b-lg border border-t-0 overflow-hidden">
+            <div className="overflow-y-auto p-6">
+              {activeDoc?.content && (() => {
+                switch (activeDoc.slug) {
+                  case "scene-breakdown":
+                    return <SceneBreakdownViewer content={activeDoc.content} />;
+                  case "production-matrices":
+                    return <ProductionMatricesViewer content={activeDoc.content} />;
+                  case "marketing-brief":
+                    return (
+                      <MarketingBriefViewer
+                        content={activeDoc.content}
+                        onContentChange={onDocumentUpdate ? (c) => onDocumentUpdate("marketing-brief", c) : undefined}
+                        onRewrite={onDocumentRewrite ? () => onDocumentRewrite("marketing-brief") : undefined}
+                      />
+                    );
+                  case "storyboard-prompts":
+                    return <StoryboardViewer content={activeDoc.content} />;
+                  case "poster-concepts":
+                    return <PosterConceptsViewer content={activeDoc.content} />;
+                  default:
+                    return <DocumentViewer content={activeDoc.content} />;
+                }
+              })()}
+            </div>
+          </div>
+        </div>
       )}
 
       {completedDocs.length === 0 && (
@@ -101,7 +136,7 @@ export function StepResults({ documents, onStartOver }: StepResultsProps) {
             No documents were generated. Try again with different input.
           </p>
           <Button className="mt-4" onClick={onStartOver}>
-            Start Over
+            Try Again
           </Button>
         </div>
       )}

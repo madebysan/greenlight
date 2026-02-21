@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { generateDocument } from "@/lib/claude";
 import { MARKETING_BRIEF_PROMPT } from "@/lib/prompts/marketing-brief";
+import { trimForMarketingBrief } from "@/lib/json-trimmer";
+import { getCached, setCache } from "@/lib/response-cache";
+
+const SLUG = "marketing-brief";
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,7 +17,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const markdown = await generateDocument(MARKETING_BRIEF_PROMPT, jsonData);
+    const cached = getCached(SLUG);
+    if (cached) {
+      return NextResponse.json({ content: cached });
+    }
+
+    const trimmed = trimForMarketingBrief(jsonData);
+    const markdown = await generateDocument(MARKETING_BRIEF_PROMPT, trimmed);
+    setCache(SLUG, markdown);
 
     return NextResponse.json({ content: markdown });
   } catch (error) {

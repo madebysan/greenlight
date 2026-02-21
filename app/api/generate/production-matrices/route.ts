@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { generateDocument } from "@/lib/claude";
 import { PRODUCTION_MATRICES_PROMPT } from "@/lib/prompts/production-matrices";
+import { trimForProductionMatrices } from "@/lib/json-trimmer";
+import { getCached, setCache } from "@/lib/response-cache";
+
+const SLUG = "production-matrices";
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,7 +17,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const markdown = await generateDocument(PRODUCTION_MATRICES_PROMPT, jsonData);
+    const cached = getCached(SLUG);
+    if (cached) {
+      return NextResponse.json({ content: cached });
+    }
+
+    const trimmed = trimForProductionMatrices(jsonData);
+    const markdown = await generateDocument(PRODUCTION_MATRICES_PROMPT, trimmed);
+    setCache(SLUG, markdown);
 
     return NextResponse.json({ content: markdown });
   } catch (error) {

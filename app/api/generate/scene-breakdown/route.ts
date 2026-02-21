@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { generateDocument } from "@/lib/claude";
 import { SCENE_BREAKDOWN_PROMPT } from "@/lib/prompts/scene-breakdown";
+import { trimForSceneBreakdown } from "@/lib/json-trimmer";
+import { getCached, setCache } from "@/lib/response-cache";
+
+const SLUG = "scene-breakdown";
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,7 +17,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const markdown = await generateDocument(SCENE_BREAKDOWN_PROMPT, jsonData);
+    // Return cached response if available
+    const cached = getCached(SLUG);
+    if (cached) {
+      return NextResponse.json({ content: cached });
+    }
+
+    const trimmed = trimForSceneBreakdown(jsonData);
+    const markdown = await generateDocument(SCENE_BREAKDOWN_PROMPT, trimmed);
+    setCache(SLUG, markdown);
 
     return NextResponse.json({ content: markdown });
   } catch (error) {
