@@ -437,12 +437,8 @@ function CollapsibleSection({
 
 // --- Map table titles to nav IDs ---
 function getNavId(tableTitle: string) {
-  const lower = tableTitle.toLowerCase();
-  if (lower.includes("location")) return "location";
-  if (lower.includes("props")) return "props";
-  if (lower.includes("wardrobe")) return "wardrobe";
-  if (lower.includes("vfx") || lower.includes("stunt")) return "vfx";
-  return tableTitle.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+  const type = getTableType(tableTitle);
+  return type === "generic" ? tableTitle.toLowerCase().replace(/[^a-z0-9]+/g, "-") : type;
 }
 
 // --- Main component ---
@@ -464,33 +460,43 @@ export function ProductionMatricesViewer({ content }: { content: string }) {
     return ids;
   }, [otherTables, textSections]);
 
-  // Track which section is visible while scrolling
+  // Track which section is visible while scrolling (throttled to one check per frame)
+  const rafRef = useRef(0);
+  const scrollContainerRef = useRef<Element | null>(null);
   const handleScroll = useCallback(() => {
-    const scrollContainer = containerRef.current?.closest(".overflow-y-auto");
-    if (!scrollContainer) return;
+    cancelAnimationFrame(rafRef.current);
+    rafRef.current = requestAnimationFrame(() => {
+      const scrollContainer = scrollContainerRef.current;
+      if (!scrollContainer) return;
 
-    const containerTop = scrollContainer.getBoundingClientRect().top;
-    let closest = sectionIds[0];
-    let closestDistance = Infinity;
+      const containerTop = scrollContainer.getBoundingClientRect().top;
+      let closest = sectionIds[0];
+      let closestDistance = Infinity;
 
-    for (const id of sectionIds) {
-      const el = document.getElementById(`pm-${id}`);
-      if (!el) continue;
-      const distance = Math.abs(el.getBoundingClientRect().top - containerTop - 80);
-      if (distance < closestDistance) {
-        closestDistance = distance;
-        closest = id;
+      for (const id of sectionIds) {
+        const el = document.getElementById(`pm-${id}`);
+        if (!el) continue;
+        const distance = Math.abs(el.getBoundingClientRect().top - containerTop - 80);
+        if (distance < closestDistance) {
+          closestDistance = distance;
+          closest = id;
+        }
       }
-    }
 
-    setActiveSection(closest);
+      setActiveSection(closest);
+    });
   }, [sectionIds]);
 
   useEffect(() => {
     const scrollContainer = containerRef.current?.closest(".overflow-y-auto");
     if (!scrollContainer) return;
+    scrollContainerRef.current = scrollContainer;
     scrollContainer.addEventListener("scroll", handleScroll, { passive: true });
-    return () => scrollContainer.removeEventListener("scroll", handleScroll);
+    return () => {
+      scrollContainer.removeEventListener("scroll", handleScroll);
+      cancelAnimationFrame(rafRef.current);
+      scrollContainerRef.current = null;
+    };
   }, [handleScroll]);
 
   const scrollToSection = (id: string) => {

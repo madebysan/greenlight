@@ -26,7 +26,7 @@ export function loadReports(): SavedReport[] {
   }
 }
 
-export function saveReport(report: SavedReport): void {
+export function saveReport(report: SavedReport): SavedReport[] {
   const reports = loadReports();
   // Replace if same id exists, otherwise prepend
   const idx = reports.findIndex((r) => r.id === report.id);
@@ -48,11 +48,13 @@ export function saveReport(report: SavedReport): void {
       // Give up
     }
   }
+  return reports;
 }
 
-export function deleteReport(id: string): void {
+export function deleteReport(id: string): SavedReport[] {
   const reports = loadReports().filter((r) => r.id !== id);
   localStorage.setItem(REPORTS_KEY, JSON.stringify(reports));
+  return reports;
 }
 
 export function extractTitle(jsonData: string): string {
