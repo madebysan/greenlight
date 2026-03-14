@@ -7,7 +7,6 @@ import React from "react";
 
 type DocumentViewerProps = {
   content: string;
-  name?: string;
 };
 
 // Inline hex color swatch

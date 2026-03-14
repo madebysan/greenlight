@@ -90,8 +90,7 @@ export function WizardShell() {
           error: d.error,
         })),
       };
-      saveReport(report);
-      setReports(loadReports());
+      setReports(saveReport(report));
       setActiveReportId(id);
     },
     [jsonData]
@@ -135,8 +134,7 @@ export function WizardShell() {
   };
 
   const handleDeleteReport = (id: string) => {
-    deleteReport(id);
-    setReports(loadReports());
+    setReports(deleteReport(id));
     if (activeReportId === id) {
       setActiveReportId(null);
       handleNewReport();
@@ -224,7 +222,7 @@ export function WizardShell() {
                   </div>
                   <div className="flex items-center justify-between mt-0.5">
                     <span className="text-[11px] text-muted-foreground">
-                      {date.toLocaleDateString()} &middot; {doneCount}/5 docs
+                      {date.toLocaleDateString()} &middot; {doneCount}/{report.documents.length} docs
                     </span>
                     <AlertDialog>
                       <AlertDialogTrigger asChild>

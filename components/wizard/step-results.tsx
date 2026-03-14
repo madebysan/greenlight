@@ -11,14 +11,6 @@ import { StoryboardViewer } from "@/components/viewers/storyboard-viewer";
 import { PosterConceptsViewer } from "@/components/viewers/poster-concepts-viewer";
 import type { DocumentResult } from "./wizard-shell";
 
-const DOC_META: Record<string, { desc: string }> = {
-  "scene-breakdown": { desc: "Scene-by-scene analysis" },
-  "production-matrices": { desc: "Cast, locations, props & schedules" },
-  "marketing-brief": { desc: "Logline, palette & audience" },
-  "storyboard-prompts": { desc: "Per-scene image prompts" },
-  "poster-concepts": { desc: "Visual poster directions" },
-};
-
 type StepResultsProps = {
   documents: DocumentResult[];
   onStartOver: () => void;

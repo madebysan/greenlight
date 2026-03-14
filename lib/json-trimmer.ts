@@ -11,14 +11,6 @@ function parseData(jsonString: string): AnyData {
   return raw as AnyData;
 }
 
-function pick<T extends Record<string, unknown>>(obj: T, keys: string[]): Partial<T> {
-  const result: Record<string, unknown> = {};
-  for (const key of keys) {
-    if (key in obj) result[key] = obj[key];
-  }
-  return result as Partial<T>;
-}
-
 // Scene Breakdown: needs scenes (full), locations (for count), title, total_pages
 export function trimForSceneBreakdown(jsonString: string): string {
   const data = parseData(jsonString);
@@ -31,12 +23,6 @@ export function trimForSceneBreakdown(jsonString: string): string {
       scenes: l.scenes,
     })),
   });
-}
-
-// Production Matrices: needs everything — full cross-reference
-export function trimForProductionMatrices(jsonString: string): string {
-  // Pass through — this document needs all data
-  return jsonString;
 }
 
 // Marketing Brief: needs title/genre/tone/themes + character summaries + scene highlights
