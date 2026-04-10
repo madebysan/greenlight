@@ -7,11 +7,11 @@ const SLUG = "production-matrices";
 
 export async function POST(request: NextRequest) {
   try {
-    const { jsonData } = await request.json();
+    const { jsonData, apiKey } = await request.json();
 
-    if (!jsonData) {
+    if (!jsonData || !apiKey) {
       return NextResponse.json(
-        { error: "Missing jsonData in request body" },
+        { error: "Missing jsonData or apiKey in request body" },
         { status: 400 }
       );
     }
@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ content: cached });
     }
 
-    const markdown = await generateDocument(PRODUCTION_MATRICES_PROMPT, jsonData);
+    const markdown = await generateDocument(PRODUCTION_MATRICES_PROMPT, jsonData, apiKey);
     setCache(SLUG, jsonData, markdown);
 
     return NextResponse.json({ content: markdown });

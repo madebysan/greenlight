@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import type { DocumentResult } from "./wizard-shell";
 
 type StepGeneratingProps = {
+  apiKey: string;
   jsonData: string;
   documents: DocumentResult[];
   setDocuments: React.Dispatch<React.SetStateAction<DocumentResult[]>>;
@@ -27,6 +28,7 @@ const STATUS_COLOR: Record<DocumentResult["status"], string> = {
 async function generateOne(
   doc: DocumentResult,
   jsonData: string,
+  apiKey: string,
   setDocuments: React.Dispatch<React.SetStateAction<DocumentResult[]>>
 ): Promise<{ slug: string; content: string | null; error: string | null }> {
   // Mark as generating
@@ -40,7 +42,7 @@ async function generateOne(
     const res = await fetch(`/api/generate/${doc.slug}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ jsonData }),
+      body: JSON.stringify({ jsonData, apiKey }),
     });
 
     if (!res.ok) {
@@ -83,6 +85,7 @@ async function generateOne(
 }
 
 export function StepGenerating({
+  apiKey,
   jsonData,
   documents,
   setDocuments,
@@ -99,7 +102,7 @@ export function StepGenerating({
 
       // Generate one at a time to avoid rate limits
       for (const doc of documents) {
-        const result = await generateOne(doc, jsonData, setDocuments);
+        const result = await generateOne(doc, jsonData, apiKey, setDocuments);
         results.push(result);
       }
 
