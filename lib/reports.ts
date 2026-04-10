@@ -1,5 +1,10 @@
 // Report history — persisted to localStorage
 
+export type SavedImage = {
+  status: "done";
+  url: string;
+};
+
 export type SavedReport = {
   id: string;
   title: string;
@@ -12,6 +17,8 @@ export type SavedReport = {
     content: string | null;
     error: string | null;
   }[];
+  images?: Record<number, SavedImage>;
+  promptOverrides?: Record<number, string>;
 };
 
 const REPORTS_KEY = "stp-reports";

@@ -328,12 +328,35 @@ function SceneCard({ scene, copiedScene, onCopy, imageState, onGenerate, regenSt
   );
 }
 
-export function StoryboardViewer({ content }: { content: string }) {
+type SavedImage = { status: "done"; url: string };
+
+type StoryboardViewerProps = {
+  content: string;
+  savedImages: Record<number, SavedImage>;
+  onImagesChange: (images: Record<number, SavedImage>) => void;
+  savedPromptOverrides: Record<number, string>;
+  onPromptOverridesChange: (overrides: Record<number, string>) => void;
+};
+
+export function StoryboardViewer({ content, savedImages, onImagesChange, savedPromptOverrides, onPromptOverridesChange }: StoryboardViewerProps) {
   const { intro, acts } = useMemo(() => parseStoryboardPrompts(content), [content]);
   const [copiedScene, setCopiedScene] = useState<number | null>(null);
-  const [images, setImages] = useState<Record<number, ImageState>>({});
-  const [promptOverrides, setPromptOverrides] = useState<Record<number, string>>({});
+  const [localImages, setLocalImages] = useState<Record<number, ImageState>>({});
   const [regenStates, setRegenStates] = useState<Record<number, "idle" | "loading">>({});
+
+  // Merge saved images into local state on mount/change
+  const images: Record<number, ImageState> = useMemo(() => {
+    const merged: Record<number, ImageState> = {};
+    for (const [k, v] of Object.entries(savedImages)) {
+      merged[Number(k)] = v;
+    }
+    for (const [k, v] of Object.entries(localImages)) {
+      merged[Number(k)] = v; // local (generating/error) overrides saved
+    }
+    return merged;
+  }, [savedImages, localImages]);
+
+  const promptOverrides = savedPromptOverrides;
 
   const totalScenes = acts.reduce((sum, act) => sum + act.scenes.length, 0);
 
@@ -344,7 +367,7 @@ export function StoryboardViewer({ content }: { content: string }) {
   };
 
   const generateImage = async (scene: StoryboardScene) => {
-    setImages((prev) => ({ ...prev, [scene.number]: { status: "generating" } }));
+    setLocalImages((prev) => ({ ...prev, [scene.number]: { status: "generating" } }));
     try {
       const res = await fetch("/api/generate-image", {
         method: "POST",
@@ -356,9 +379,11 @@ export function StoryboardViewer({ content }: { content: string }) {
         throw new Error(data.error || `HTTP ${res.status}`);
       }
       const { url } = await res.json();
-      setImages((prev) => ({ ...prev, [scene.number]: { status: "done", url } }));
+      setLocalImages((prev) => ({ ...prev, [scene.number]: { status: "done", url } }));
+      // Persist to report
+      onImagesChange({ ...savedImages, [scene.number]: { status: "done", url } });
     } catch (error) {
-      setImages((prev) => ({
+      setLocalImages((prev) => ({
         ...prev,
         [scene.number]: {
           status: "error",
@@ -378,7 +403,8 @@ export function StoryboardViewer({ content }: { content: string }) {
       });
       if (!res.ok) throw new Error("Failed");
       const { prompt } = await res.json();
-      setPromptOverrides((prev) => ({ ...prev, [scene.number]: prompt }));
+      const updated = { ...savedPromptOverrides, [scene.number]: prompt };
+      onPromptOverridesChange(updated);
     } catch {
       // silently fail — original prompt stays
     }
