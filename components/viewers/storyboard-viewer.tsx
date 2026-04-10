@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Video, Sun, Heart, Check, Copy } from "lucide-react";
+import { Video, Sun, Heart, Check, Copy, ImageIcon, Loader2, Download } from "lucide-react";
 
 type StoryboardScene = {
   number: number;
@@ -170,10 +170,14 @@ function parseStoryboardPrompts(md: string): { title: string; intro: string; act
   return { title, intro: introBuffer.trim(), acts };
 }
 
-function SceneCard({ scene, copiedScene, onCopy }: {
+type ImageState = { status: "idle" | "generating" | "done" | "error"; url?: string; error?: string };
+
+function SceneCard({ scene, copiedScene, onCopy, imageState, onGenerate }: {
   scene: StoryboardScene;
   copiedScene: number | null;
   onCopy: (scene: StoryboardScene) => void;
+  imageState: ImageState;
+  onGenerate: (scene: StoryboardScene) => void;
 }) {
   const isCopied = copiedScene === scene.number;
   const intExtMatch = scene.slugLine.match(/^(INT|EXT)\b/i);
@@ -199,6 +203,34 @@ function SceneCard({ scene, copiedScene, onCopy }: {
           {scene.slugLine.replace(/^(INT|EXT)\.\s*/, "")}
         </span>
         <button
+          onClick={() => onGenerate(scene)}
+          disabled={imageState.status === "generating"}
+          className={`inline-flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1.5 rounded-md border transition-colors ${
+            imageState.status === "generating"
+              ? "text-primary border-primary/20 bg-primary/5"
+              : imageState.status === "done"
+              ? "text-muted-foreground hover:text-foreground hover:bg-muted border-transparent hover:border-border"
+              : "text-muted-foreground hover:text-foreground hover:bg-muted border-transparent hover:border-border"
+          }`}
+        >
+          {imageState.status === "generating" ? (
+            <>
+              <Loader2 size={12} className="animate-spin" />
+              Generating...
+            </>
+          ) : imageState.status === "done" ? (
+            <>
+              <ImageIcon size={12} />
+              Regenerate
+            </>
+          ) : (
+            <>
+              <ImageIcon size={12} />
+              Generate image
+            </>
+          )}
+        </button>
+        <button
           onClick={() => onCopy(scene)}
           className={`inline-flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1.5 rounded-md border transition-colors ${
             isCopied
@@ -219,6 +251,32 @@ function SceneCard({ scene, copiedScene, onCopy }: {
           )}
         </button>
       </div>
+
+      {/* Generated image */}
+      {imageState.status === "done" && imageState.url && (
+        <div className="relative group">
+          <img
+            src={imageState.url}
+            alt={`Storyboard frame — Scene ${scene.number}`}
+            className="w-full"
+          />
+          <a
+            href={imageState.url}
+            download={`scene-${scene.number}.png`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity inline-flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1.5 rounded-md bg-black/70 text-white hover:bg-black/90"
+          >
+            <Download size={12} />
+            Save
+          </a>
+        </div>
+      )}
+      {imageState.status === "error" && (
+        <div className="px-4 py-3 bg-destructive/5 border-b">
+          <p className="text-xs text-destructive">{imageState.error || "Image generation failed"}</p>
+        </div>
+      )}
 
       {/* Prompt text */}
       <div className="px-4 py-4">
@@ -257,6 +315,7 @@ function SceneCard({ scene, copiedScene, onCopy }: {
 export function StoryboardViewer({ content }: { content: string }) {
   const { intro, acts } = useMemo(() => parseStoryboardPrompts(content), [content]);
   const [copiedScene, setCopiedScene] = useState<number | null>(null);
+  const [images, setImages] = useState<Record<number, ImageState>>({});
 
   const totalScenes = acts.reduce((sum, act) => sum + act.scenes.length, 0);
 
@@ -264,6 +323,31 @@ export function StoryboardViewer({ content }: { content: string }) {
     await navigator.clipboard.writeText(scene.prompt);
     setCopiedScene(scene.number);
     setTimeout(() => setCopiedScene(null), 2000);
+  };
+
+  const generateImage = async (scene: StoryboardScene) => {
+    setImages((prev) => ({ ...prev, [scene.number]: { status: "generating" } }));
+    try {
+      const res = await fetch("/api/generate-image", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt: scene.prompt }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || `HTTP ${res.status}`);
+      }
+      const { url } = await res.json();
+      setImages((prev) => ({ ...prev, [scene.number]: { status: "done", url } }));
+    } catch (error) {
+      setImages((prev) => ({
+        ...prev,
+        [scene.number]: {
+          status: "error",
+          error: error instanceof Error ? error.message : "Failed",
+        },
+      }));
+    }
   };
 
   return (
@@ -301,6 +385,8 @@ export function StoryboardViewer({ content }: { content: string }) {
                   scene={scene}
                   copiedScene={copiedScene}
                   onCopy={copyPrompt}
+                  imageState={images[scene.number] || { status: "idle" }}
+                  onGenerate={generateImage}
                 />
               ))}
             </div>
