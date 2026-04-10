@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Video, Sun, Heart, Check, Copy, ImageIcon, Loader2, Download } from "lucide-react";
+import { Video, Sun, Heart, Check, Copy, ImageIcon, Loader2, Download, RefreshCw } from "lucide-react";
 
 type StoryboardScene = {
   number: number;
@@ -172,12 +172,14 @@ function parseStoryboardPrompts(md: string): { title: string; intro: string; act
 
 type ImageState = { status: "idle" | "generating" | "done" | "error"; url?: string; error?: string };
 
-function SceneCard({ scene, copiedScene, onCopy, imageState, onGenerate }: {
+function SceneCard({ scene, copiedScene, onCopy, imageState, onGenerate, regenState, onRegenPrompt }: {
   scene: StoryboardScene;
   copiedScene: number | null;
   onCopy: (scene: StoryboardScene) => void;
   imageState: ImageState;
   onGenerate: (scene: StoryboardScene) => void;
+  regenState: "idle" | "loading";
+  onRegenPrompt: (scene: StoryboardScene) => void;
 }) {
   const isCopied = copiedScene === scene.number;
   const intExtMatch = scene.slugLine.match(/^(INT|EXT)\b/i);
@@ -229,6 +231,14 @@ function SceneCard({ scene, copiedScene, onCopy, imageState, onGenerate }: {
               Generate image
             </>
           )}
+        </button>
+        <button
+          onClick={() => onRegenPrompt(scene)}
+          disabled={regenState === "loading"}
+          className="inline-flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1.5 rounded-md border border-transparent text-muted-foreground hover:text-foreground hover:bg-muted hover:border-border transition-colors"
+        >
+          <RefreshCw size={12} className={regenState === "loading" ? "animate-spin" : ""} />
+          {regenState === "loading" ? "Rewriting..." : "Rewrite prompt"}
         </button>
         <button
           onClick={() => onCopy(scene)}
@@ -322,6 +332,8 @@ export function StoryboardViewer({ content }: { content: string }) {
   const { intro, acts } = useMemo(() => parseStoryboardPrompts(content), [content]);
   const [copiedScene, setCopiedScene] = useState<number | null>(null);
   const [images, setImages] = useState<Record<number, ImageState>>({});
+  const [promptOverrides, setPromptOverrides] = useState<Record<number, string>>({});
+  const [regenStates, setRegenStates] = useState<Record<number, "idle" | "loading">>({});
 
   const totalScenes = acts.reduce((sum, act) => sum + act.scenes.length, 0);
 
@@ -356,6 +368,23 @@ export function StoryboardViewer({ content }: { content: string }) {
     }
   };
 
+  const regenPrompt = async (scene: StoryboardScene) => {
+    setRegenStates((prev) => ({ ...prev, [scene.number]: "loading" }));
+    try {
+      const res = await fetch("/api/regenerate-prompt", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt: scene.prompt, slugLine: scene.slugLine }),
+      });
+      if (!res.ok) throw new Error("Failed");
+      const { prompt } = await res.json();
+      setPromptOverrides((prev) => ({ ...prev, [scene.number]: prompt }));
+    } catch {
+      // silently fail — original prompt stays
+    }
+    setRegenStates((prev) => ({ ...prev, [scene.number]: "idle" }));
+  };
+
   return (
     <div>
       {intro && (
@@ -385,16 +414,23 @@ export function StoryboardViewer({ content }: { content: string }) {
             </div>
 
             <div className="space-y-4">
-              {act.scenes.map((scene) => (
-                <SceneCard
-                  key={scene.number}
-                  scene={scene}
-                  copiedScene={copiedScene}
-                  onCopy={copyPrompt}
-                  imageState={images[scene.number] || { status: "idle" }}
-                  onGenerate={generateImage}
-                />
-              ))}
+              {act.scenes.map((scene) => {
+                const displayScene = promptOverrides[scene.number]
+                  ? { ...scene, prompt: promptOverrides[scene.number] }
+                  : scene;
+                return (
+                  <SceneCard
+                    key={scene.number}
+                    scene={displayScene}
+                    copiedScene={copiedScene}
+                    onCopy={copyPrompt}
+                    imageState={images[scene.number] || { status: "idle" }}
+                    onGenerate={generateImage}
+                    regenState={regenStates[scene.number] || "idle"}
+                    onRegenPrompt={regenPrompt}
+                  />
+                );
+              })}
             </div>
           </section>
         ))}
