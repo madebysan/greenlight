@@ -1,21 +1,27 @@
-// File-based response cache for development.
-// First API call generates and caches. Subsequent calls return cached content instantly.
+// File-based response cache keyed by slug + input hash.
+// Same screenplay data returns cached content; different data triggers fresh generation.
 // Delete .cache/ directory to force fresh generation.
 
 import { readFileSync, writeFileSync, mkdirSync } from "fs";
 import { join } from "path";
+import { createHash } from "crypto";
 
 const CACHE_DIR = join(process.cwd(), ".cache");
 
-export function getCached(slug: string): string | null {
+function cacheKey(slug: string, jsonData: string): string {
+  const hash = createHash("sha256").update(jsonData).digest("hex").slice(0, 12);
+  return `${slug}-${hash}`;
+}
+
+export function getCached(slug: string, jsonData: string): string | null {
   try {
-    return readFileSync(join(CACHE_DIR, `${slug}.md`), "utf-8");
+    return readFileSync(join(CACHE_DIR, `${cacheKey(slug, jsonData)}.md`), "utf-8");
   } catch {
     return null;
   }
 }
 
-export function setCache(slug: string, content: string): void {
+export function setCache(slug: string, jsonData: string, content: string): void {
   mkdirSync(CACHE_DIR, { recursive: true });
-  writeFileSync(join(CACHE_DIR, `${slug}.md`), content, "utf-8");
+  writeFileSync(join(CACHE_DIR, `${cacheKey(slug, jsonData)}.md`), content, "utf-8");
 }

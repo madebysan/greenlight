@@ -17,15 +17,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Return cached response if available
-    const cached = getCached(SLUG);
+    // Return cached response if available (keyed by slug + input hash)
+    const cached = getCached(SLUG, jsonData);
     if (cached) {
       return NextResponse.json({ content: cached });
     }
 
     const trimmed = trimForSceneBreakdown(jsonData);
     const markdown = await generateDocument(SCENE_BREAKDOWN_PROMPT, trimmed);
-    setCache(SLUG, markdown);
+    setCache(SLUG, jsonData, markdown);
 
     return NextResponse.json({ content: markdown });
   } catch (error) {
