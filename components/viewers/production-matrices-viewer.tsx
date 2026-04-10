@@ -1,9 +1,12 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Images, Loader2 } from "lucide-react";
+
+type SavedImage = { status: "done"; url: string };
+type PortraitState = { status: "idle" | "generating" | "done" | "error"; url?: string };
 
 type Character = {
   name: string;
@@ -451,14 +454,26 @@ function classifyTable(title: string): TabId {
 }
 
 // --- Character card (extracted for reuse) ---
-function CharacterCard({ char, index }: { char: Character; index: number }) {
+function CharacterCard({ char, index, portrait }: { char: Character; index: number; portrait?: PortraitState }) {
   const sceneCount = char.scenes.split(",").filter(Boolean).length;
   return (
     <div className="rounded-xl border p-4">
       <div className="flex items-start gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-foreground/5 text-sm font-bold shrink-0">
-          {char.name.charAt(0)}
-        </div>
+        {portrait?.status === "done" && portrait.url ? (
+          <img
+            src={portrait.url}
+            alt={char.name}
+            className="h-10 w-10 rounded-full object-cover shrink-0 border"
+          />
+        ) : portrait?.status === "generating" ? (
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-foreground/5 shrink-0">
+            <Loader2 size={16} className="animate-spin text-muted-foreground" />
+          </div>
+        ) : (
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-foreground/5 text-sm font-bold shrink-0">
+            {char.name.charAt(0)}
+          </div>
+        )}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1 flex-wrap">
             <span className="text-sm font-semibold">{char.name}</span>
@@ -494,12 +509,69 @@ function CharacterCard({ char, index }: { char: Character; index: number }) {
 }
 
 // --- Main component ---
-export function ProductionMatricesViewer({ content }: { content: string }) {
+type ProductionMatricesViewerProps = {
+  content: string;
+  savedPortraits: Record<string, SavedImage>;
+  onPortraitsChange: (portraits: Record<string, SavedImage>) => void;
+};
+
+export function ProductionMatricesViewer({ content, savedPortraits, onPortraitsChange }: ProductionMatricesViewerProps) {
   const { characters, otherTables, textSections } = useMemo(
     () => parseProductionMatrices(content),
     [content]
   );
   const [activeTab, setActiveTab] = useState<TabId>("characters");
+  const [localPortraits, setLocalPortraits] = useState<Record<string, PortraitState>>({});
+  const [generatingAll, setGeneratingAll] = useState(false);
+  const [genAllProgress, setGenAllProgress] = useState({ done: 0, total: 0 });
+  const cancelRef = useRef(false);
+
+  // Merge saved + local portraits
+  const portraits: Record<string, PortraitState> = useMemo(() => {
+    const merged: Record<string, PortraitState> = {};
+    for (const [k, v] of Object.entries(savedPortraits)) {
+      merged[k] = v;
+    }
+    for (const [k, v] of Object.entries(localPortraits)) {
+      merged[k] = v;
+    }
+    return merged;
+  }, [savedPortraits, localPortraits]);
+
+  const generatePortrait = async (char: Character) => {
+    const key = char.name;
+    setLocalPortraits((prev) => ({ ...prev, [key]: { status: "generating" } }));
+    try {
+      const res = await fetch("/api/generate-portrait", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: char.name, description: char.description }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const { url } = await res.json();
+      setLocalPortraits((prev) => ({ ...prev, [key]: { status: "done", url } }));
+      onPortraitsChange({ ...savedPortraits, [key]: { status: "done", url } });
+    } catch {
+      setLocalPortraits((prev) => ({ ...prev, [key]: { status: "error" } }));
+    }
+  };
+
+  const generateAllPortraits = async () => {
+    const toGenerate = characters.filter((c) => !savedPortraits[c.name]);
+    if (toGenerate.length === 0) return;
+
+    cancelRef.current = false;
+    setGeneratingAll(true);
+    setGenAllProgress({ done: 0, total: toGenerate.length });
+
+    for (let i = 0; i < toGenerate.length; i++) {
+      if (cancelRef.current) break;
+      await generatePortrait(toGenerate[i]);
+      setGenAllProgress({ done: i + 1, total: toGenerate.length });
+    }
+
+    setGeneratingAll(false);
+  };
 
   // Group tables by department tab
   const tablesByTab = useMemo(() => {
@@ -551,13 +623,35 @@ export function ProductionMatricesViewer({ content }: { content: string }) {
 
       {/* Characters tab */}
       {activeTab === "characters" && (
-        <div className="space-y-3">
-          {characters.map((char, i) => (
-            <CharacterCard key={`${char.name}-${i}`} char={char} index={i} />
-          ))}
-          {characters.length === 0 && (
-            <p className="text-sm text-muted-foreground py-8 text-center">No character data found.</p>
-          )}
+        <div>
+          <div className="flex items-center gap-3 mb-4">
+            <div className="flex-1 h-px bg-border" />
+            {generatingAll ? (
+              <button
+                onClick={() => { cancelRef.current = true; }}
+                className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-md border border-destructive/30 text-destructive hover:bg-destructive/5 transition-colors"
+              >
+                <Loader2 size={13} className="animate-spin" />
+                {genAllProgress.done}/{genAllProgress.total} — Cancel
+              </button>
+            ) : (
+              <button
+                onClick={generateAllPortraits}
+                className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-md border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors"
+              >
+                <Images size={13} />
+                Generate all portraits
+              </button>
+            )}
+          </div>
+          <div className="space-y-3">
+            {characters.map((char, i) => (
+              <CharacterCard key={`${char.name}-${i}`} char={char} index={i} portrait={portraits[char.name]} />
+            ))}
+            {characters.length === 0 && (
+              <p className="text-sm text-muted-foreground py-8 text-center">No character data found.</p>
+            )}
+          </div>
         </div>
       )}
 

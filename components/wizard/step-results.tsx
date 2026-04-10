@@ -24,9 +24,11 @@ type StepResultsProps = {
   onPromptOverridesChange: (overrides: Record<number, string>) => void;
   posterImages: Record<number, SavedImage>;
   onPosterImagesChange: (images: Record<number, SavedImage>) => void;
+  portraits: Record<string, SavedImage>;
+  onPortraitsChange: (portraits: Record<string, SavedImage>) => void;
 };
 
-export function StepResults({ documents, jsonData, onStartOver, onDocumentUpdate, onDocumentRewrite, storyboardImages, onStoryboardImagesChange, promptOverrides, onPromptOverridesChange, posterImages, onPosterImagesChange }: StepResultsProps) {
+export function StepResults({ documents, jsonData, onStartOver, onDocumentUpdate, onDocumentRewrite, storyboardImages, onStoryboardImagesChange, promptOverrides, onPromptOverridesChange, posterImages, onPosterImagesChange, portraits, onPortraitsChange }: StepResultsProps) {
   const completedDocs = documents.filter((doc) => doc.status === "done");
   const failedDocs = documents.filter((doc) => doc.status === "error");
   const [activeSlug, setActiveSlug] = useState(
@@ -113,7 +115,13 @@ export function StepResults({ documents, jsonData, onStartOver, onDocumentUpdate
                       />
                     );
                   case "production-matrices":
-                    return <ProductionMatricesViewer content={activeDoc.content} />;
+                    return (
+                      <ProductionMatricesViewer
+                        content={activeDoc.content}
+                        savedPortraits={portraits}
+                        onPortraitsChange={onPortraitsChange}
+                      />
+                    );
                   case "marketing-brief":
                     return (
                       <MarketingBriefViewer
