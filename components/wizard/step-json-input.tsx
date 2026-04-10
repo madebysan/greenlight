@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { validateScreenplayJson } from "@/lib/schema";
-import { JAWS_JSON } from "@/lib/sample-data";
+import { SAMPLES } from "@/lib/sample-data";
 
 type StepJsonInputProps = {
   onSubmit: (json: string) => void;
@@ -125,12 +125,20 @@ export function StepJsonInput({ onSubmit, onBack }: StepJsonInputProps) {
         />
 
         {!hasContent && (
-          <button
-            onClick={() => setInput(JAWS_JSON)}
-            className="text-xs text-muted-foreground hover:text-foreground transition-colors"
-          >
-            Or try with sample data (Jaws) &rarr;
-          </button>
+          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+            <span>Or try with:</span>
+            {SAMPLES.map((s, i) => (
+              <span key={s.title}>
+                {i > 0 && <span className="mx-0.5">&middot;</span>}
+                <button
+                  onClick={() => setInput(s.json)}
+                  className="hover:text-foreground transition-colors underline underline-offset-2"
+                >
+                  {s.title}
+                </button>
+              </span>
+            ))}
+          </div>
         )}
 
         {errors.length > 0 && (
