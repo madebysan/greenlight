@@ -63,6 +63,7 @@ export function WizardShell() {
   const [storyboardImages, setStoryboardImages] = useState<Record<number, SavedImage>>({});
   const [promptOverrides, setPromptOverrides] = useState<Record<number, string>>({});
   const [posterImages, setPosterImages] = useState<Record<number, SavedImage>>({});
+  const [portraits, setPortraits] = useState<Record<string, SavedImage>>({});
 
   // Load reports and API key on mount
   useEffect(() => {
@@ -121,6 +122,7 @@ export function WizardShell() {
     setStoryboardImages(report.images || {});
     setPromptOverrides(report.promptOverrides || {});
     setPosterImages(report.posterImages || {});
+    setPortraits(report.portraits || {});
     setCurrentStep(4);
   };
 
@@ -165,6 +167,7 @@ export function WizardShell() {
     setStoryboardImages({});
     setPromptOverrides({});
     setPosterImages({});
+    setPortraits({});
   };
 
   const handleRenameReport = (id: string, newTitle: string) => {
@@ -192,7 +195,7 @@ export function WizardShell() {
 
   // Save all extras to the active report
   const persistExtras = useCallback(
-    (extras: { images?: Record<number, SavedImage>; overrides?: Record<number, string>; posters?: Record<number, SavedImage> }) => {
+    (extras: { images?: Record<number, SavedImage>; overrides?: Record<number, string>; posters?: Record<number, SavedImage>; portraits?: Record<string, SavedImage> }) => {
       if (!activeReportId) return;
       const current = loadReports();
       const idx = current.findIndex((r) => r.id === activeReportId);
@@ -200,6 +203,7 @@ export function WizardShell() {
       if (extras.images !== undefined) current[idx].images = extras.images;
       if (extras.overrides !== undefined) current[idx].promptOverrides = extras.overrides;
       if (extras.posters !== undefined) current[idx].posterImages = extras.posters;
+      if (extras.portraits !== undefined) current[idx].portraits = extras.portraits;
       try {
         localStorage.setItem("stp-reports", JSON.stringify(current));
       } catch {}
@@ -227,6 +231,14 @@ export function WizardShell() {
     (posters: Record<number, SavedImage>) => {
       setPosterImages(posters);
       persistExtras({ posters });
+    },
+    [persistExtras]
+  );
+
+  const handlePortraitsChange = useCallback(
+    (p: Record<string, SavedImage>) => {
+      setPortraits(p);
+      persistExtras({ portraits: p });
     },
     [persistExtras]
   );
@@ -542,6 +554,8 @@ export function WizardShell() {
               onPromptOverridesChange={handlePromptOverridesChange}
               posterImages={posterImages}
               onPosterImagesChange={handlePosterImagesChange}
+              portraits={portraits}
+              onPortraitsChange={handlePortraitsChange}
             />
           )}
         </main>
