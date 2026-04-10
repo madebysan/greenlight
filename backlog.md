@@ -76,17 +76,41 @@ See `presentation.md` for full context. The demo narrative is: *"I can show you 
   - Strong visual identity (black & white, claustrophobic, rural horror) → Mood & Tone tab will look great
 
 ### Bonus-round samples (pre-cached but NOT shown in the public picker)
-- **2–3 A24 scripts**, pre-converted to JSON and pre-cached in `.cache/`, held in reserve
-- Only loaded during the interview IF the interviewer invites it ("we could try it with an A24 script if you want")
-- Candidates (pick 2–3 san has already confirmed work well):
-  - Ex Machina (2014) — already tested, cerebral sci-fi
-  - The Witch (2015) — period horror, Mood & Tone showcase
-  - Hereditary (2018) — family drama/horror
-  - Midsommar (2019) — bright horror, incredible mood potential
-  - Moonlight (2016) — intimate character drama
-  - The Lighthouse (2019) — B&W, two-hander, contained
-  - Aftersun (2022) — subtle, emotional
-- Open question: how are these surfaced in the UI during the demo? Hidden shortcut? Dev-only menu? Or just JSON files on disk san pastes manually?
+
+**⚠️ This is the LAST step.** Do not start this until the full app is working end-to-end with Night of the Living Dead at the quality bar we want. The A24 validation pipeline depends on knowing what "good output" looks like, which we can only define after NotLD is locked in.
+
+**The task: test 6 A24 scripts through the full Gemini → JSON → Greenlight pipeline.**
+
+Process for each script:
+1. Source the PDF
+2. Upload to Gemini (or Claude) with the extraction prompt → get JSON
+3. Time how long extraction takes
+4. Paste JSON into Greenlight → generate full bible
+5. Time how long the full generation takes (document gen + image gen)
+6. **Review every tab manually.** Does the output make sense? Is the Mood & Tone tab actually good? Do the characters, locations, and scene breakdowns feel right? Are the generated images usable?
+7. Mark the script as PASS (ready to use as a bonus sample) or FAIL (don't use — output was weak, Gemini crashed, or something looked off)
+
+**Acceptance criteria:**
+- End-to-end processing time ≤ 2 minutes is totally fine
+- Output quality must match the Night of the Living Dead bar — nothing embarrassing, nothing generic, no obvious hallucinations
+- Gemini must not crash or refuse the script
+- The goal is to have **2–3 confirmed-good A24 options** to offer live in the interview, selected from the 6 tested
+
+Candidates to test (all 6):
+- Ex Machina (2014) — already tested informally, cerebral sci-fi
+- The Witch (2015) — period horror, Mood & Tone showcase
+- Hereditary (2018) — family drama/horror
+- Midsommar (2019) — bright horror, incredible mood potential
+- Moonlight (2016) — intimate character drama
+- The Lighthouse (2019) — B&W, two-hander, contained
+- (Swap in Aftersun or another A24 film if any of the above are hard to source or fail validation)
+
+**Storage & safety:**
+- Pre-cached A24 output goes in `.cache/` keyed by slug, same as NotLD
+- The A24 JSONs themselves must NOT live in `lib/sample-data.ts` or anywhere that could get committed/deployed — store in a gitignored directory (e.g., `.a24-scripts/`) loaded only when explicitly triggered
+- Add `.a24-scripts/` to `.gitignore` before any A24 script touches the filesystem
+
+**Open question:** how are these surfaced in the UI during the demo? Hidden keyboard shortcut? URL flag (`?bonus=1`)? Dev-only menu only visible on localhost? Or just JSON files on disk san pastes manually into the upload flow? Decide during the plan step.
 
 ### Optional variety samples (only if time allows)
 - 1 CC-licensed short (Sintel or Tears of Steel) — shows tool handles short-form work, community-legitimate
