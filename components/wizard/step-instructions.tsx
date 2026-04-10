@@ -5,12 +5,10 @@ import { Button } from "@/components/ui/button";
 import { STAGE_0_PROMPT } from "@/lib/prompts/stage-0";
 
 type StepInstructionsProps = {
-  apiKey: string;
-  onApiKeyChange: (key: string) => void;
   onNext: () => void;
 };
 
-export function StepInstructions({ apiKey, onApiKeyChange, onNext }: StepInstructionsProps) {
+export function StepInstructions({ onNext }: StepInstructionsProps) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
@@ -90,36 +88,6 @@ export function StepInstructions({ apiKey, onApiKeyChange, onNext }: StepInstruc
             </div>
           </div>
         ))}
-      </div>
-
-      {/* API Key */}
-      <div className="space-y-3">
-        <h3 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">
-          Claude API Key
-        </h3>
-        <p className="text-[13px] text-muted-foreground max-w-[60ch]">
-          Your key is stored in your browser only and sent directly to the Anthropic API. Get one at{" "}
-          <a
-            href="https://console.anthropic.com/settings/keys"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="underline text-primary"
-          >
-            console.anthropic.com
-          </a>
-        </p>
-        <input
-          type="password"
-          placeholder="sk-ant-api03-..."
-          value={apiKey}
-          onChange={(e) => onApiKeyChange(e.target.value)}
-          className="w-full rounded-lg border bg-background px-3 py-2.5 text-sm font-mono placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-        />
-        {apiKey && !apiKey.startsWith("sk-ant-") && (
-          <p className="text-xs text-destructive">
-            API keys usually start with &quot;sk-ant-&quot;
-          </p>
-        )}
       </div>
 
       {/* Extraction prompt with copy button */}
