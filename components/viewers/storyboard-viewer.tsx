@@ -21,12 +21,13 @@ function parseStoryboardPrompts(md: string): { title: string; intro: string; act
   const lines = md.split("\n");
   let title = "";
   const allScenes: StoryboardScene[] = [];
-  const actLabels: { label: string; startScene: number }[] = [];
+  const actLabels: { label: string; startIndex: number }[] = [];
   let current: StoryboardScene | null = null;
   let collectingPrompt = false;
   let promptBuffer = "";
   let introBuffer = "";
   let pastIntro = false;
+  let sceneIndex = 0;
 
   for (const line of lines) {
     if (/^# /.test(line) && !title) {
@@ -41,13 +42,15 @@ function parseStoryboardPrompts(md: string): { title: string; intro: string; act
         // Could be intro section heading — skip but capture act label if it looks like one
         const actText = actMatch[1].trim();
         if (/act/i.test(actText)) {
-          actLabels.push({ label: actText, startScene: allScenes.length + 1 });
+          actLabels.push({ label: actText, startIndex: allScenes.length });
         }
         continue;
       }
-      // Act heading after scenes have started
+      // Act heading after scenes have started — only if it looks like an act label
       const actText = actMatch[1].trim();
-      actLabels.push({ label: actText, startScene: allScenes.length + 1 });
+      if (/act/i.test(actText)) {
+        actLabels.push({ label: actText, startIndex: allScenes.length });
+      }
       continue;
     }
 
@@ -58,6 +61,7 @@ function parseStoryboardPrompts(md: string): { title: string; intro: string; act
       if (current) {
         if (collectingPrompt) current.prompt = promptBuffer.trim();
         allScenes.push(current);
+        sceneIndex++;
       }
       current = {
         number: parseInt(sceneMatch[1]),
@@ -139,19 +143,18 @@ function parseStoryboardPrompts(md: string): { title: string; intro: string; act
   // Group scenes into acts
   let acts: Act[];
   if (actLabels.length > 0) {
-    // Use parsed act labels
+    // Use parsed act labels with array indices
     acts = actLabels.map((act, i) => {
-      const nextStart = actLabels[i + 1]?.startScene ?? allScenes.length + 1;
+      const nextStart = actLabels[i + 1]?.startIndex ?? allScenes.length;
       return {
         label: act.label,
-        scenes: allScenes.filter((s) => s.number >= act.startScene && s.number < nextStart),
+        scenes: allScenes.slice(act.startIndex, nextStart),
       };
     });
     // Catch any scenes before the first act label
-    const firstActStart = actLabels[0].startScene;
-    const preActScenes = allScenes.filter((s) => s.number < firstActStart);
-    if (preActScenes.length > 0) {
-      acts.unshift({ label: "Prologue", scenes: preActScenes });
+    const firstStart = actLabels[0].startIndex;
+    if (firstStart > 0) {
+      acts.unshift({ label: "Prologue", scenes: allScenes.slice(0, firstStart) });
     }
   } else if (allScenes.length > 0) {
     // Fall back to 3-act structure based on scene count
