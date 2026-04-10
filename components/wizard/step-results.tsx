@@ -12,6 +12,14 @@ import { PosterConceptsViewer } from "@/components/viewers/poster-concepts-viewe
 import type { DocumentResult } from "./wizard-shell";
 import type { SavedImage } from "@/lib/reports";
 
+const TAB_LABELS: Record<string, string> = {
+  "scene-breakdown": "Scene Breakdown",
+  "production-matrices": "Production",
+  "marketing-brief": "Marketing Brief",
+  "storyboard-prompts": "Storyboard",
+  "poster-concepts": "Posters",
+};
+
 type StepResultsProps = {
   documents: DocumentResult[];
   jsonData?: string;
@@ -83,7 +91,7 @@ export function StepResults({ documents, jsonData, onStartOver, onDocumentUpdate
                       : "text-muted-foreground hover:text-foreground hover:bg-muted/30"
                   }`}
                 >
-                  {doc.name}
+                  {TAB_LABELS[doc.slug] || doc.name}
                   {isActive && (
                     <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-full" />
                   )}
