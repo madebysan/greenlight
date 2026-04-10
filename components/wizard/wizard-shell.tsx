@@ -243,11 +243,29 @@ export function WizardShell() {
     [persistExtras]
   );
 
-  // Update a specific document's content (e.g., after editing synopsis)
+  // Update a specific document's content and persist to localStorage
   const handleDocumentUpdate = (slug: string, newContent: string) => {
-    setDocuments((prev) =>
-      prev.map((d) => (d.slug === slug ? { ...d, content: newContent } : d))
-    );
+    setDocuments((prev) => {
+      const updated = prev.map((d) => (d.slug === slug ? { ...d, content: newContent } : d));
+      // Persist to report in localStorage
+      if (activeReportId) {
+        const current = loadReports();
+        const idx = current.findIndex((r) => r.id === activeReportId);
+        if (idx >= 0) {
+          current[idx].documents = updated.map((d) => ({
+            name: d.name,
+            slug: d.slug,
+            status: d.status === "done" ? "done" as const : "error" as const,
+            content: d.content,
+            error: d.error,
+          }));
+          try {
+            localStorage.setItem("stp-reports", JSON.stringify(current));
+          } catch {}
+        }
+      }
+      return updated;
+    });
   };
 
   // Regenerate a specific document via the API
@@ -260,9 +278,7 @@ export function WizardShell() {
     });
     if (!res.ok) throw new Error("Rewrite failed");
     const data = await res.json();
-    setDocuments((prev) =>
-      prev.map((d) => (d.slug === slug ? { ...d, content: data.content } : d))
-    );
+    handleDocumentUpdate(slug, data.content);
   };
 
   if (!hydrated) {
