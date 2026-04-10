@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useMemo, useRef, useEffect, useCallback } from "react";
+import { useState, useMemo } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { Users, MapPin, Wrench, Shirt, Zap, FileText, ChevronDown, type LucideIcon } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 
 type Character = {
   name: string;
@@ -382,15 +382,6 @@ function renderTableSection(table: TableSection) {
   }
 }
 
-// --- Section nav config ---
-const SECTION_NAV: { id: string; label: string; icon: LucideIcon }[] = [
-  { id: "characters", label: "Characters", icon: Users },
-  { id: "location", label: "Locations", icon: MapPin },
-  { id: "props", label: "Props", icon: Wrench },
-  { id: "wardrobe", label: "Wardrobe", icon: Shirt },
-  { id: "vfx", label: "VFX/Stunts", icon: Zap },
-  { id: "cross-reference", label: "Notes", icon: FileText },
-];
 
 // --- Collapsible section wrapper ---
 function CollapsibleSection({
@@ -447,96 +438,9 @@ export function ProductionMatricesViewer({ content }: { content: string }) {
     () => parseProductionMatrices(content),
     [content]
   );
-  const [activeSection, setActiveSection] = useState("characters");
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  // Build list of all section IDs in order for scroll tracking
-  const sectionIds = useMemo(() => {
-    const ids = ["characters"];
-    for (const table of otherTables) {
-      ids.push(getNavId(table.title));
-    }
-    if (textSections.length > 0) ids.push("cross-reference");
-    return ids;
-  }, [otherTables, textSections]);
-
-  // Track which section is visible while scrolling (throttled to one check per frame)
-  const rafRef = useRef(0);
-  const scrollContainerRef = useRef<Element | null>(null);
-  const handleScroll = useCallback(() => {
-    cancelAnimationFrame(rafRef.current);
-    rafRef.current = requestAnimationFrame(() => {
-      const scrollContainer = scrollContainerRef.current;
-      if (!scrollContainer) return;
-
-      const containerTop = scrollContainer.getBoundingClientRect().top;
-      let closest = sectionIds[0];
-      let closestDistance = Infinity;
-
-      for (const id of sectionIds) {
-        const el = document.getElementById(`pm-${id}`);
-        if (!el) continue;
-        const distance = Math.abs(el.getBoundingClientRect().top - containerTop - 80);
-        if (distance < closestDistance) {
-          closestDistance = distance;
-          closest = id;
-        }
-      }
-
-      setActiveSection(closest);
-    });
-  }, [sectionIds]);
-
-  useEffect(() => {
-    const scrollContainer = containerRef.current?.closest(".overflow-y-auto");
-    if (!scrollContainer) return;
-    scrollContainerRef.current = scrollContainer;
-    scrollContainer.addEventListener("scroll", handleScroll, { passive: true });
-    return () => {
-      scrollContainer.removeEventListener("scroll", handleScroll);
-      cancelAnimationFrame(rafRef.current);
-      scrollContainerRef.current = null;
-    };
-  }, [handleScroll]);
-
-  const scrollToSection = (id: string) => {
-    setActiveSection(id);
-    const el = document.getElementById(`pm-${id}`);
-    if (!el) return;
-    const scrollContainer = el.closest(".overflow-y-auto");
-    if (scrollContainer) {
-      const containerRect = scrollContainer.getBoundingClientRect();
-      const elRect = el.getBoundingClientRect();
-      const scrollOffset = elRect.top - containerRect.top + scrollContainer.scrollTop - 60;
-      scrollContainer.scrollTo({ top: scrollOffset, behavior: "smooth" });
-    } else {
-      el.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-  };
 
   return (
-    <div ref={containerRef}>
-      {/* Section navigation pills — sticky within scroll container */}
-      <div className="flex flex-wrap gap-1.5 mb-6 sticky top-0 bg-background/95 backdrop-blur-sm py-2 -mx-1 px-1 z-20 border-b border-transparent [.overflow-y-auto_&]:border-border/40">
-        {SECTION_NAV.map((nav) => {
-          const Icon = nav.icon;
-          return (
-            <button
-              key={nav.id}
-              onClick={() => scrollToSection(nav.id)}
-              className={`inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full border transition-colors ${
-                activeSection === nav.id
-                  ? "bg-foreground text-background border-foreground"
-                  : "bg-background text-muted-foreground border-border hover:text-foreground hover:border-foreground/30"
-              }`}
-            >
-              <Icon size={13} />
-              {nav.label}
-            </button>
-          );
-        })}
-      </div>
-
+    <div>
       {/* Characters */}
       <CollapsibleSection
         id="pm-characters"
