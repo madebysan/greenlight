@@ -103,6 +103,21 @@ function parseMarketingBrief(md: string): ParsedBrief {
   }
   flush();
 
+  // Merge Primary/Secondary Audience into a single "Target Audience" section
+  const audienceSections = result.remainingSections.filter(
+    (s) => /audience/i.test(s.title)
+  );
+  if (audienceSections.length > 1) {
+    const merged = audienceSections.map((s) => {
+      const label = s.title.replace(/audience/i, "").trim();
+      return label ? `**${label}**\n\n${s.content}` : s.content;
+    }).join("\n\n");
+    result.remainingSections = result.remainingSections.filter(
+      (s) => !/audience/i.test(s.title)
+    );
+    result.remainingSections.push({ title: "Target Audience", content: merged });
+  }
+
   return result;
 }
 
@@ -314,13 +329,7 @@ export function MarketingBriefViewer({ content, onContentChange, onRewrite }: Ma
       {/* Color Palette */}
       {brief.colors.length > 0 && (
         <section className="mb-8">
-          <SectionHeader title="Color Palette">
-            <SectionActions
-              onRewrite={onRewrite ? handleRewrite : undefined}
-              isRewriting={isRewriting}
-              rewriteLabel="Regenerate"
-            />
-          </SectionHeader>
+          <SectionHeader title="Color Palette" />
           {/* Swatch strip */}
           <div className="flex rounded-xl overflow-hidden mb-4 h-16">
             {brief.colors.map((c) => (
@@ -397,17 +406,28 @@ export function MarketingBriefViewer({ content, onContentChange, onRewrite }: Ma
       {/* Full Plot (collapsible) */}
       {brief.fullPlot && (
         <section className="mb-8">
-          <button
-            onClick={() => setPlotExpanded(!plotExpanded)}
-            className="w-full text-sm font-semibold uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors flex items-center gap-3 cursor-pointer py-1"
-          >
-            <ChevronDown
-              size={16}
-              className={`shrink-0 transition-transform ${plotExpanded ? "" : "-rotate-90"}`}
-            />
-            Full Plot Summary (Spoilers)
+          <div className="flex items-center gap-3 py-1">
+            <button
+              onClick={() => setPlotExpanded(!plotExpanded)}
+              className="text-sm font-semibold uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors flex items-center gap-3 cursor-pointer"
+            >
+              <ChevronDown
+                size={16}
+                className={`shrink-0 transition-transform ${plotExpanded ? "" : "-rotate-90"}`}
+              />
+              Full Plot Summary (Spoilers)
+            </button>
             <span className="flex-1 h-px bg-border" />
-          </button>
+            {plotExpanded && (
+              <SectionActions
+                onEdit={onContentChange ? () => openEditDialog(
+                  "Edit Full Plot Summary",
+                  brief.fullPlot,
+                  (val) => replaceInContent(brief.fullPlot, val)
+                ) : undefined}
+              />
+            )}
+          </div>
           {plotExpanded && (
             <p className="text-[13px] leading-[1.8] text-foreground/75 mt-4 whitespace-pre-line">
               {brief.fullPlot}
@@ -419,7 +439,15 @@ export function MarketingBriefViewer({ content, onContentChange, onRewrite }: Ma
       {/* Remaining sections rendered as markdown */}
       {brief.remainingSections.map((sec) => (
         <section key={sec.title} className="mb-8">
-          <SectionHeader title={sec.title} />
+          <SectionHeader title={sec.title}>
+            <SectionActions
+              onEdit={onContentChange ? () => openEditDialog(
+                `Edit ${sec.title}`,
+                sec.content,
+                (val) => replaceInContent(sec.content, val)
+              ) : undefined}
+            />
+          </SectionHeader>
           <div className="rounded-xl border p-5 text-[13px] leading-[1.7] text-foreground/75 [&_strong]:text-foreground [&_strong]:font-semibold [&_p]:mb-3 [&_ul]:ml-5 [&_ul]:list-disc [&_ul]:mb-4 [&_li]:mb-1.5 [&_em]:italic">
             <ReactMarkdown remarkPlugins={[remarkGfm]}>
               {sec.content}
