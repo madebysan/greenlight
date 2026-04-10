@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Trash2, Copy, Pencil } from "lucide-react";
+import { Trash2, Copy, Pencil, Settings, Info } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -13,6 +13,12 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { StepInstructions } from "./step-instructions";
 import { StepJsonInput } from "./step-json-input";
 import { StepGenerating } from "./step-generating";
@@ -60,6 +66,9 @@ export function WizardShell() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [renamingId, setRenamingId] = useState<string | null>(null);
   const [renameValue, setRenameValue] = useState("");
+  const [showAbout, setShowAbout] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [falKey, setFalKey] = useState<string>("");
   const [storyboardImages, setStoryboardImages] = useState<Record<number, SavedImage>>({});
   const [promptOverrides, setPromptOverrides] = useState<Record<number, string>>({});
   const [posterImages, setPosterImages] = useState<Record<number, SavedImage>>({});
@@ -69,6 +78,7 @@ export function WizardShell() {
   useEffect(() => {
     setReports(loadReports());
     setApiKey(localStorage.getItem("stp-api-key") || "");
+    setFalKey(localStorage.getItem("stp-fal-key") || "");
     setHydrated(true);
   }, []);
 
@@ -413,6 +423,23 @@ export function WizardShell() {
               );
             })}
           </div>
+          {/* Sidebar footer */}
+          <div className="p-2 border-t flex items-center gap-1">
+            <button
+              onClick={() => setShowSettings(true)}
+              className="flex-1 inline-flex items-center justify-center gap-1.5 text-[11px] text-muted-foreground hover:text-foreground py-1.5 rounded-md hover:bg-muted/60 transition-colors"
+            >
+              <Settings size={12} />
+              Settings
+            </button>
+            <button
+              onClick={() => setShowAbout(true)}
+              className="flex-1 inline-flex items-center justify-center gap-1.5 text-[11px] text-muted-foreground hover:text-foreground py-1.5 rounded-md hover:bg-muted/60 transition-colors"
+            >
+              <Info size={12} />
+              About
+            </button>
+          </div>
         </aside>
       )}
 
@@ -537,8 +564,6 @@ export function WizardShell() {
         >
           {currentStep === 1 && (
             <StepInstructions
-              apiKey={apiKey}
-              onApiKeyChange={handleApiKeyChange}
               onNext={() => setCurrentStep(2)}
             />
           )}
@@ -576,6 +601,136 @@ export function WizardShell() {
           )}
         </main>
       </div>
+
+      {/* Settings dialog */}
+      <Dialog open={showSettings} onOpenChange={setShowSettings}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Settings</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-5 py-2">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Claude API Key</label>
+              <p className="text-[12px] text-muted-foreground">
+                Used to generate documents from your screenplay data.{" "}
+                <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground">
+                  Get a key
+                </a>
+              </p>
+              <input
+                type="password"
+                placeholder="sk-ant-api03-..."
+                value={apiKey}
+                onChange={(e) => handleApiKeyChange(e.target.value)}
+                className="w-full rounded-lg border bg-background px-3 py-2.5 text-sm font-mono placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">fal.ai API Key</label>
+              <p className="text-[12px] text-muted-foreground">
+                Used to generate storyboard sketches, poster concepts, and character portraits.{" "}
+                <a href="https://fal.ai/dashboard/keys" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground">
+                  Get a key
+                </a>
+              </p>
+              <input
+                type="password"
+                placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx:..."
+                value={falKey}
+                onChange={(e) => {
+                  setFalKey(e.target.value);
+                  localStorage.setItem("stp-fal-key", e.target.value);
+                }}
+                className="w-full rounded-lg border bg-background px-3 py-2.5 text-sm font-mono placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+              />
+            </div>
+            <p className="text-[11px] text-muted-foreground">
+              Keys are stored in your browser only. They are never sent to our servers.
+            </p>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* About dialog */}
+      <Dialog open={showAbout} onOpenChange={setShowAbout}>
+        <DialogContent className="sm:max-w-lg max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>About Script to Production</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2 text-[13px] text-foreground/80 leading-relaxed">
+            <p>
+              Generate a complete pre-production bible from your screenplay using AI.
+              Upload a script, extract structured data, and get professional documents
+              that cover every department of a film production.
+            </p>
+
+            <div>
+              <h3 className="text-sm font-semibold text-foreground mb-2">How it works</h3>
+              <ol className="list-decimal list-inside space-y-1.5 text-foreground/70">
+                <li>Extract structured JSON from your screenplay PDF using Claude or ChatGPT</li>
+                <li>Paste the JSON into the app</li>
+                <li>AI generates 5 production documents automatically</li>
+                <li>Review, edit, and generate visuals for each document</li>
+              </ol>
+            </div>
+
+            <div>
+              <h3 className="text-sm font-semibold text-foreground mb-2">Documents generated</h3>
+              <ul className="space-y-1.5 text-foreground/70">
+                <li><span className="text-foreground font-medium">Scene Breakdown</span> — scene-by-scene analysis with locations, cast, props, VFX, and emotional beats. Fully editable.</li>
+                <li><span className="text-foreground font-medium">Production</span> — department worksheets for Characters, Locations, Production Design (props & wardrobe), and Technical (VFX, stunts, notes).</li>
+                <li><span className="text-foreground font-medium">Marketing Brief</span> — film identity, logline, taglines, color palette, synopsis, comparable films, audience analysis. Expandable with Festival Strategy, Casting Wishlist, and more.</li>
+                <li><span className="text-foreground font-medium">Storyboard</span> — AI-generated visual prompts for every scene. Generate B&W sketch storyboards, edit prompts, rewrite for variations.</li>
+                <li><span className="text-foreground font-medium">Posters</span> — 15 poster concepts across 5 categories with color palettes, composition notes, and AI-generated sketch previews.</li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 className="text-sm font-semibold text-foreground mb-2">Image generation</h3>
+              <p className="text-foreground/70">
+                Storyboard frames, poster sketches, and character portraits are generated using FLUX Schnell
+                in a consistent black-and-white felt-tip marker style. All images are saved locally and persist
+                with your project.
+              </p>
+            </div>
+
+            <div>
+              <h3 className="text-sm font-semibold text-foreground mb-2">Features</h3>
+              <ul className="space-y-1 text-foreground/70">
+                <li>Multiple projects with full state persistence</li>
+                <li>Inline editing across all documents</li>
+                <li>Generate all images in batch (storyboards, posters, portraits)</li>
+                <li>Duplicate projects to iterate without affecting originals</li>
+                <li>On-demand marketing sections (Festival Strategy, Casting Wishlist, etc.)</li>
+                <li>Add, edit, and remove scenes</li>
+                <li>Download individual documents or all as markdown</li>
+                <li>Sample data included (Jaws, Ex Machina)</li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 className="text-sm font-semibold text-foreground mb-2">Powered by</h3>
+              <ul className="space-y-1 text-foreground/70">
+                <li>Claude (Anthropic) — document generation and prompt rewriting</li>
+                <li>FLUX Schnell (fal.ai) — image generation</li>
+                <li>Next.js + Tailwind CSS + shadcn/ui</li>
+              </ul>
+            </div>
+
+            <div className="pt-2 border-t text-[12px] text-muted-foreground">
+              Made by{" "}
+              <a
+                href="https://santiagoalonso.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline hover:text-foreground transition-colors"
+              >
+                santiagoalonso.com
+              </a>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
