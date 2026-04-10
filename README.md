@@ -1,111 +1,64 @@
-<h1 align="center">Script to Production</h1>
-<p align="center">Generate pre-production documents from your screenplay using AI.<br>
-Scene breakdowns, production matrices, marketing briefs, storyboard prompts, and poster concepts.</p>
+<h1 align="center">Greenlight</h1>
+<p align="center">AI-powered pre-production bible generator.<br>
+Turn any screenplay into scene breakdowns, production worksheets, marketing briefs, storyboards, and poster concepts.</p>
+<p align="center"><code>Next.js</code> <code>React 19</code> <code>Tailwind CSS 4</code> <code>Claude API</code> <code>FLUX Schnell</code></p>
+
+---
 
 ## How It Works
 
-1. **Extract** — Upload your screenplay PDF to Claude or ChatGPT with the extraction prompt. The AI returns structured JSON.
-2. **Paste** — Paste the JSON output into the app. It validates the structure automatically.
-3. **Generate** — The app sends your data to Claude Haiku and generates 5 production documents in sequence.
-4. **Review & Edit** — Browse your production bible, edit sections inline, regenerate any section with one click, and download everything as markdown.
+1. **Extract** — Upload your screenplay PDF to Claude or ChatGPT with the built-in extraction prompt. Get structured JSON back.
+2. **Paste** — Paste the JSON into the app (or use a sample: Jaws, Ex Machina).
+3. **Generate** — AI creates 5 production documents automatically.
+4. **Refine** — Edit inline, generate storyboard sketches, poster concepts, and character portraits. Add marketing sections on demand.
 
-## Documents Generated
+## Documents
 
-| Document | What It Contains |
-|----------|-----------------|
-| **Scene Breakdown** | Scene-by-scene analysis with locations, cast, and props |
-| **Production Matrices** | Characters, locations, props, wardrobe, VFX/stunts cross-referenced |
-| **Marketing Brief** | Film identity, logline, taglines, color palette, synopsis, comparables |
-| **Storyboard Prompts** | Per-scene AI image prompts with camera, lighting, and mood metadata |
-| **Poster Concepts** | Visual poster directions with color palettes and AI prompts |
+| Tab | What It Does |
+|-----|-------------|
+| **Scene Breakdown** | Scene-by-scene analysis with locations, cast, props, VFX, emotional beats. Add, edit, and delete scenes. |
+| **Production** | Department tabs: Characters (with AI portraits), Locations, Production Design (props & wardrobe), Technical (VFX, stunts, notes). |
+| **Marketing Brief** | Film identity, logline, taglines, color palette, synopsis, comparables, audience. Expandable with Festival Strategy, Casting Wishlist, Distribution Positioning, and more. |
+| **Storyboard** | Visual prompt per scene. Generate B&W sketch storyboards in batch, edit/rewrite prompts, side-by-side layout. |
+| **Posters** | 15 poster concepts across 5 categories with color palettes, composition notes, and AI-generated sketch previews. |
+
+## Image Generation
+
+Storyboard frames, poster sketches, and character portraits are generated using FLUX Schnell (fal.ai) in a consistent black-and-white felt-tip marker production art style. All images are saved locally to `.cache/images/` and persist with your project.
 
 ## Setup
 
-### Prerequisites
-
-- Node.js 18+
-- An [Anthropic API key](https://console.anthropic.com/)
-
-### Install & Run
-
 ```bash
-git clone <repo-url>
-cd script-to-production
+cd greenlight
 npm install
-```
-
-Create a `.env.local` file:
-
-```
-ANTHROPIC_API_KEY=sk-ant-...
-```
-
-Start the dev server:
-
-```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
+Open [http://localhost:3001](http://localhost:3001).
+
+### API Keys
+
+Configure via **Settings** in the sidebar:
+
+| Key | Purpose | Get one at |
+|-----|---------|-----------|
+| Claude API Key | Document generation, prompt rewriting | [console.anthropic.com](https://console.anthropic.com/settings/keys) |
+| fal.ai API Key | Image generation (storyboards, posters, portraits) | [fal.ai/dashboard](https://fal.ai/dashboard/keys) |
+
+Or set them in `.env.local` for local development:
+
+```
+ANTHROPIC_API_KEY=sk-ant-...
+FAL_KEY=...
+```
 
 ## Tech Stack
 
-- **Framework:** Next.js 16 (App Router)
-- **UI:** React 19, Tailwind CSS 4, shadcn/ui, Radix UI
-- **AI:** Anthropic Claude Haiku 4.5
-- **Icons:** Lucide React
-- **Markdown:** react-markdown + remark-gfm
-- **Testing:** Vitest, Playwright
+- **Framework:** Next.js 16, React 19, Tailwind CSS 4, shadcn/ui
+- **AI:** Claude Haiku 4.5 (Anthropic), FLUX Schnell (fal.ai)
+- **Fonts:** Space Grotesk + Space Mono
+- **Theme:** Dark mode, Runway-inspired aesthetic
 
-## Project Structure
+---
 
-```
-app/
-  api/generate/          # API routes for each document type
-  page.tsx               # Main page (renders WizardShell)
-components/
-  wizard/                # Multi-step wizard flow
-    wizard-shell.tsx     # Main shell with sidebar, steps, report history
-    step-instructions.tsx
-    step-json-input.tsx
-    step-generating.tsx
-    step-results.tsx     # Tabbed viewer for generated documents
-  viewers/               # Document-specific viewers
-    scene-breakdown-viewer.tsx
-    production-matrices-viewer.tsx
-    marketing-brief-viewer.tsx
-    storyboard-viewer.tsx
-    poster-concepts-viewer.tsx
-  ui/                    # shadcn/ui components
-lib/
-  prompts/               # System prompts for each document type
-  claude.ts              # Anthropic SDK wrapper with retry logic
-  schema.ts              # JSON validation
-  reports.ts             # localStorage report persistence
-  json-trimmer.ts        # Trims JSON to fit context windows
-```
-
-## Features
-
-- **Report History** — All generated reports are saved to localStorage. Switch between reports in the sidebar.
-- **Inline Editing** — Edit film identity, logline, synopsis, and other sections directly in the viewer.
-- **Regenerate** — One-click rewrite for any section (logline, taglines, color palette, synopsis).
-- **Collapsible Sections** — Production matrices sections collapse/expand independently.
-- **Act Grouping** — Storyboard scenes are grouped by act structure (parsed from markdown or auto-divided into 3 acts).
-- **Download** — Download individual documents or all at once as markdown files.
-- **Delete Confirmation** — Reports require confirmation before deletion.
-
-## Environment Variables
-
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `ANTHROPIC_API_KEY` | Yes | Your Anthropic API key for Claude |
-
-## Scripts
-
-```bash
-npm run dev      # Start dev server
-npm run build    # Production build
-npm run start    # Start production server
-npm run lint     # Run ESLint
-```
+Made by [santiagoalonso.com](https://santiagoalonso.com)
