@@ -19,6 +19,7 @@ export type SavedReport = {
   }[];
   images?: Record<number, SavedImage>;
   promptOverrides?: Record<number, string>;
+  posterImages?: Record<number, SavedImage>;
 };
 
 const REPORTS_KEY = "stp-reports";

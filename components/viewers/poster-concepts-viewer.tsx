@@ -103,14 +103,34 @@ function parsePosterConcepts(md: string): { title: string; intro: string; concep
   return { title, intro: intro.trim(), concepts };
 }
 
-export function PosterConceptsViewer({ content }: { content: string }) {
+type SavedImage = { status: "done"; url: string };
+
+type PosterConceptsViewerProps = {
+  content: string;
+  savedImages: Record<number, SavedImage>;
+  onImagesChange: (images: Record<number, SavedImage>) => void;
+};
+
+export function PosterConceptsViewer({ content, savedImages, onImagesChange }: PosterConceptsViewerProps) {
   const { title, intro, concepts } = useMemo(() => parsePosterConcepts(content), [content]);
   const [copiedId, setCopiedId] = useState<number | null>(null);
   const [expandedConcepts, setExpandedConcepts] = useState<Set<number>>(() => new Set([1]));
-  const [posterImages, setPosterImages] = useState<Record<number, PosterImageState>>({});
+  const [localImages, setLocalImages] = useState<Record<number, PosterImageState>>({});
   const [generatingAll, setGeneratingAll] = useState(false);
   const [genAllProgress, setGenAllProgress] = useState({ done: 0, total: 0 });
   const cancelRef = useRef(false);
+
+  // Merge saved + local images
+  const posterImages: Record<number, PosterImageState> = useMemo(() => {
+    const merged: Record<number, PosterImageState> = {};
+    for (const [k, v] of Object.entries(savedImages)) {
+      merged[Number(k)] = v;
+    }
+    for (const [k, v] of Object.entries(localImages)) {
+      merged[Number(k)] = v;
+    }
+    return merged;
+  }, [savedImages, localImages]);
 
   const categories = [...new Set(concepts.map((c) => c.category))];
 
@@ -130,8 +150,7 @@ export function PosterConceptsViewer({ content }: { content: string }) {
   };
 
   const generatePosterImage = async (concept: PosterConcept) => {
-    setPosterImages((prev) => ({ ...prev, [concept.number]: { status: "generating" } }));
-    // Build a prompt from the concept's composition + style + mood
+    setLocalImages((prev) => ({ ...prev, [concept.number]: { status: "generating" } }));
     const prompt = [
       concept.composition,
       concept.style ? `Style: ${concept.style}.` : "",
@@ -145,14 +164,15 @@ export function PosterConceptsViewer({ content }: { content: string }) {
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const { url } = await res.json();
-      setPosterImages((prev) => ({ ...prev, [concept.number]: { status: "done", url } }));
+      setLocalImages((prev) => ({ ...prev, [concept.number]: { status: "done", url } }));
+      onImagesChange({ ...savedImages, [concept.number]: { status: "done", url } });
     } catch {
-      setPosterImages((prev) => ({ ...prev, [concept.number]: { status: "error" } }));
+      setLocalImages((prev) => ({ ...prev, [concept.number]: { status: "error" } }));
     }
   };
 
   const generateAllPosters = async () => {
-    const toGenerate = concepts.filter((c) => posterImages[c.number]?.status !== "done");
+    const toGenerate = concepts.filter((c) => !savedImages[c.number]);
     if (toGenerate.length === 0) return;
 
     cancelRef.current = false;

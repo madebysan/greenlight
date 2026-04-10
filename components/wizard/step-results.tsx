@@ -21,9 +21,11 @@ type StepResultsProps = {
   onStoryboardImagesChange: (images: Record<number, SavedImage>) => void;
   promptOverrides: Record<number, string>;
   onPromptOverridesChange: (overrides: Record<number, string>) => void;
+  posterImages: Record<number, SavedImage>;
+  onPosterImagesChange: (images: Record<number, SavedImage>) => void;
 };
 
-export function StepResults({ documents, onStartOver, onDocumentUpdate, onDocumentRewrite, storyboardImages, onStoryboardImagesChange, promptOverrides, onPromptOverridesChange }: StepResultsProps) {
+export function StepResults({ documents, onStartOver, onDocumentUpdate, onDocumentRewrite, storyboardImages, onStoryboardImagesChange, promptOverrides, onPromptOverridesChange, posterImages, onPosterImagesChange }: StepResultsProps) {
   const completedDocs = documents.filter((doc) => doc.status === "done");
   const failedDocs = documents.filter((doc) => doc.status === "error");
   const [activeSlug, setActiveSlug] = useState(
@@ -125,7 +127,13 @@ export function StepResults({ documents, onStartOver, onDocumentUpdate, onDocume
                       />
                     );
                   case "poster-concepts":
-                    return <PosterConceptsViewer content={activeDoc.content} />;
+                    return (
+                      <PosterConceptsViewer
+                        content={activeDoc.content}
+                        savedImages={posterImages}
+                        onImagesChange={onPosterImagesChange}
+                      />
+                    );
                   default:
                     return <DocumentViewer content={activeDoc.content} />;
                 }
