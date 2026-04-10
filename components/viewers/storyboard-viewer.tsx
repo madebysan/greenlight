@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { Video, Sun, Heart, Check, Copy, ImageIcon, Loader2, Download, RefreshCw } from "lucide-react";
+import { useState, useMemo, useRef } from "react";
+import { Video, Sun, Heart, Check, Copy, ImageIcon, Loader2, Download, RefreshCw, Images } from "lucide-react";
 
 type StoryboardScene = {
   number: number;
@@ -175,7 +175,7 @@ function parseStoryboardPrompts(md: string): { title: string; intro: string; act
 
 type ImageState = { status: "idle" | "generating" | "done" | "error"; url?: string; error?: string };
 
-function SceneCard({ scene, copiedScene, onCopy, imageState, onGenerate, regenState, onRegenPrompt }: {
+function SceneCard({ scene, copiedScene, onCopy, imageState, onGenerate, regenState, onRegenPrompt, onEditPrompt }: {
   scene: StoryboardScene;
   copiedScene: number | null;
   onCopy: (scene: StoryboardScene) => void;
@@ -183,10 +183,13 @@ function SceneCard({ scene, copiedScene, onCopy, imageState, onGenerate, regenSt
   onGenerate: (scene: StoryboardScene) => void;
   regenState: "idle" | "loading";
   onRegenPrompt: (scene: StoryboardScene) => void;
+  onEditPrompt: (sceneNumber: number, newPrompt: string) => void;
 }) {
   const isCopied = copiedScene === scene.number;
   const intExtMatch = scene.slugLine.match(/^(INT|EXT)\b/i);
   const intExt = intExtMatch ? intExtMatch[1].toUpperCase() : "";
+  const [editing, setEditing] = useState(false);
+  const [editText, setEditText] = useState(scene.prompt);
 
   return (
     <div className="rounded-xl border overflow-hidden">
@@ -236,9 +239,27 @@ function SceneCard({ scene, copiedScene, onCopy, imageState, onGenerate, regenSt
           )}
         </button>
         <button
+          onClick={() => {
+            if (editing) {
+              onEditPrompt(scene.number, editText);
+              setEditing(false);
+            } else {
+              setEditText(scene.prompt);
+              setEditing(true);
+            }
+          }}
+          className={`inline-flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1.5 rounded-md border transition-colors ${
+            editing
+              ? "bg-primary text-primary-foreground border-primary"
+              : "border-transparent text-muted-foreground hover:text-foreground hover:bg-muted hover:border-border"
+          }`}
+        >
+          {editing ? "Save" : "Edit prompt"}
+        </button>
+        <button
           onClick={() => onRegenPrompt(scene)}
-          disabled={regenState === "loading"}
-          className="inline-flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1.5 rounded-md border border-transparent text-muted-foreground hover:text-foreground hover:bg-muted hover:border-border transition-colors"
+          disabled={regenState === "loading" || editing}
+          className="inline-flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1.5 rounded-md border border-transparent text-muted-foreground hover:text-foreground hover:bg-muted hover:border-border transition-colors disabled:opacity-40"
         >
           <RefreshCw size={12} className={regenState === "loading" ? "animate-spin" : ""} />
           {regenState === "loading" ? "Rewriting..." : "Rewrite prompt"}
@@ -275,9 +296,19 @@ function SceneCard({ scene, copiedScene, onCopy, imageState, onGenerate, regenSt
       <div className={`flex gap-4 px-4 py-4 ${imageState.status === "done" && imageState.url ? "" : "flex-col"}`}>
         {/* Text content */}
         <div className="flex-1 min-w-0">
-          <p className="text-[13px] leading-[1.8] text-foreground/80">
-            {scene.prompt}
-          </p>
+          {editing ? (
+            <textarea
+              value={editText}
+              onChange={(e) => setEditText(e.target.value)}
+              className="w-full text-[13px] leading-[1.8] text-foreground/80 bg-muted/30 border rounded-lg p-3 resize-none focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+              rows={Math.max(3, editText.split("\n").length + 1)}
+              autoFocus
+            />
+          ) : (
+            <p className="text-[13px] leading-[1.8] text-foreground/80">
+              {scene.prompt}
+            </p>
+          )}
 
           {/* Metadata chips */}
           {(scene.camera || scene.lighting || scene.mood) && (
@@ -346,6 +377,9 @@ export function StoryboardViewer({ content, savedImages, onImagesChange, savedPr
   const [copiedScene, setCopiedScene] = useState<number | null>(null);
   const [localImages, setLocalImages] = useState<Record<number, ImageState>>({});
   const [regenStates, setRegenStates] = useState<Record<number, "idle" | "loading">>({});
+  const [generatingAll, setGeneratingAll] = useState(false);
+  const [genAllProgress, setGenAllProgress] = useState({ done: 0, total: 0 });
+  const cancelRef = useRef(false);
 
   // Merge saved images into local state on mount/change
   const images: Record<number, ImageState> = useMemo(() => {
@@ -396,6 +430,63 @@ export function StoryboardViewer({ content, savedImages, onImagesChange, savedPr
     }
   };
 
+  // All scenes flattened for "generate all"
+  const allScenes = useMemo(() => acts.flatMap((a) => a.scenes), [acts]);
+
+  const generateAllImages = async () => {
+    const scenesToGenerate = allScenes.filter(
+      (s) => !savedImages[s.number]
+    );
+    if (scenesToGenerate.length === 0) return;
+
+    cancelRef.current = false;
+    setGeneratingAll(true);
+    setGenAllProgress({ done: 0, total: scenesToGenerate.length });
+
+    let updatedImages = { ...savedImages };
+
+    for (let i = 0; i < scenesToGenerate.length; i++) {
+      if (cancelRef.current) break;
+      const scene = scenesToGenerate[i];
+      const displayScene = promptOverrides[scene.number]
+        ? { ...scene, prompt: promptOverrides[scene.number] }
+        : scene;
+
+      setLocalImages((prev) => ({ ...prev, [scene.number]: { status: "generating" } }));
+
+      try {
+        const res = await fetch("/api/generate-image", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ prompt: displayScene.prompt, camera: displayScene.camera }),
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const { url } = await res.json();
+        setLocalImages((prev) => ({ ...prev, [scene.number]: { status: "done", url } }));
+        updatedImages = { ...updatedImages, [scene.number]: { status: "done" as const, url } };
+        onImagesChange(updatedImages);
+      } catch {
+        setLocalImages((prev) => ({
+          ...prev,
+          [scene.number]: { status: "error", error: "Failed" },
+        }));
+      }
+
+      setGenAllProgress({ done: i + 1, total: scenesToGenerate.length });
+    }
+
+    setGeneratingAll(false);
+  };
+
+  const cancelGenerateAll = () => {
+    cancelRef.current = true;
+  };
+
+  const editPrompt = (sceneNumber: number, newPrompt: string) => {
+    const updated = { ...savedPromptOverrides, [sceneNumber]: newPrompt };
+    onPromptOverridesChange(updated);
+  };
+
   const regenPrompt = async (scene: StoryboardScene) => {
     setRegenStates((prev) => ({ ...prev, [scene.number]: "loading" }));
     try {
@@ -428,6 +519,23 @@ export function StoryboardViewer({ content, savedImages, onImagesChange, savedPr
         </h2>
         <div className="flex-1 h-px bg-border" />
         <span className="text-[11px] text-muted-foreground">{totalScenes} scenes</span>
+        {generatingAll ? (
+          <button
+            onClick={cancelGenerateAll}
+            className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-md border border-destructive/30 text-destructive hover:bg-destructive/5 transition-colors"
+          >
+            <Loader2 size={13} className="animate-spin" />
+            {genAllProgress.done}/{genAllProgress.total} — Cancel
+          </button>
+        ) : (
+          <button
+            onClick={generateAllImages}
+            className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-md border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors"
+          >
+            <Images size={13} />
+            Generate all images
+          </button>
+        )}
       </div>
 
       <div className="space-y-8">
@@ -457,6 +565,7 @@ export function StoryboardViewer({ content, savedImages, onImagesChange, savedPr
                     onGenerate={generateImage}
                     regenState={regenStates[scene.number] || "idle"}
                     onRegenPrompt={regenPrompt}
+                    onEditPrompt={editPrompt}
                   />
                 );
               })}

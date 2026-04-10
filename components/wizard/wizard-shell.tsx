@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Trash2 } from "lucide-react";
+import { Trash2, Copy } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -162,6 +162,18 @@ export function WizardShell() {
     setPromptOverrides({});
   };
 
+  const handleDuplicateReport = (report: SavedReport) => {
+    const id = crypto.randomUUID();
+    const duplicate: SavedReport = {
+      ...structuredClone(report),
+      id,
+      title: `${report.title} (copy)`,
+      createdAt: new Date().toISOString(),
+    };
+    setReports(saveReport(duplicate));
+    handleViewReport(duplicate);
+  };
+
   // Save storyboard images/prompts to the active report
   const updateReportExtras = useCallback(
     (images: Record<number, SavedImage>, overrides: Record<number, string>) => {
@@ -236,7 +248,7 @@ export function WizardShell() {
               onClick={handleNewReport}
               className="flex-1 text-sm font-medium bg-primary text-primary-foreground rounded-md px-3 py-2 hover:bg-primary/90 transition-colors"
             >
-              + New Report
+              + New Project
             </button>
             <button
               onClick={() => setSidebarOpen(false)}
@@ -270,19 +282,27 @@ export function WizardShell() {
                     <span className="text-[11px] text-muted-foreground">
                       {date.toLocaleDateString()} &middot; {doneCount}/{report.documents.length} docs
                     </span>
+                    <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button
+                        onClick={(e) => { e.stopPropagation(); handleDuplicateReport(report); }}
+                        className="text-muted-foreground/50 hover:text-foreground p-0.5 rounded"
+                        title="Duplicate project"
+                      >
+                        <Copy size={12} />
+                      </button>
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
                         <button
                           onClick={(e) => e.stopPropagation()}
-                          className="text-muted-foreground/50 hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity p-0.5 rounded"
-                          title="Delete report"
+                          className="text-muted-foreground/50 hover:text-destructive p-0.5 rounded"
+                          title="Delete project"
                         >
                           <Trash2 size={12} />
                         </button>
                       </AlertDialogTrigger>
                       <AlertDialogContent>
                         <AlertDialogHeader>
-                          <AlertDialogTitle>Delete report?</AlertDialogTitle>
+                          <AlertDialogTitle>Delete project?</AlertDialogTitle>
                           <AlertDialogDescription>
                             This will permanently delete &ldquo;{report.title}&rdquo; and all its generated documents. This action cannot be undone.
                           </AlertDialogDescription>
@@ -298,6 +318,7 @@ export function WizardShell() {
                         </AlertDialogFooter>
                       </AlertDialogContent>
                     </AlertDialog>
+                    </div>
                   </div>
                 </div>
               );
@@ -311,7 +332,7 @@ export function WizardShell() {
         <button
           onClick={() => setSidebarOpen(true)}
           className="fixed left-0 top-1/2 -translate-y-1/2 z-10 bg-muted/80 hover:bg-muted border border-l-0 rounded-r-md px-1.5 py-3 text-muted-foreground hover:text-foreground transition-colors"
-          title="Show reports"
+          title="Show projects"
         >
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
         </button>
