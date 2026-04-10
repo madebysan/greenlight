@@ -101,9 +101,13 @@ export function StepGenerating({
       const results: { slug: string; content: string | null; error: string | null }[] = [];
 
       // Generate one at a time to avoid rate limits
+      // Minimum 800ms per doc so the UI animation is visible even with cached results
       for (const doc of documents) {
+        const start = Date.now();
         const result = await generateOne(doc, jsonData, apiKey, setDocuments);
         results.push(result);
+        const elapsed = Date.now() - start;
+        if (elapsed < 800) await new Promise((r) => setTimeout(r, 800 - elapsed));
       }
 
       // Build final state and advance
