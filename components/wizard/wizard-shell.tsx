@@ -45,8 +45,8 @@ const INITIAL_DOCS: DocumentResult[] = [
   { name: "Scene Breakdown", slug: "scene-breakdown", status: "pending", content: null, error: null },
   { name: "Production Matrices", slug: "production-matrices", status: "pending", content: null, error: null },
   { name: "Marketing Brief", slug: "marketing-brief", status: "pending", content: null, error: null },
-  { name: "Storyboard Prompts", slug: "storyboard-prompts", status: "pending", content: null, error: null },
-  { name: "Poster Concepts", slug: "poster-concepts", status: "pending", content: null, error: null },
+  { name: "Storyboard", slug: "storyboard-prompts", status: "pending", content: null, error: null },
+  { name: "Posters", slug: "poster-concepts", status: "pending", content: null, error: null },
 ];
 
 export function WizardShell() {
