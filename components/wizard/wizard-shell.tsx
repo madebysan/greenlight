@@ -1,18 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Trash2, Copy, Pencil, Settings, Info } from "lucide-react";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+import { Settings, Info, RotateCcw } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -24,11 +13,11 @@ import { StepJsonInput } from "./step-json-input";
 import { StepGenerating } from "./step-generating";
 import { StepResults } from "./step-results";
 import {
-  type SavedReport,
+  type SavedProject,
   type SavedImage,
-  loadReports,
-  saveReport,
-  deleteReport,
+  loadProject,
+  saveProject,
+  clearProject,
   extractTitle,
 } from "@/lib/reports";
 
@@ -61,11 +50,7 @@ export function WizardShell() {
   const [apiKey, setApiKey] = useState<string>("");
   const [jsonData, setJsonData] = useState<string>("");
   const [documents, setDocuments] = useState<DocumentResult[]>(INITIAL_DOCS);
-  const [reports, setReports] = useState<SavedReport[]>([]);
-  const [activeReportId, setActiveReportId] = useState<string | null>(null);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [renamingId, setRenamingId] = useState<string | null>(null);
-  const [renameValue, setRenameValue] = useState("");
+  const [hasActiveProject, setHasActiveProject] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [falKey, setFalKey] = useState<string>("");
@@ -74,12 +59,32 @@ export function WizardShell() {
   const [posterImages, setPosterImages] = useState<Record<number, SavedImage>>({});
   const [portraits, setPortraits] = useState<Record<string, SavedImage>>({});
 
-  // Load reports and API key on mount
+  // Hydrate from localStorage on mount.
+  // setState in an effect is intentional here: we need SSR to render a neutral
+  // "Loading..." state and only read localStorage after client hydration to
+  // avoid hydration mismatch. React 18+ auto-batches these updates.
   useEffect(() => {
-    setReports(loadReports());
+    /* eslint-disable react-hooks/set-state-in-effect */
+    const project = loadProject();
+    if (project) {
+      setJsonData(project.jsonData || "");
+      setDocuments(
+        project.documents.map((d) => ({
+          ...d,
+          status: d.status as DocumentResult["status"],
+        }))
+      );
+      setStoryboardImages(project.images || {});
+      setPromptOverrides(project.promptOverrides || {});
+      setPosterImages(project.posterImages || {});
+      setPortraits(project.portraits || {});
+      setHasActiveProject(true);
+      setCurrentStep(4);
+    }
     setApiKey(localStorage.getItem("stp-api-key") || "");
     setFalKey(localStorage.getItem("stp-fal-key") || "");
     setHydrated(true);
+    /* eslint-enable react-hooks/set-state-in-effect */
   }, []);
 
   const handleApiKeyChange = (key: string) => {
@@ -89,7 +94,6 @@ export function WizardShell() {
 
   const handleJsonSubmit = (json: string) => {
     setJsonData(json);
-    setActiveReportId(null);
     setCurrentStep(3);
   };
 
@@ -98,12 +102,8 @@ export function WizardShell() {
       setDocuments(results);
       setCurrentStep(4);
 
-      // Save as a report
-      const id = crypto.randomUUID();
-      const title = extractTitle(jsonData);
-      const report: SavedReport = {
-        id,
-        title,
+      const project: SavedProject = {
+        title: extractTitle(jsonData),
         createdAt: new Date().toISOString(),
         jsonData,
         documents: results.map((d) => ({
@@ -114,27 +114,11 @@ export function WizardShell() {
           error: d.error,
         })),
       };
-      setReports(saveReport(report));
-      setActiveReportId(id);
+      saveProject(project);
+      setHasActiveProject(true);
     },
     [jsonData]
   );
-
-  const handleViewReport = (report: SavedReport) => {
-    setActiveReportId(report.id);
-    if (report.jsonData) setJsonData(report.jsonData);
-    setDocuments(
-      report.documents.map((d) => ({
-        ...d,
-        status: d.status as DocumentResult["status"],
-      }))
-    );
-    setStoryboardImages(report.images || {});
-    setPromptOverrides(report.promptOverrides || {});
-    setPosterImages(report.posterImages || {});
-    setPortraits(report.portraits || {});
-    setCurrentStep(4);
-  };
 
   const handleDownloadAll = () => {
     const completedDocs = documents.filter((d) => d.status === "done");
@@ -161,64 +145,31 @@ export function WizardShell() {
     URL.revokeObjectURL(url);
   };
 
-  const handleDeleteReport = (id: string) => {
-    setReports(deleteReport(id));
-    if (activeReportId === id) {
-      setActiveReportId(null);
-      handleNewReport();
-    }
-  };
-
-  const handleNewReport = () => {
+  const handleStartOver = () => {
+    clearProject();
     setCurrentStep(1);
     setJsonData("");
     setDocuments(INITIAL_DOCS);
-    setActiveReportId(null);
     setStoryboardImages({});
     setPromptOverrides({});
     setPosterImages({});
     setPortraits({});
+    setHasActiveProject(false);
   };
 
-  const handleRenameReport = (id: string, newTitle: string) => {
-    const trimmed = newTitle.trim();
-    if (!trimmed) return;
-    const current = loadReports();
-    const idx = current.findIndex((r) => r.id === id);
-    if (idx < 0) return;
-    current[idx].title = trimmed;
-    localStorage.setItem("stp-reports", JSON.stringify(current));
-    setReports([...current]);
-  };
-
-  const handleDuplicateReport = (report: SavedReport) => {
-    const id = crypto.randomUUID();
-    const duplicate: SavedReport = {
-      ...structuredClone(report),
-      id,
-      title: `${report.title} (copy)`,
-      createdAt: new Date().toISOString(),
-    };
-    setReports(saveReport(duplicate));
-    handleViewReport(duplicate);
-  };
-
-  // Save all extras to the active report
+  // Persist incremental edits (images, prompt overrides, posters, portraits) to the active project
   const persistExtras = useCallback(
     (extras: { images?: Record<number, SavedImage>; overrides?: Record<number, string>; posters?: Record<number, SavedImage>; portraits?: Record<string, SavedImage> }) => {
-      if (!activeReportId) return;
-      const current = loadReports();
-      const idx = current.findIndex((r) => r.id === activeReportId);
-      if (idx < 0) return;
-      if (extras.images !== undefined) current[idx].images = extras.images;
-      if (extras.overrides !== undefined) current[idx].promptOverrides = extras.overrides;
-      if (extras.posters !== undefined) current[idx].posterImages = extras.posters;
-      if (extras.portraits !== undefined) current[idx].portraits = extras.portraits;
-      try {
-        localStorage.setItem("stp-reports", JSON.stringify(current));
-      } catch {}
+      const current = loadProject();
+      if (!current) return;
+      const next: SavedProject = { ...current };
+      if (extras.images !== undefined) next.images = extras.images;
+      if (extras.overrides !== undefined) next.promptOverrides = extras.overrides;
+      if (extras.posters !== undefined) next.posterImages = extras.posters;
+      if (extras.portraits !== undefined) next.portraits = extras.portraits;
+      saveProject(next);
     },
-    [activeReportId]
+    []
   );
 
   const handleImagesChange = useCallback(
@@ -253,26 +204,23 @@ export function WizardShell() {
     [persistExtras]
   );
 
-  // Update a specific document's content and persist to localStorage
+  // Update a specific document's content and persist
   const handleDocumentUpdate = (slug: string, newContent: string) => {
     setDocuments((prev) => {
       const updated = prev.map((d) => (d.slug === slug ? { ...d, content: newContent } : d));
-      // Persist to report in localStorage
-      if (activeReportId) {
-        const current = loadReports();
-        const idx = current.findIndex((r) => r.id === activeReportId);
-        if (idx >= 0) {
-          current[idx].documents = updated.map((d) => ({
+      const current = loadProject();
+      if (current) {
+        const next: SavedProject = {
+          ...current,
+          documents: updated.map((d) => ({
             name: d.name,
             slug: d.slug,
-            status: d.status === "done" ? "done" as const : "error" as const,
+            status: d.status === "done" ? ("done" as const) : ("error" as const),
             content: d.content,
             error: d.error,
-          }));
-          try {
-            localStorage.setItem("stp-reports", JSON.stringify(current));
-          } catch {}
-        }
+          })),
+        };
+        saveProject(next);
       }
       return updated;
     });
@@ -299,308 +247,173 @@ export function WizardShell() {
     );
   }
 
-  const hasReports = reports.length > 0;
-
   return (
-    <div className="min-h-screen bg-background flex">
-      {/* Report history sidebar */}
-      {hasReports && sidebarOpen && (
-        <aside className="w-56 shrink-0 border-r bg-muted/20 flex flex-col">
-          <div className="p-3 border-b flex items-center gap-2">
-            <button
-              onClick={handleNewReport}
-              className="flex-1 text-sm font-medium bg-primary text-primary-foreground rounded-md px-3 py-2 hover:bg-primary/90 transition-colors"
-            >
-              + New Project
-            </button>
-            <button
-              onClick={() => setSidebarOpen(false)}
-              className="text-muted-foreground hover:text-foreground p-1 rounded transition-colors"
-              title="Collapse sidebar"
-            >
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 12L6 8l4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
-            </button>
-          </div>
-          <div className="flex-1 overflow-y-auto p-2 space-y-1">
-            {reports.map((report) => {
-              const isActive = report.id === activeReportId;
-              const doneCount = report.documents.filter(
-                (d) => d.status === "done"
-              ).length;
-              const date = new Date(report.createdAt);
-              return (
-                <div
-                  key={report.id}
-                  className={`group rounded-lg px-2.5 py-2 cursor-pointer transition-colors ${
-                    isActive
-                      ? "bg-primary/10 border border-primary/20"
-                      : "hover:bg-muted/60 border border-transparent"
-                  }`}
-                  onClick={() => handleViewReport(report)}
+    <div className="min-h-screen bg-background">
+      <header className="border-b bg-background/95 backdrop-blur-sm">
+        <div className={`mx-auto px-6 py-4 ${currentStep === 4 ? "max-w-6xl" : "max-w-4xl"}`}>
+          <div className="flex items-center gap-3">
+            {/* Brand */}
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
+                <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
+                <polyline points="14,2 14,8 20,8" />
+                <line x1="16" y1="13" x2="8" y2="13" />
+                <line x1="16" y1="17" x2="8" y2="17" />
+                <polyline points="10,9 9,9 8,9" />
+              </svg>
+            </div>
+            <div>
+              <h1 className="text-lg font-bold tracking-tight">Greenlight</h1>
+              <p className="text-[13px] text-muted-foreground">
+                AI-powered pre-production bible generator
+              </p>
+            </div>
+
+            {/* Header actions */}
+            <div className="flex items-center gap-2 ml-auto">
+              {currentStep === 4 && jsonData && (
+                <button
+                  onClick={handleDownloadJson}
+                  className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground px-3 py-1.5 rounded-md border border-border hover:border-foreground/20 transition-colors"
                 >
-                  {renamingId === report.id ? (
-                    <form
-                      onSubmit={(e) => {
-                        e.preventDefault();
-                        handleRenameReport(report.id, renameValue);
-                        setRenamingId(null);
-                      }}
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <input
-                        autoFocus
-                        value={renameValue}
-                        onChange={(e) => setRenameValue(e.target.value)}
-                        onBlur={() => {
-                          handleRenameReport(report.id, renameValue);
-                          setRenamingId(null);
-                        }}
-                        onKeyDown={(e) => {
-                          if (e.key === "Escape") setRenamingId(null);
-                        }}
-                        className="text-sm font-medium w-full bg-background border rounded px-1.5 py-0.5 focus:outline-none focus:ring-1 focus:ring-primary"
-                      />
-                    </form>
-                  ) : (
-                    <div className="text-sm font-medium truncate">
-                      {report.title}
-                    </div>
-                  )}
-                  <div className="flex items-center justify-between mt-0.5">
-                    <span className="text-[11px] text-muted-foreground">
-                      {date.toLocaleDateString()} &middot; {doneCount}/{report.documents.length} docs
-                    </span>
-                    <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setRenamingId(report.id);
-                          setRenameValue(report.title);
-                        }}
-                        className="text-muted-foreground/50 hover:text-foreground p-0.5 rounded"
-                        title="Rename project"
-                      >
-                        <Pencil size={12} />
-                      </button>
-                      <button
-                        onClick={(e) => { e.stopPropagation(); handleDuplicateReport(report); }}
-                        className="text-muted-foreground/50 hover:text-foreground p-0.5 rounded"
-                        title="Duplicate project"
-                      >
-                        <Copy size={12} />
-                      </button>
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <button
-                          onClick={(e) => e.stopPropagation()}
-                          className="text-muted-foreground/50 hover:text-destructive p-0.5 rounded"
-                          title="Delete project"
-                        >
-                          <Trash2 size={12} />
-                        </button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Delete project?</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            This will permanently delete &ldquo;{report.title}&rdquo; and all its generated documents. This action cannot be undone.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction
-                            onClick={() => handleDeleteReport(report.id)}
-                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                          >
-                            Delete
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-          {/* Sidebar footer */}
-          <div className="p-2 border-t flex items-center gap-1">
-            <button
-              onClick={() => setShowSettings(true)}
-              className="flex-1 inline-flex items-center justify-center gap-1.5 text-[11px] text-muted-foreground hover:text-foreground py-1.5 rounded-md hover:bg-muted/60 transition-colors"
-            >
-              <Settings size={12} />
-              Settings
-            </button>
-            <button
-              onClick={() => setShowAbout(true)}
-              className="flex-1 inline-flex items-center justify-center gap-1.5 text-[11px] text-muted-foreground hover:text-foreground py-1.5 rounded-md hover:bg-muted/60 transition-colors"
-            >
-              <Info size={12} />
-              About
-            </button>
-          </div>
-        </aside>
-      )}
-
-      {/* Collapsed sidebar toggle */}
-      {hasReports && !sidebarOpen && (
-        <button
-          onClick={() => setSidebarOpen(true)}
-          className="fixed left-0 top-1/2 -translate-y-1/2 z-10 bg-muted/80 hover:bg-muted border border-l-0 rounded-r-md px-1.5 py-3 text-muted-foreground hover:text-foreground transition-colors"
-          title="Show projects"
-        >
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
-        </button>
-      )}
-
-      {/* Main content */}
-      <div className="flex-1 min-w-0">
-        <header className="border-b bg-background/95 backdrop-blur-sm">
-          <div className={`mx-auto px-6 py-4 ${currentStep === 4 ? "max-w-6xl" : "max-w-4xl"}`}>
-            <div className="flex items-center gap-3">
-              {/* Simple icon */}
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
-                  <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
-                  <polyline points="14,2 14,8 20,8" />
-                  <line x1="16" y1="13" x2="8" y2="13" />
-                  <line x1="16" y1="17" x2="8" y2="17" />
-                  <polyline points="10,9 9,9 8,9" />
-                </svg>
-              </div>
-              <div>
-                <h1 className="text-lg font-bold tracking-tight">
-                  Greenlight
-                </h1>
-                <p className="text-[13px] text-muted-foreground">
-                  AI-powered pre-production bible generator
-                </p>
-              </div>
-              {/* Download actions on results step */}
-              {currentStep === 4 && (
-                <div className="flex items-center gap-2 ml-auto">
-                  {jsonData && (
-                    <button
-                      onClick={handleDownloadJson}
-                      className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground px-3 py-1.5 rounded-md border border-border hover:border-foreground/20 transition-colors"
-                    >
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                        <polyline points="14,2 14,8 20,8" />
-                        <line x1="16" y1="13" x2="8" y2="13" />
-                        <line x1="16" y1="17" x2="8" y2="17" />
-                      </svg>
-                      JSON
-                    </button>
-                  )}
-                  {documents.some((d) => d.status === "done") && (
-                    <button
-                      onClick={handleDownloadAll}
-                      className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground px-3 py-1.5 rounded-md border border-border hover:border-foreground/20 transition-colors"
-                    >
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                        <polyline points="7,10 12,15 17,10" />
-                        <line x1="12" y1="15" x2="12" y2="3" />
-                      </svg>
-                      Download All
-                    </button>
-                  )}
-                </div>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                    <polyline points="14,2 14,8 20,8" />
+                    <line x1="16" y1="13" x2="8" y2="13" />
+                    <line x1="16" y1="17" x2="8" y2="17" />
+                  </svg>
+                  JSON
+                </button>
               )}
+              {currentStep === 4 && documents.some((d) => d.status === "done") && (
+                <button
+                  onClick={handleDownloadAll}
+                  className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground px-3 py-1.5 rounded-md border border-border hover:border-foreground/20 transition-colors"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                    <polyline points="7,10 12,15 17,10" />
+                    <line x1="12" y1="15" x2="12" y2="3" />
+                  </svg>
+                  Download All
+                </button>
+              )}
+              {hasActiveProject && (
+                <button
+                  onClick={handleStartOver}
+                  className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground px-3 py-1.5 rounded-md border border-border hover:border-foreground/20 transition-colors"
+                  title="Start a new project"
+                >
+                  <RotateCcw size={14} />
+                  Start Over
+                </button>
+              )}
+              <button
+                onClick={() => setShowSettings(true)}
+                className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground px-3 py-1.5 rounded-md border border-border hover:border-foreground/20 transition-colors"
+                title="Settings"
+              >
+                <Settings size={14} />
+                Settings
+              </button>
+              <button
+                onClick={() => setShowAbout(true)}
+                className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground px-3 py-1.5 rounded-md border border-border hover:border-foreground/20 transition-colors"
+                title="About Greenlight"
+              >
+                <Info size={14} />
+                About
+              </button>
             </div>
           </div>
-        </header>
+        </div>
+      </header>
 
-        {/* Step indicator */}
-        {currentStep < 4 && (
-          <div className={`mx-auto px-6 py-6 ${currentStep === 4 ? "max-w-6xl" : "max-w-4xl"}`}>
-            <div className="flex items-center">
-              {STEPS.map((step, i) => (
-                <div key={step.number} className="flex items-center">
-                  <div className="flex items-center gap-2">
-                    <div
-                      className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold transition-colors ${
-                        currentStep === step.number
-                          ? "bg-primary text-primary-foreground shadow-sm"
-                          : currentStep > step.number
-                            ? "bg-primary/20 text-primary"
-                            : "bg-muted text-muted-foreground"
-                      }`}
-                    >
-                      {currentStep > step.number ? "\u2713" : step.number}
-                    </div>
-                    <span
-                      className={`text-sm ${
-                        currentStep === step.number
-                          ? "font-semibold text-foreground"
-                          : currentStep > step.number
-                            ? "font-medium text-primary/70"
-                            : "text-muted-foreground"
-                      }`}
-                    >
-                      {step.label}
-                    </span>
+      {/* Step indicator */}
+      {currentStep < 4 && (
+        <div className={`mx-auto px-6 py-6 ${currentStep === 4 ? "max-w-6xl" : "max-w-4xl"}`}>
+          <div className="flex items-center">
+            {STEPS.map((step, i) => (
+              <div key={step.number} className="flex items-center">
+                <div className="flex items-center gap-2">
+                  <div
+                    className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold transition-colors ${
+                      currentStep === step.number
+                        ? "bg-primary text-primary-foreground shadow-sm"
+                        : currentStep > step.number
+                          ? "bg-primary/20 text-primary"
+                          : "bg-muted text-muted-foreground"
+                    }`}
+                  >
+                    {currentStep > step.number ? "\u2713" : step.number}
                   </div>
-                  {i < STEPS.length - 1 && (
-                    <div
-                      className={`h-0.5 w-12 mx-3 rounded-full transition-colors ${
-                        currentStep > step.number ? "bg-primary/30" : "bg-border"
-                      }`}
-                    />
-                  )}
+                  <span
+                    className={`text-sm ${
+                      currentStep === step.number
+                        ? "font-semibold text-foreground"
+                        : currentStep > step.number
+                          ? "font-medium text-primary/70"
+                          : "text-muted-foreground"
+                    }`}
+                  >
+                    {step.label}
+                  </span>
                 </div>
-              ))}
-            </div>
+                {i < STEPS.length - 1 && (
+                  <div
+                    className={`h-0.5 w-12 mx-3 rounded-full transition-colors ${
+                      currentStep > step.number ? "bg-primary/30" : "bg-border"
+                    }`}
+                  />
+                )}
+              </div>
+            ))}
           </div>
-        )}
+        </div>
+      )}
 
-        {/* Step content */}
-        <main
-          className={`mx-auto px-6 pb-12 ${
-            currentStep === 4 ? "max-w-6xl" : "max-w-4xl"
-          }`}
-        >
-          {currentStep === 1 && (
-            <StepInstructions
-              onNext={() => setCurrentStep(2)}
-            />
-          )}
-          {currentStep === 2 && (
-            <StepJsonInput
-              onSubmit={handleJsonSubmit}
-              onBack={() => setCurrentStep(1)}
-            />
-          )}
-          {currentStep === 3 && (
-            <StepGenerating
-              apiKey={apiKey}
-              jsonData={jsonData}
-              documents={documents}
-              setDocuments={setDocuments}
-              onComplete={handleGenerationComplete}
-            />
-          )}
-          {currentStep === 4 && (
-            <StepResults
-              documents={documents}
-              jsonData={jsonData}
-              onStartOver={handleNewReport}
-              onDocumentUpdate={handleDocumentUpdate}
-              onDocumentRewrite={handleDocumentRewrite}
-              storyboardImages={storyboardImages}
-              onStoryboardImagesChange={handleImagesChange}
-              promptOverrides={promptOverrides}
-              onPromptOverridesChange={handlePromptOverridesChange}
-              posterImages={posterImages}
-              onPosterImagesChange={handlePosterImagesChange}
-              portraits={portraits}
-              onPortraitsChange={handlePortraitsChange}
-            />
-          )}
-        </main>
-      </div>
+      {/* Step content */}
+      <main
+        className={`mx-auto px-6 pb-12 ${
+          currentStep === 4 ? "max-w-6xl" : "max-w-4xl"
+        }`}
+      >
+        {currentStep === 1 && (
+          <StepInstructions onNext={() => setCurrentStep(2)} />
+        )}
+        {currentStep === 2 && (
+          <StepJsonInput
+            onSubmit={handleJsonSubmit}
+            onBack={() => setCurrentStep(1)}
+          />
+        )}
+        {currentStep === 3 && (
+          <StepGenerating
+            apiKey={apiKey}
+            jsonData={jsonData}
+            documents={documents}
+            setDocuments={setDocuments}
+            onComplete={handleGenerationComplete}
+          />
+        )}
+        {currentStep === 4 && (
+          <StepResults
+            documents={documents}
+            jsonData={jsonData}
+            onStartOver={handleStartOver}
+            onDocumentUpdate={handleDocumentUpdate}
+            onDocumentRewrite={handleDocumentRewrite}
+            storyboardImages={storyboardImages}
+            onStoryboardImagesChange={handleImagesChange}
+            promptOverrides={promptOverrides}
+            onPromptOverridesChange={handlePromptOverridesChange}
+            posterImages={posterImages}
+            onPosterImagesChange={handlePosterImagesChange}
+            portraits={portraits}
+            onPortraitsChange={handlePortraitsChange}
+          />
+        )}
+      </main>
 
       {/* Settings dialog */}
       <Dialog open={showSettings} onOpenChange={setShowSettings}>
