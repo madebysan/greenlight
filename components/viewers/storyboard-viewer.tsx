@@ -201,8 +201,8 @@ function SceneCard({ scene, copiedScene, onCopy, imageState, onGenerate, regenSt
         {intExt && (
           <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded border ${
             intExt === "EXT"
-              ? "bg-sky-50 text-sky-700 border-sky-200"
-              : "bg-amber-50 text-amber-700 border-amber-200"
+              ? "bg-sky-500/15 text-sky-400 border-sky-500/20"
+              : "bg-amber-500/15 text-amber-400 border-amber-500/20"
           }`}>
             {intExt}
           </span>
@@ -268,7 +268,7 @@ function SceneCard({ scene, copiedScene, onCopy, imageState, onGenerate, regenSt
           onClick={() => onCopy(scene)}
           className={`inline-flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1.5 rounded-md border transition-colors ${
             isCopied
-              ? "bg-green-50 text-green-700 border-green-200"
+              ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/20"
               : "text-muted-foreground hover:text-foreground hover:bg-muted border-transparent hover:border-border"
           }`}
         >

@@ -21,7 +21,7 @@ const STATUS_ICON: Record<DocumentResult["status"], string> = {
 const STATUS_COLOR: Record<DocumentResult["status"], string> = {
   pending: "text-muted-foreground",
   generating: "text-primary animate-pulse",
-  done: "text-green-600",
+  done: "text-emerald-400",
   error: "text-destructive",
 };
 
@@ -173,7 +173,7 @@ export function StepGenerating({
               doc.status === "generating"
                 ? "border-primary/30 bg-primary/5 shadow-sm"
                 : doc.status === "done"
-                  ? "bg-green-50/50 border-green-200/50"
+                  ? "bg-emerald-500/10 border-emerald-500/20"
                   : doc.status === "error"
                     ? "bg-destructive/5 border-destructive/20"
                     : ""

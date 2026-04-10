@@ -153,7 +153,7 @@ function LocationCards({ table }: { table: TableSection }) {
           <div key={i} className="rounded-xl border p-4">
             <div className="flex items-center gap-2 mb-2.5">
               <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded border ${
-                isExt ? "bg-sky-50 text-sky-700 border-sky-200" : "bg-amber-50 text-amber-700 border-amber-200"
+                isExt ? "bg-sky-500/15 text-sky-400 border-sky-500/20" : "bg-amber-500/15 text-amber-400 border-amber-500/20"
               }`}>
                 {locType}
               </span>
@@ -273,9 +273,9 @@ function WardrobeTimeline({ table }: { table: TableSection }) {
                       {change && change !== "Same" && change !== "Initial" && (
                         <span className={`ml-2 inline-block text-[10px] px-1.5 py-0.5 rounded ${
                           change.toLowerCase() === "change"
-                            ? "bg-blue-50 text-blue-600"
+                            ? "bg-blue-500/15 text-blue-400"
                             : change.toLowerCase() === "callback"
-                            ? "bg-purple-50 text-purple-600"
+                            ? "bg-purple-500/15 text-purple-400"
                             : "bg-muted text-muted-foreground"
                         }`}>
                           {change}
@@ -305,10 +305,10 @@ function VFXCards({ table }: { table: TableSection }) {
         const reqs = row[4] || "";
 
         const complexityColor = complexity.toLowerCase().includes("high")
-          ? "bg-red-50 text-red-700 border-red-200"
+          ? "bg-red-500/15 text-red-400 border-red-500/20"
           : complexity.toLowerCase().includes("moderate")
-          ? "bg-amber-50 text-amber-700 border-amber-200"
-          : "bg-green-50 text-green-700 border-green-200";
+          ? "bg-amber-500/15 text-amber-400 border-amber-500/20"
+          : "bg-emerald-500/15 text-emerald-400 border-emerald-500/20";
 
         return (
           <div key={i} className="rounded-xl border p-4">
@@ -316,7 +316,7 @@ function VFXCards({ table }: { table: TableSection }) {
               <span className="text-[11px] font-mono font-semibold bg-muted rounded px-1.5 py-0.5">
                 Sc {scene}
               </span>
-              <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded border bg-violet-50 text-violet-700 border-violet-200">
+              <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded border bg-violet-500/15 text-violet-400 border-violet-500/20">
                 {type}
               </span>
               <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded border ${complexityColor}`}>
@@ -494,7 +494,7 @@ function CharacterCard({ char, index, portrait }: { char: Character; index: numb
           </p>
           {char.specialReqs && char.specialReqs !== "None" && (
             <div className="flex gap-2 items-start">
-              <span className="text-[10px] uppercase tracking-wider text-amber-700 font-semibold bg-amber-50 rounded px-1.5 py-0.5 shrink-0 mt-0.5">
+              <span className="text-[10px] uppercase tracking-wider text-amber-400 font-semibold bg-amber-500/15 rounded px-1.5 py-0.5 shrink-0 mt-0.5">
                 Special
               </span>
               <span className="text-[12px] text-foreground/60">
