@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { Pencil, RefreshCw, ChevronDown, Film } from "lucide-react";
+import { Pencil, RefreshCw, ChevronDown, Film, Plus, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -177,16 +177,27 @@ function SectionHeader({
   );
 }
 
+const ADDABLE_SECTIONS = [
+  { id: "festival-strategy", label: "Festival Strategy" },
+  { id: "distribution", label: "Distribution Positioning" },
+  { id: "pitch-deck", label: "Pitch Deck Elements" },
+  { id: "social-hooks", label: "Social Media Hooks" },
+  { id: "casting-wishlist", label: "Casting Wishlist" },
+  { id: "music-direction", label: "Music & Soundtrack" },
+];
+
 type MarketingBriefViewerProps = {
   content: string;
+  jsonData?: string;
   onContentChange?: (newContent: string) => void;
   onRewrite?: () => Promise<void>;
 };
 
-export function MarketingBriefViewer({ content, onContentChange, onRewrite }: MarketingBriefViewerProps) {
+export function MarketingBriefViewer({ content, jsonData, onContentChange, onRewrite }: MarketingBriefViewerProps) {
   const brief = useMemo(() => parseMarketingBrief(content), [content]);
   const [isRewriting, setIsRewriting] = useState(false);
   const [plotExpanded, setPlotExpanded] = useState(false);
+  const [generatingSection, setGeneratingSection] = useState<string | null>(null);
 
   // Generic edit dialog state
   const [editDialog, setEditDialog] = useState<{
@@ -224,6 +235,25 @@ export function MarketingBriefViewer({ content, onContentChange, onRewrite }: Ma
     } finally {
       setIsRewriting(false);
     }
+  };
+
+  // Generate a new section on demand
+  const handleGenerateSection = async (sectionId: string) => {
+    if (!onContentChange || !jsonData) return;
+    setGeneratingSection(sectionId);
+    try {
+      const res = await fetch("/api/generate-section", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sectionType: sectionId, jsonData }),
+      });
+      if (!res.ok) throw new Error("Generation failed");
+      const data = await res.json();
+      onContentChange(content + "\n\n" + data.content);
+    } catch {
+      // silently fail
+    }
+    setGeneratingSection(null);
   };
 
   // Film identity form handlers
@@ -455,6 +485,38 @@ export function MarketingBriefViewer({ content, onContentChange, onRewrite }: Ma
           </div>
         </section>
       ))}
+
+      {/* Add Section */}
+      {onContentChange && jsonData && (() => {
+        const contentLower = content.toLowerCase();
+        const available = ADDABLE_SECTIONS.filter((s) => {
+          const label = s.label.toLowerCase();
+          return !contentLower.includes(`## ${label}`);
+        });
+        if (available.length === 0) return null;
+        return (
+          <section className="mb-8 mt-4">
+            <SectionHeader title="Add Section" />
+            <div className="flex flex-wrap gap-2">
+              {available.map((sec) => (
+                <button
+                  key={sec.id}
+                  onClick={() => handleGenerateSection(sec.id)}
+                  disabled={generatingSection !== null}
+                  className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-lg border border-dashed border-border text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors disabled:opacity-40"
+                >
+                  {generatingSection === sec.id ? (
+                    <Loader2 size={13} className="animate-spin" />
+                  ) : (
+                    <Plus size={13} />
+                  )}
+                  {generatingSection === sec.id ? `Generating ${sec.label}...` : sec.label}
+                </button>
+              ))}
+            </div>
+          </section>
+        );
+      })()}
 
       {/* Generic text edit dialog */}
       <Dialog open={editDialog.open} onOpenChange={(open) => setEditDialog((prev) => ({ ...prev, open }))}>

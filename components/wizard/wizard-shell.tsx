@@ -532,6 +532,7 @@ export function WizardShell() {
           {currentStep === 4 && (
             <StepResults
               documents={documents}
+              jsonData={jsonData}
               onStartOver={handleNewReport}
               onDocumentUpdate={handleDocumentUpdate}
               onDocumentRewrite={handleDocumentRewrite}
