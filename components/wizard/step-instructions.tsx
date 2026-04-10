@@ -148,7 +148,7 @@ export function StepInstructions({ apiKey, onApiKeyChange, onNext }: StepInstruc
 
       {/* Next button */}
       <div className="flex justify-end">
-        <Button onClick={onNext} size="lg" className="px-8" disabled={!apiKey}>
+        <Button onClick={onNext} size="lg" className="px-8">
           I have my JSON &rarr;
         </Button>
       </div>

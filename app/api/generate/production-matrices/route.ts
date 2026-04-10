@@ -7,11 +7,12 @@ const SLUG = "production-matrices";
 
 export async function POST(request: NextRequest) {
   try {
-    const { jsonData, apiKey } = await request.json();
+    const { jsonData, apiKey: clientKey } = await request.json();
+    const apiKey = clientKey || process.env.ANTHROPIC_API_KEY;
 
     if (!jsonData || !apiKey) {
       return NextResponse.json(
-        { error: "Missing jsonData or apiKey in request body" },
+        { error: "Missing jsonData or apiKey" },
         { status: 400 }
       );
     }
