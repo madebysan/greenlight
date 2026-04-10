@@ -252,62 +252,68 @@ function SceneCard({ scene, copiedScene, onCopy, imageState, onGenerate }: {
         </button>
       </div>
 
-      {/* Generated image */}
-      {imageState.status === "done" && imageState.url && (
-        <div className="relative group">
-          <img
-            src={imageState.url}
-            alt={`Storyboard frame — Scene ${scene.number}`}
-            className="w-full"
-          />
-          <a
-            href={imageState.url}
-            download={`scene-${scene.number}.png`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity inline-flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1.5 rounded-md bg-black/70 text-white hover:bg-black/90"
-          >
-            <Download size={12} />
-            Save
-          </a>
-        </div>
-      )}
       {imageState.status === "error" && (
         <div className="px-4 py-3 bg-destructive/5 border-b">
           <p className="text-xs text-destructive">{imageState.error || "Image generation failed"}</p>
         </div>
       )}
 
-      {/* Prompt text */}
-      <div className="px-4 py-4">
-        <p className="text-[13px] leading-[1.8] text-foreground/80">
-          {scene.prompt}
-        </p>
-      </div>
+      {/* Content: text + image side by side when image exists */}
+      <div className={`flex gap-4 px-4 py-4 ${imageState.status === "done" && imageState.url ? "" : "flex-col"}`}>
+        {/* Text content */}
+        <div className="flex-1 min-w-0">
+          <p className="text-[13px] leading-[1.8] text-foreground/80">
+            {scene.prompt}
+          </p>
 
-      {/* Metadata chips */}
-      {(scene.camera || scene.lighting || scene.mood) && (
-        <div className="flex flex-wrap gap-x-4 gap-y-2 px-4 pb-4">
-          {scene.camera && (
-            <div className="flex items-center gap-1.5">
-              <Video size={13} className="text-muted-foreground" />
-              <span className="text-[11px] text-muted-foreground">{scene.camera}</span>
-            </div>
-          )}
-          {scene.lighting && (
-            <div className="flex items-center gap-1.5">
-              <Sun size={13} className="text-muted-foreground" />
-              <span className="text-[11px] text-muted-foreground">{scene.lighting}</span>
-            </div>
-          )}
-          {scene.mood && (
-            <div className="flex items-center gap-1.5">
-              <Heart size={13} className="text-muted-foreground" />
-              <span className="text-[11px] text-muted-foreground">{scene.mood}</span>
+          {/* Metadata chips */}
+          {(scene.camera || scene.lighting || scene.mood) && (
+            <div className="flex flex-wrap gap-x-4 gap-y-2 mt-3">
+              {scene.camera && (
+                <div className="flex items-center gap-1.5">
+                  <Video size={13} className="text-muted-foreground" />
+                  <span className="text-[11px] text-muted-foreground">{scene.camera}</span>
+                </div>
+              )}
+              {scene.lighting && (
+                <div className="flex items-center gap-1.5">
+                  <Sun size={13} className="text-muted-foreground" />
+                  <span className="text-[11px] text-muted-foreground">{scene.lighting}</span>
+                </div>
+              )}
+              {scene.mood && (
+                <div className="flex items-center gap-1.5">
+                  <Heart size={13} className="text-muted-foreground" />
+                  <span className="text-[11px] text-muted-foreground">{scene.mood}</span>
+                </div>
+              )}
             </div>
           )}
         </div>
-      )}
+
+        {/* Generated image — fixed 16:9 thumbnail to the right */}
+        {imageState.status === "done" && imageState.url && (
+          <div className="relative group shrink-0 w-[280px]">
+            <div className="aspect-video rounded-lg overflow-hidden border bg-muted/30">
+              <img
+                src={imageState.url}
+                alt={`Storyboard frame — Scene ${scene.number}`}
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <a
+              href={imageState.url}
+              download={`scene-${scene.number}.png`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="absolute top-1.5 right-1.5 opacity-0 group-hover:opacity-100 transition-opacity inline-flex items-center gap-1 text-[10px] font-medium px-2 py-1 rounded bg-black/70 text-white hover:bg-black/90"
+            >
+              <Download size={10} />
+              Save
+            </a>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
