@@ -64,15 +64,35 @@ Full rethink of the tab architecture to match the indie-filmmaker framing. Curre
 
 ## Sample Data
 
-**Kill Jaws and Ex Machina.** Don't want to signal "I'm uploading studio scripts into an LLM" to anyone from A24 or Universal seeing this tool. Replace with scripts that are legally safe to showcase — public domain, Creative Commons, or synthetic/original.
+See `presentation.md` for full context. The demo narrative is: *"I can show you how it works with a script I already converted into JSON. It's Night of the Living Dead. ...btw, we could try it with an A24 script if you want."*
 
-Target mix to showcase range:
-- 1 open-source / CC-licensed short film
-- 1 public-domain feature (classic, recognizable, clearly out of copyright)
-- 1 synthetic commercial / ad spec (original, nothing to infringe)
-- Stretch: 1 music video spec, 1 doc short
+**Kill Jaws and Ex Machina from the public sample picker.** Replace with:
 
-Sample data lives in `lib/sample-data.ts` as exported const strings.
+### Primary sample (baked into the public UI)
+- **Night of the Living Dead** (1968, George A. Romero) — public domain
+  - The hero sample, shown first in every demo
+  - Pre-cached output so the demo is instant
+  - Philosophically aligned: the original indie horror, zero-budget feature, the spiritual ancestor of what A24 does today
+  - Strong visual identity (black & white, claustrophobic, rural horror) → Mood & Tone tab will look great
+
+### Bonus-round samples (pre-cached but NOT shown in the public picker)
+- **2–3 A24 scripts**, pre-converted to JSON and pre-cached in `.cache/`, held in reserve
+- Only loaded during the interview IF the interviewer invites it ("we could try it with an A24 script if you want")
+- Candidates (pick 2–3 san has already confirmed work well):
+  - Ex Machina (2014) — already tested, cerebral sci-fi
+  - The Witch (2015) — period horror, Mood & Tone showcase
+  - Hereditary (2018) — family drama/horror
+  - Midsommar (2019) — bright horror, incredible mood potential
+  - Moonlight (2016) — intimate character drama
+  - The Lighthouse (2019) — B&W, two-hander, contained
+  - Aftersun (2022) — subtle, emotional
+- Open question: how are these surfaced in the UI during the demo? Hidden shortcut? Dev-only menu? Or just JSON files on disk san pastes manually?
+
+### Optional variety samples (only if time allows)
+- 1 CC-licensed short (Sintel or Tears of Steel) — shows tool handles short-form work, community-legitimate
+- 1 synthetic commercial / ad spec — shows format flexibility, zero IP risk
+
+Sample data lives in `lib/sample-data.ts` as exported const strings. A24 scripts should NOT live in this file (risk of accidental commit / deploy) — they should live in a gitignored directory loaded at runtime only when explicitly triggered.
 
 ---
 
