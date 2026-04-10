@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { ImageIcon, Loader2, Download } from "lucide-react";
+import { useState, useMemo, useRef } from "react";
+import { ImageIcon, Loader2, Download, Images } from "lucide-react";
 
 type PosterImageState = { status: "idle" | "generating" | "done" | "error"; url?: string };
 
@@ -108,6 +108,9 @@ export function PosterConceptsViewer({ content }: { content: string }) {
   const [copiedId, setCopiedId] = useState<number | null>(null);
   const [expandedConcepts, setExpandedConcepts] = useState<Set<number>>(() => new Set([1]));
   const [posterImages, setPosterImages] = useState<Record<number, PosterImageState>>({});
+  const [generatingAll, setGeneratingAll] = useState(false);
+  const [genAllProgress, setGenAllProgress] = useState({ done: 0, total: 0 });
+  const cancelRef = useRef(false);
 
   const categories = [...new Set(concepts.map((c) => c.category))];
 
@@ -148,6 +151,23 @@ export function PosterConceptsViewer({ content }: { content: string }) {
     }
   };
 
+  const generateAllPosters = async () => {
+    const toGenerate = concepts.filter((c) => posterImages[c.number]?.status !== "done");
+    if (toGenerate.length === 0) return;
+
+    cancelRef.current = false;
+    setGeneratingAll(true);
+    setGenAllProgress({ done: 0, total: toGenerate.length });
+
+    for (let i = 0; i < toGenerate.length; i++) {
+      if (cancelRef.current) break;
+      await generatePosterImage(toGenerate[i]);
+      setGenAllProgress({ done: i + 1, total: toGenerate.length });
+    }
+
+    setGeneratingAll(false);
+  };
+
   return (
     <div>
       {intro && (
@@ -155,6 +175,27 @@ export function PosterConceptsViewer({ content }: { content: string }) {
           {intro}
         </p>
       )}
+
+      <div className="flex items-center gap-3 mb-6">
+        <div className="flex-1 h-px bg-border" />
+        {generatingAll ? (
+          <button
+            onClick={() => { cancelRef.current = true; }}
+            className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-md border border-destructive/30 text-destructive hover:bg-destructive/5 transition-colors"
+          >
+            <Loader2 size={13} className="animate-spin" />
+            {genAllProgress.done}/{genAllProgress.total} — Cancel
+          </button>
+        ) : (
+          <button
+            onClick={generateAllPosters}
+            className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-md border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors"
+          >
+            <Images size={13} />
+            Generate all posters
+          </button>
+        )}
+      </div>
 
       {categories.map((category) => {
         const categoryConcepts = concepts.filter((c) => c.category === category);
