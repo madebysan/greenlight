@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Trash2, Copy } from "lucide-react";
+import { Trash2, Copy, Pencil } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -58,6 +58,8 @@ export function WizardShell() {
   const [reports, setReports] = useState<SavedReport[]>([]);
   const [activeReportId, setActiveReportId] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [renamingId, setRenamingId] = useState<string | null>(null);
+  const [renameValue, setRenameValue] = useState("");
   const [storyboardImages, setStoryboardImages] = useState<Record<number, SavedImage>>({});
   const [promptOverrides, setPromptOverrides] = useState<Record<number, string>>({});
 
@@ -160,6 +162,17 @@ export function WizardShell() {
     setActiveReportId(null);
     setStoryboardImages({});
     setPromptOverrides({});
+  };
+
+  const handleRenameReport = (id: string, newTitle: string) => {
+    const trimmed = newTitle.trim();
+    if (!trimmed) return;
+    const current = loadReports();
+    const idx = current.findIndex((r) => r.id === id);
+    if (idx < 0) return;
+    current[idx].title = trimmed;
+    localStorage.setItem("stp-reports", JSON.stringify(current));
+    setReports([...current]);
   };
 
   const handleDuplicateReport = (report: SavedReport) => {
@@ -275,14 +288,50 @@ export function WizardShell() {
                   }`}
                   onClick={() => handleViewReport(report)}
                 >
-                  <div className="text-sm font-medium truncate">
-                    {report.title}
-                  </div>
+                  {renamingId === report.id ? (
+                    <form
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        handleRenameReport(report.id, renameValue);
+                        setRenamingId(null);
+                      }}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <input
+                        autoFocus
+                        value={renameValue}
+                        onChange={(e) => setRenameValue(e.target.value)}
+                        onBlur={() => {
+                          handleRenameReport(report.id, renameValue);
+                          setRenamingId(null);
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Escape") setRenamingId(null);
+                        }}
+                        className="text-sm font-medium w-full bg-background border rounded px-1.5 py-0.5 focus:outline-none focus:ring-1 focus:ring-primary"
+                      />
+                    </form>
+                  ) : (
+                    <div className="text-sm font-medium truncate">
+                      {report.title}
+                    </div>
+                  )}
                   <div className="flex items-center justify-between mt-0.5">
                     <span className="text-[11px] text-muted-foreground">
                       {date.toLocaleDateString()} &middot; {doneCount}/{report.documents.length} docs
                     </span>
                     <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setRenamingId(report.id);
+                          setRenameValue(report.title);
+                        }}
+                        className="text-muted-foreground/50 hover:text-foreground p-0.5 rounded"
+                        title="Rename project"
+                      >
+                        <Pencil size={12} />
+                      </button>
                       <button
                         onClick={(e) => { e.stopPropagation(); handleDuplicateReport(report); }}
                         className="text-muted-foreground/50 hover:text-foreground p-0.5 rounded"
