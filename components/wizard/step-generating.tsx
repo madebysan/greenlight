@@ -61,7 +61,7 @@ async function generateOne(
       )
     );
 
-    // Auto-save to ~/Desktop/script-to-production/
+    // Auto-save to ~/Desktop/greenlight/
     fetch("/api/save-local", {
       method: "POST",
       headers: { "Content-Type": "application/json" },

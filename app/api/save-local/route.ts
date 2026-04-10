@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
 
     // Sanitize filename to prevent path traversal
     const safeName = filename.replace(/[^a-zA-Z0-9._-]/g, "-");
-    const dir = join(homedir(), "Desktop", "script-to-production");
+    const dir = join(homedir(), "Desktop", "greenlight");
     mkdirSync(dir, { recursive: true });
     writeFileSync(join(dir, safeName), content, "utf-8");
 

@@ -471,10 +471,10 @@ export function WizardShell() {
               </div>
               <div>
                 <h1 className="text-lg font-bold tracking-tight">
-                  Script to Production
+                  Greenlight
                 </h1>
                 <p className="text-[13px] text-muted-foreground">
-                  Generate pre-production documents from your screenplay
+                  AI-powered pre-production bible generator
                 </p>
               </div>
               {/* Download actions on results step */}
@@ -663,7 +663,7 @@ export function WizardShell() {
                 </svg>
               </div>
               <div>
-                <DialogTitle className="text-lg">Script to Production</DialogTitle>
+                <DialogTitle className="text-lg">Greenlight</DialogTitle>
                 <p className="text-[12px] text-muted-foreground mt-0.5">AI-powered pre-production bible generator</p>
               </div>
             </div>
@@ -713,28 +713,6 @@ export function WizardShell() {
                       <div className="text-[13px] font-semibold text-foreground">{doc.title}</div>
                       <p className="text-[12px] text-muted-foreground mt-0.5 leading-snug">{doc.desc}</p>
                     </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Features */}
-            <div>
-              <h3 className="text-sm font-semibold text-foreground mb-3">Features</h3>
-              <div className="grid grid-cols-2 gap-x-6 gap-y-2">
-                {[
-                  { icon: <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" /></svg>, text: "Inline editing across all documents" },
-                  { icon: <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><circle cx="8.5" cy="8.5" r="1.5" /><polyline points="21,15 16,10 5,21" /></svg>, text: "Batch image generation (storyboards, posters, portraits)" },
-                  { icon: <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" /><rect x="8" y="2" width="8" height="4" rx="1" ry="1" /></svg>, text: "Multiple projects with full state persistence" },
-                  { icon: <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" /></svg>, text: "Duplicate projects to iterate safely" },
-                  { icon: <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="16" /><line x1="8" y1="12" x2="16" y2="12" /></svg>, text: "On-demand marketing sections" },
-                  { icon: <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7,10 12,15 17,10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>, text: "Download documents as markdown" },
-                  { icon: <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="16,18 22,12 16,6" /><polyline points="8,6 2,12 8,18" /></svg>, text: "Sample data included (Jaws, Ex Machina)" },
-                  { icon: <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>, text: "API keys stored locally, never sent to our servers" },
-                ].map((f) => (
-                  <div key={f.text} className="flex items-start gap-2 py-1">
-                    <span className="text-muted-foreground shrink-0 mt-0.5">{f.icon}</span>
-                    <span className="text-[12px] text-foreground/70">{f.text}</span>
                   </div>
                 ))}
               </div>

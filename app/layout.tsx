@@ -15,8 +15,8 @@ const spaceMono = Space_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Script to Production",
-  description: "Generate pre-production documents from your screenplay",
+  title: "Greenlight",
+  description: "AI-powered pre-production bible generator",
 };
 
 export default function RootLayout({
