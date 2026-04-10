@@ -432,96 +432,204 @@ function getNavId(tableTitle: string) {
   return type === "generic" ? tableTitle.toLowerCase().replace(/[^a-z0-9]+/g, "-") : type;
 }
 
+// --- Tab definitions ---
+type TabId = "characters" | "locations" | "design" | "technical";
+
+const TABS: { id: TabId; label: string }[] = [
+  { id: "characters", label: "Characters" },
+  { id: "locations", label: "Locations" },
+  { id: "design", label: "Production Design" },
+  { id: "technical", label: "Technical" },
+];
+
+function classifyTable(title: string): TabId {
+  const lower = title.toLowerCase();
+  if (lower.includes("location")) return "locations";
+  if (lower.includes("props") || lower.includes("wardrobe") || lower.includes("costume")) return "design";
+  if (lower.includes("vfx") || lower.includes("stunt") || lower.includes("music") || lower.includes("sound")) return "technical";
+  return "technical"; // catch-all
+}
+
+// --- Character card (extracted for reuse) ---
+function CharacterCard({ char, index }: { char: Character; index: number }) {
+  const sceneCount = char.scenes.split(",").filter(Boolean).length;
+  return (
+    <div className="rounded-xl border p-4">
+      <div className="flex items-start gap-3">
+        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-foreground/5 text-sm font-bold shrink-0">
+          {char.name.charAt(0)}
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-1 flex-wrap">
+            <span className="text-sm font-semibold">{char.name}</span>
+            <span className="text-[11px] text-muted-foreground bg-muted rounded-full px-2 py-0.5">
+              {sceneCount} {sceneCount === 1 ? "scene" : "scenes"}
+            </span>
+            <span className="text-[11px] text-muted-foreground bg-muted rounded-full px-2 py-0.5">
+              {char.screenTime}
+            </span>
+            {char.wardrobeChanges && char.wardrobeChanges !== "0" && (
+              <span className="text-[11px] text-muted-foreground bg-muted rounded-full px-2 py-0.5">
+                {char.wardrobeChanges} {char.wardrobeChanges === "1" ? "wardrobe change" : "wardrobe changes"}
+              </span>
+            )}
+          </div>
+          <p className="text-[13px] text-foreground/70 leading-relaxed mb-2">
+            {char.description}
+          </p>
+          {char.specialReqs && char.specialReqs !== "None" && (
+            <div className="flex gap-2 items-start">
+              <span className="text-[10px] uppercase tracking-wider text-amber-700 font-semibold bg-amber-50 rounded px-1.5 py-0.5 shrink-0 mt-0.5">
+                Special
+              </span>
+              <span className="text-[12px] text-foreground/60">
+                {char.specialReqs}
+              </span>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // --- Main component ---
 export function ProductionMatricesViewer({ content }: { content: string }) {
   const { characters, otherTables, textSections } = useMemo(
     () => parseProductionMatrices(content),
     [content]
   );
+  const [activeTab, setActiveTab] = useState<TabId>("characters");
+
+  // Group tables by department tab
+  const tablesByTab = useMemo(() => {
+    const grouped: Record<TabId, TableSection[]> = {
+      characters: [],
+      locations: [],
+      design: [],
+      technical: [],
+    };
+    for (const table of otherTables) {
+      const tab = classifyTable(table.title);
+      grouped[tab].push(table);
+    }
+    return grouped;
+  }, [otherTables]);
+
+  // Count items per tab
+  const tabCounts: Record<TabId, number> = {
+    characters: characters.length,
+    locations: tablesByTab.locations.reduce((n, t) => n + t.rows.length, 0),
+    design: tablesByTab.design.reduce((n, t) => n + t.rows.length, 0),
+    technical: tablesByTab.technical.reduce((n, t) => n + t.rows.length, 0) + textSections.length,
+  };
 
   return (
     <div>
-      {/* Characters */}
-      <CollapsibleSection
-        id="pm-characters"
-        title="Character Matrix"
-        count={characters.length}
-        countLabel={characters.length === 1 ? "character" : "characters"}
-      >
-        <div className="space-y-3">
-          {characters.map((char, i) => {
-            const sceneCount = char.scenes.split(",").filter(Boolean).length;
-            return (
-              <div key={`${char.name}-${i}`} className="rounded-xl border p-4">
-                <div className="flex items-start gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-foreground/5 text-sm font-bold shrink-0">
-                    {char.name.charAt(0)}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-sm font-semibold">{char.name}</span>
-                      <span className="text-[11px] text-muted-foreground bg-muted rounded-full px-2 py-0.5">
-                        {sceneCount} {sceneCount === 1 ? "scene" : "scenes"}
-                      </span>
-                      <span className="text-[11px] text-muted-foreground bg-muted rounded-full px-2 py-0.5">
-                        {char.screenTime}
-                      </span>
-                      {char.wardrobeChanges && char.wardrobeChanges !== "0" && (
-                        <span className="text-[11px] text-muted-foreground bg-muted rounded-full px-2 py-0.5">
-                          {char.wardrobeChanges} {char.wardrobeChanges === "1" ? "wardrobe change" : "wardrobe changes"}
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-[13px] text-foreground/70 leading-relaxed mb-2">
-                      {char.description}
-                    </p>
-                    {char.specialReqs && char.specialReqs !== "None" && (
-                      <div className="flex gap-2 items-start">
-                        <span className="text-[10px] uppercase tracking-wider text-amber-700 font-semibold bg-amber-50 rounded px-1.5 py-0.5 shrink-0 mt-0.5">
-                          Special
-                        </span>
-                        <span className="text-[12px] text-foreground/60">
-                          {char.specialReqs}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </CollapsibleSection>
-
-      {/* Other sections with type-specific rendering */}
-      {otherTables.map((table) => {
-        const navId = getNavId(table.title);
-        return (
-          <CollapsibleSection
-            key={table.id}
-            id={`pm-${navId}`}
-            title={table.title}
-            count={table.rows.length}
+      {/* Department tabs */}
+      <div className="flex items-center gap-1 border-b mb-6">
+        {TABS.map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={`relative px-4 py-2.5 text-[13px] font-medium transition-colors rounded-t-lg ${
+              activeTab === tab.id
+                ? "text-foreground bg-muted/50"
+                : "text-muted-foreground hover:text-foreground hover:bg-muted/30"
+            }`}
           >
-            {renderTableSection(table)}
-          </CollapsibleSection>
-        );
-      })}
+            {tab.label}
+            {tabCounts[tab.id] > 0 && (
+              <span className="ml-1.5 text-[10px] text-muted-foreground">{tabCounts[tab.id]}</span>
+            )}
+            {activeTab === tab.id && (
+              <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-full" />
+            )}
+          </button>
+        ))}
+      </div>
 
-      {/* Text sections (Cross-Reference Notes) */}
-      {textSections.map((section) => (
-        <CollapsibleSection
-          key={section.id}
-          id="pm-cross-reference"
-          title={section.title}
-        >
-          <div className="rounded-xl border p-5 text-[13px] leading-[1.7] text-foreground/75 [&_h3]:text-sm [&_h3]:font-semibold [&_h3]:text-foreground [&_h3]:mt-6 [&_h3]:mb-2 [&_strong]:text-foreground [&_strong]:font-semibold [&_p]:mb-3 [&_p]:max-w-[72ch] [&_ul]:ml-5 [&_ul]:list-disc [&_ul]:mb-4 [&_li]:mb-1 [&_ol]:ml-5 [&_ol]:list-decimal [&_ol]:mb-4">
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>
-              {section.content}
-            </ReactMarkdown>
-          </div>
-        </CollapsibleSection>
-      ))}
+      {/* Characters tab */}
+      {activeTab === "characters" && (
+        <div className="space-y-3">
+          {characters.map((char, i) => (
+            <CharacterCard key={`${char.name}-${i}`} char={char} index={i} />
+          ))}
+          {characters.length === 0 && (
+            <p className="text-sm text-muted-foreground py-8 text-center">No character data found.</p>
+          )}
+        </div>
+      )}
+
+      {/* Locations tab */}
+      {activeTab === "locations" && (
+        <div>
+          {tablesByTab.locations.map((table) => (
+            <CollapsibleSection
+              key={table.id}
+              id={`pm-${table.id}`}
+              title={table.title}
+              count={table.rows.length}
+            >
+              <LocationCards table={table} />
+            </CollapsibleSection>
+          ))}
+          {tablesByTab.locations.length === 0 && (
+            <p className="text-sm text-muted-foreground py-8 text-center">No location data found.</p>
+          )}
+        </div>
+      )}
+
+      {/* Production Design tab (props + wardrobe) */}
+      {activeTab === "design" && (
+        <div>
+          {tablesByTab.design.map((table) => (
+            <CollapsibleSection
+              key={table.id}
+              id={`pm-${table.id}`}
+              title={table.title}
+              count={table.rows.length}
+            >
+              {renderTableSection(table)}
+            </CollapsibleSection>
+          ))}
+          {tablesByTab.design.length === 0 && (
+            <p className="text-sm text-muted-foreground py-8 text-center">No production design data found.</p>
+          )}
+        </div>
+      )}
+
+      {/* Technical tab (VFX, stunts, notes) */}
+      {activeTab === "technical" && (
+        <div>
+          {tablesByTab.technical.map((table) => (
+            <CollapsibleSection
+              key={table.id}
+              id={`pm-${table.id}`}
+              title={table.title}
+              count={table.rows.length}
+            >
+              {renderTableSection(table)}
+            </CollapsibleSection>
+          ))}
+          {textSections.map((section) => (
+            <CollapsibleSection
+              key={section.id}
+              id={`pm-${section.id}`}
+              title={section.title}
+            >
+              <div className="rounded-xl border p-5 text-[13px] leading-[1.7] text-foreground/75 [&_h3]:text-sm [&_h3]:font-semibold [&_h3]:text-foreground [&_h3]:mt-6 [&_h3]:mb-2 [&_strong]:text-foreground [&_strong]:font-semibold [&_p]:mb-3 [&_p]:max-w-[72ch] [&_ul]:ml-5 [&_ul]:list-disc [&_ul]:mb-4 [&_li]:mb-1 [&_ol]:ml-5 [&_ol]:list-decimal [&_ol]:mb-4">
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                  {section.content}
+                </ReactMarkdown>
+              </div>
+            </CollapsibleSection>
+          ))}
+          {tablesByTab.technical.length === 0 && textSections.length === 0 && (
+            <p className="text-sm text-muted-foreground py-8 text-center">No technical data found.</p>
+          )}
+        </div>
+      )}
     </div>
   );
 }
