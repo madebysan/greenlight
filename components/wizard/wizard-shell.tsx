@@ -653,80 +653,108 @@ export function WizardShell() {
 
       {/* About dialog */}
       <Dialog open={showAbout} onOpenChange={setShowAbout}>
-        <DialogContent className="sm:max-w-lg max-h-[80vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-3xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>About Script to Production</DialogTitle>
+            <div className="flex items-center gap-3 mb-1">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/15">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
+                  <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
+                  <polyline points="14,2 14,8 20,8" />
+                </svg>
+              </div>
+              <div>
+                <DialogTitle className="text-lg">Script to Production</DialogTitle>
+                <p className="text-[12px] text-muted-foreground mt-0.5">AI-powered pre-production bible generator</p>
+              </div>
+            </div>
           </DialogHeader>
-          <div className="space-y-4 py-2 text-[13px] text-foreground/80 leading-relaxed">
-            <p>
-              Generate a complete pre-production bible from your screenplay using AI.
-              Upload a script, extract structured data, and get professional documents
-              that cover every department of a film production.
+
+          <div className="space-y-6 py-3 text-[13px] leading-relaxed">
+            <p className="text-foreground/70">
+              Turn any screenplay into a complete production bible. Extract structured data,
+              generate professional documents for every department, and create visual assets — all from a single JSON file.
             </p>
 
+            {/* How it works */}
             <div>
-              <h3 className="text-sm font-semibold text-foreground mb-2">How it works</h3>
-              <ol className="list-decimal list-inside space-y-1.5 text-foreground/70">
-                <li>Extract structured JSON from your screenplay PDF using Claude or ChatGPT</li>
-                <li>Paste the JSON into the app</li>
-                <li>AI generates 5 production documents automatically</li>
-                <li>Review, edit, and generate visuals for each document</li>
-              </ol>
+              <h3 className="text-sm font-semibold text-foreground mb-3">How it works</h3>
+              <div className="grid grid-cols-4 gap-3">
+                {[
+                  { num: "1", label: "Extract", desc: "Upload your screenplay to Claude or ChatGPT with the extraction prompt", color: "text-violet-400" },
+                  { num: "2", label: "Paste", desc: "Paste the structured JSON output into the app", color: "text-sky-400" },
+                  { num: "3", label: "Generate", desc: "AI creates 5 production documents automatically", color: "text-emerald-400" },
+                  { num: "4", label: "Refine", desc: "Edit, generate visuals, add sections, and iterate", color: "text-amber-400" },
+                ].map((step) => (
+                  <div key={step.num} className="rounded-xl border bg-card/50 p-3">
+                    <span className={`text-lg font-bold ${step.color}`}>{step.num}</span>
+                    <div className="text-[12px] font-semibold text-foreground mt-1">{step.label}</div>
+                    <div className="text-[11px] text-muted-foreground mt-0.5 leading-snug">{step.desc}</div>
+                  </div>
+                ))}
+              </div>
             </div>
 
+            {/* Documents */}
             <div>
-              <h3 className="text-sm font-semibold text-foreground mb-2">Documents generated</h3>
-              <ul className="space-y-1.5 text-foreground/70">
-                <li><span className="text-foreground font-medium">Scene Breakdown</span> — scene-by-scene analysis with locations, cast, props, VFX, and emotional beats. Fully editable.</li>
-                <li><span className="text-foreground font-medium">Production</span> — department worksheets for Characters, Locations, Production Design (props & wardrobe), and Technical (VFX, stunts, notes).</li>
-                <li><span className="text-foreground font-medium">Marketing Brief</span> — film identity, logline, taglines, color palette, synopsis, comparable films, audience analysis. Expandable with Festival Strategy, Casting Wishlist, and more.</li>
-                <li><span className="text-foreground font-medium">Storyboard</span> — AI-generated visual prompts for every scene. Generate B&W sketch storyboards, edit prompts, rewrite for variations.</li>
-                <li><span className="text-foreground font-medium">Posters</span> — 15 poster concepts across 5 categories with color palettes, composition notes, and AI-generated sketch previews.</li>
-              </ul>
+              <h3 className="text-sm font-semibold text-foreground mb-3">Documents generated</h3>
+              <div className="space-y-2.5">
+                {[
+                  { icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="3" y="14" width="7" height="7" /><rect x="14" y="14" width="7" height="7" /></svg>, color: "text-violet-400 bg-violet-500/15", title: "Scene Breakdown", desc: "Scene-by-scene analysis with locations, cast, props, VFX, and emotional beats. Fully editable — add, remove, and modify scenes." },
+                  { icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="5" /><path d="M20 21a8 8 0 0 0-16 0" /></svg>, color: "text-sky-400 bg-sky-500/15", title: "Production", desc: "Department worksheets: Characters (with AI portraits), Locations, Production Design (props & wardrobe), and Technical (VFX, stunts, notes)." },
+                  { icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" /><line x1="4" y1="22" x2="4" y2="15" /></svg>, color: "text-emerald-400 bg-emerald-500/15", title: "Marketing Brief", desc: "Film identity, logline, taglines, color palette, synopsis, comparable films. Expandable with Festival Strategy, Casting Wishlist, Music Direction, and more." },
+                  { icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18" /><line x1="7" y1="2" x2="7" y2="22" /><line x1="17" y1="2" x2="17" y2="22" /><line x1="2" y1="12" x2="22" y2="12" /><line x1="2" y1="7" x2="7" y2="7" /><line x1="2" y1="17" x2="7" y2="17" /><line x1="17" y1="7" x2="22" y2="7" /><line x1="17" y1="17" x2="22" y2="17" /></svg>, color: "text-amber-400 bg-amber-500/15", title: "Storyboard", desc: "Visual prompt for every scene. Generate B&W sketch storyboards in batch, edit and rewrite prompts for variations." },
+                  { icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><circle cx="8.5" cy="8.5" r="1.5" /><polyline points="21,15 16,10 5,21" /></svg>, color: "text-pink-400 bg-pink-500/15", title: "Posters", desc: "15 poster concepts across 5 categories with color palettes, composition notes, and AI-generated sketch previews." },
+                ].map((doc) => (
+                  <div key={doc.title} className="flex items-start gap-3 rounded-lg border px-3.5 py-3">
+                    <div className={`flex h-8 w-8 items-center justify-center rounded-lg shrink-0 ${doc.color}`}>
+                      {doc.icon}
+                    </div>
+                    <div>
+                      <div className="text-[13px] font-semibold text-foreground">{doc.title}</div>
+                      <p className="text-[12px] text-muted-foreground mt-0.5 leading-snug">{doc.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
 
+            {/* Features */}
             <div>
-              <h3 className="text-sm font-semibold text-foreground mb-2">Image generation</h3>
-              <p className="text-foreground/70">
-                Storyboard frames, poster sketches, and character portraits are generated using FLUX Schnell
-                in a consistent black-and-white felt-tip marker style. All images are saved locally and persist
-                with your project.
-              </p>
+              <h3 className="text-sm font-semibold text-foreground mb-3">Features</h3>
+              <div className="grid grid-cols-2 gap-x-6 gap-y-2">
+                {[
+                  { icon: <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" /></svg>, text: "Inline editing across all documents" },
+                  { icon: <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><circle cx="8.5" cy="8.5" r="1.5" /><polyline points="21,15 16,10 5,21" /></svg>, text: "Batch image generation (storyboards, posters, portraits)" },
+                  { icon: <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" /><rect x="8" y="2" width="8" height="4" rx="1" ry="1" /></svg>, text: "Multiple projects with full state persistence" },
+                  { icon: <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" /></svg>, text: "Duplicate projects to iterate safely" },
+                  { icon: <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="16" /><line x1="8" y1="12" x2="16" y2="12" /></svg>, text: "On-demand marketing sections" },
+                  { icon: <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7,10 12,15 17,10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>, text: "Download documents as markdown" },
+                  { icon: <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="16,18 22,12 16,6" /><polyline points="8,6 2,12 8,18" /></svg>, text: "Sample data included (Jaws, Ex Machina)" },
+                  { icon: <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>, text: "API keys stored locally, never sent to our servers" },
+                ].map((f) => (
+                  <div key={f.text} className="flex items-start gap-2 py-1">
+                    <span className="text-muted-foreground shrink-0 mt-0.5">{f.icon}</span>
+                    <span className="text-[12px] text-foreground/70">{f.text}</span>
+                  </div>
+                ))}
+              </div>
             </div>
 
-            <div>
-              <h3 className="text-sm font-semibold text-foreground mb-2">Features</h3>
-              <ul className="space-y-1 text-foreground/70">
-                <li>Multiple projects with full state persistence</li>
-                <li>Inline editing across all documents</li>
-                <li>Generate all images in batch (storyboards, posters, portraits)</li>
-                <li>Duplicate projects to iterate without affecting originals</li>
-                <li>On-demand marketing sections (Festival Strategy, Casting Wishlist, etc.)</li>
-                <li>Add, edit, and remove scenes</li>
-                <li>Download individual documents or all as markdown</li>
-                <li>Sample data included (Jaws, Ex Machina)</li>
-              </ul>
-            </div>
-
-            <div>
-              <h3 className="text-sm font-semibold text-foreground mb-2">Powered by</h3>
-              <ul className="space-y-1 text-foreground/70">
-                <li>Claude (Anthropic) — document generation and prompt rewriting</li>
-                <li>FLUX Schnell (fal.ai) — image generation</li>
-                <li>Next.js + Tailwind CSS + shadcn/ui</li>
-              </ul>
-            </div>
-
-            <div className="pt-2 border-t text-[12px] text-muted-foreground">
-              Made by{" "}
-              <a
-                href="https://santiagoalonso.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="underline hover:text-foreground transition-colors"
-              >
-                santiagoalonso.com
-              </a>
+            {/* Powered by */}
+            <div className="flex items-center gap-4 pt-3 border-t text-[11px] text-muted-foreground">
+              <span>Powered by Claude (Anthropic) + FLUX Schnell (fal.ai)</span>
+              <span className="flex-1" />
+              <span>
+                Made by{" "}
+                <a
+                  href="https://santiagoalonso.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline hover:text-foreground transition-colors"
+                >
+                  santiagoalonso.com
+                </a>
+              </span>
             </div>
           </div>
         </DialogContent>
