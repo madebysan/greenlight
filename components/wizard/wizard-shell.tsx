@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { Settings, Info, RotateCcw } from "lucide-react";
+import { useState, useEffect, useCallback, type ReactNode } from "react";
+import { Settings, Info, RotateCcw, FileText, Download } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -13,13 +13,16 @@ import { StepJsonInput } from "./step-json-input";
 import { StepGenerating } from "./step-generating";
 import { StepResults } from "./step-results";
 import {
-  type SavedProject,
   type SavedImage,
+  API_KEY_STORAGE,
+  FAL_KEY_STORAGE,
   loadProject,
   saveProject,
+  updateProject,
   clearProject,
   extractTitle,
 } from "@/lib/reports";
+import { downloadBlob } from "@/lib/utils";
 
 const STEPS = [
   { number: 1, label: "Extract" },
@@ -44,13 +47,35 @@ const INITIAL_DOCS: DocumentResult[] = [
   { name: "Posters", slug: "poster-concepts", status: "pending", content: null, error: null },
 ];
 
+function HeaderButton({
+  icon,
+  label,
+  onClick,
+  title,
+}: {
+  icon: ReactNode;
+  label: string;
+  onClick: () => void;
+  title?: string;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      title={title}
+      className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground px-3 py-1.5 rounded-md border border-border hover:border-foreground/20 transition-colors"
+    >
+      {icon}
+      {label}
+    </button>
+  );
+}
+
 export function WizardShell() {
   const [hydrated, setHydrated] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const [apiKey, setApiKey] = useState<string>("");
   const [jsonData, setJsonData] = useState<string>("");
   const [documents, setDocuments] = useState<DocumentResult[]>(INITIAL_DOCS);
-  const [hasActiveProject, setHasActiveProject] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [falKey, setFalKey] = useState<string>("");
@@ -78,18 +103,17 @@ export function WizardShell() {
       setPromptOverrides(project.promptOverrides || {});
       setPosterImages(project.posterImages || {});
       setPortraits(project.portraits || {});
-      setHasActiveProject(true);
       setCurrentStep(4);
     }
-    setApiKey(localStorage.getItem("stp-api-key") || "");
-    setFalKey(localStorage.getItem("stp-fal-key") || "");
+    setApiKey(localStorage.getItem(API_KEY_STORAGE) || "");
+    setFalKey(localStorage.getItem(FAL_KEY_STORAGE) || "");
     setHydrated(true);
     /* eslint-enable react-hooks/set-state-in-effect */
   }, []);
 
   const handleApiKeyChange = (key: string) => {
     setApiKey(key);
-    localStorage.setItem("stp-api-key", key);
+    localStorage.setItem(API_KEY_STORAGE, key);
   };
 
   const handleJsonSubmit = (json: string) => {
@@ -102,7 +126,7 @@ export function WizardShell() {
       setDocuments(results);
       setCurrentStep(4);
 
-      const project: SavedProject = {
+      saveProject({
         title: extractTitle(jsonData),
         createdAt: new Date().toISOString(),
         jsonData,
@@ -113,36 +137,22 @@ export function WizardShell() {
           content: d.content,
           error: d.error,
         })),
-      };
-      saveProject(project);
-      setHasActiveProject(true);
+      });
     },
     [jsonData]
   );
 
   const handleDownloadAll = () => {
-    const completedDocs = documents.filter((d) => d.status === "done");
-    completedDocs.forEach((doc) => {
-      if (!doc.content) return;
-      const blob = new Blob([doc.content], { type: "text/markdown" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `${doc.slug}.md`;
-      a.click();
-      URL.revokeObjectURL(url);
-    });
+    documents
+      .filter((d) => d.status === "done" && d.content)
+      .forEach((doc) => {
+        downloadBlob(doc.content!, `${doc.slug}.md`, "text/markdown");
+      });
   };
 
   const handleDownloadJson = () => {
     if (!jsonData) return;
-    const blob = new Blob([jsonData], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "screenplay-data.json";
-    a.click();
-    URL.revokeObjectURL(url);
+    downloadBlob(jsonData, "screenplay-data.json", "application/json");
   };
 
   const handleStartOver = () => {
@@ -154,79 +164,44 @@ export function WizardShell() {
     setPromptOverrides({});
     setPosterImages({});
     setPortraits({});
-    setHasActiveProject(false);
   };
 
-  // Persist incremental edits (images, prompt overrides, posters, portraits) to the active project
-  const persistExtras = useCallback(
-    (extras: { images?: Record<number, SavedImage>; overrides?: Record<number, string>; posters?: Record<number, SavedImage>; portraits?: Record<string, SavedImage> }) => {
-      const current = loadProject();
-      if (!current) return;
-      const next: SavedProject = { ...current };
-      if (extras.images !== undefined) next.images = extras.images;
-      if (extras.overrides !== undefined) next.promptOverrides = extras.overrides;
-      if (extras.posters !== undefined) next.posterImages = extras.posters;
-      if (extras.portraits !== undefined) next.portraits = extras.portraits;
-      saveProject(next);
-    },
-    []
-  );
+  const handleImagesChange = useCallback((images: Record<number, SavedImage>) => {
+    setStoryboardImages(images);
+    updateProject({ images });
+  }, []);
 
-  const handleImagesChange = useCallback(
-    (images: Record<number, SavedImage>) => {
-      setStoryboardImages(images);
-      persistExtras({ images });
-    },
-    [persistExtras]
-  );
+  const handlePromptOverridesChange = useCallback((promptOverrides: Record<number, string>) => {
+    setPromptOverrides(promptOverrides);
+    updateProject({ promptOverrides });
+  }, []);
 
-  const handlePromptOverridesChange = useCallback(
-    (overrides: Record<number, string>) => {
-      setPromptOverrides(overrides);
-      persistExtras({ overrides });
-    },
-    [persistExtras]
-  );
+  const handlePosterImagesChange = useCallback((posterImages: Record<number, SavedImage>) => {
+    setPosterImages(posterImages);
+    updateProject({ posterImages });
+  }, []);
 
-  const handlePosterImagesChange = useCallback(
-    (posters: Record<number, SavedImage>) => {
-      setPosterImages(posters);
-      persistExtras({ posters });
-    },
-    [persistExtras]
-  );
+  const handlePortraitsChange = useCallback((portraits: Record<string, SavedImage>) => {
+    setPortraits(portraits);
+    updateProject({ portraits });
+  }, []);
 
-  const handlePortraitsChange = useCallback(
-    (p: Record<string, SavedImage>) => {
-      setPortraits(p);
-      persistExtras({ portraits: p });
-    },
-    [persistExtras]
-  );
-
-  // Update a specific document's content and persist
   const handleDocumentUpdate = (slug: string, newContent: string) => {
-    setDocuments((prev) => {
-      const updated = prev.map((d) => (d.slug === slug ? { ...d, content: newContent } : d));
-      const current = loadProject();
-      if (current) {
-        const next: SavedProject = {
-          ...current,
-          documents: updated.map((d) => ({
-            name: d.name,
-            slug: d.slug,
-            status: d.status === "done" ? ("done" as const) : ("error" as const),
-            content: d.content,
-            error: d.error,
-          })),
-        };
-        saveProject(next);
-      }
-      return updated;
+    const updated = documents.map((d) =>
+      d.slug === slug ? { ...d, content: newContent } : d
+    );
+    setDocuments(updated);
+    updateProject({
+      documents: updated.map((d) => ({
+        name: d.name,
+        slug: d.slug,
+        status: d.status === "done" ? ("done" as const) : ("error" as const),
+        content: d.content,
+        error: d.error,
+      })),
     });
   };
 
-  // Regenerate a specific document via the API
   const handleDocumentRewrite = async (slug: string) => {
     if (!jsonData || !apiKey) return;
     const res = await fetch(`/api/generate/${slug}`, {
@@ -247,12 +222,13 @@ export function WizardShell() {
     );
   }
 
+  const hasActiveProject = currentStep === 4;
+
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b bg-background/95 backdrop-blur-sm">
         <div className={`mx-auto px-6 py-4 ${currentStep === 4 ? "max-w-6xl" : "max-w-4xl"}`}>
           <div className="flex items-center gap-3">
-            {/* Brand */}
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
                 <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
@@ -269,67 +245,48 @@ export function WizardShell() {
               </p>
             </div>
 
-            {/* Header actions */}
             <div className="flex items-center gap-2 ml-auto">
-              {currentStep === 4 && jsonData && (
-                <button
+              {hasActiveProject && jsonData && (
+                <HeaderButton
+                  icon={<FileText size={14} />}
+                  label="JSON"
                   onClick={handleDownloadJson}
-                  className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground px-3 py-1.5 rounded-md border border-border hover:border-foreground/20 transition-colors"
-                >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                    <polyline points="14,2 14,8 20,8" />
-                    <line x1="16" y1="13" x2="8" y2="13" />
-                    <line x1="16" y1="17" x2="8" y2="17" />
-                  </svg>
-                  JSON
-                </button>
+                  title="Download screenplay JSON"
+                />
               )}
-              {currentStep === 4 && documents.some((d) => d.status === "done") && (
-                <button
+              {hasActiveProject && documents.some((d) => d.status === "done") && (
+                <HeaderButton
+                  icon={<Download size={14} />}
+                  label="Download All"
                   onClick={handleDownloadAll}
-                  className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground px-3 py-1.5 rounded-md border border-border hover:border-foreground/20 transition-colors"
-                >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                    <polyline points="7,10 12,15 17,10" />
-                    <line x1="12" y1="15" x2="12" y2="3" />
-                  </svg>
-                  Download All
-                </button>
+                  title="Download all documents"
+                />
               )}
               {hasActiveProject && (
-                <button
+                <HeaderButton
+                  icon={<RotateCcw size={14} />}
+                  label="Start Over"
                   onClick={handleStartOver}
-                  className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground px-3 py-1.5 rounded-md border border-border hover:border-foreground/20 transition-colors"
                   title="Start a new project"
-                >
-                  <RotateCcw size={14} />
-                  Start Over
-                </button>
+                />
               )}
-              <button
+              <HeaderButton
+                icon={<Settings size={14} />}
+                label="Settings"
                 onClick={() => setShowSettings(true)}
-                className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground px-3 py-1.5 rounded-md border border-border hover:border-foreground/20 transition-colors"
                 title="Settings"
-              >
-                <Settings size={14} />
-                Settings
-              </button>
-              <button
+              />
+              <HeaderButton
+                icon={<Info size={14} />}
+                label="About"
                 onClick={() => setShowAbout(true)}
-                className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground px-3 py-1.5 rounded-md border border-border hover:border-foreground/20 transition-colors"
                 title="About Greenlight"
-              >
-                <Info size={14} />
-                About
-              </button>
+              />
             </div>
           </div>
         </div>
       </header>
 
-      {/* Step indicator */}
       {currentStep < 4 && (
         <div className={`mx-auto px-6 py-6 ${currentStep === 4 ? "max-w-6xl" : "max-w-4xl"}`}>
           <div className="flex items-center">
@@ -372,7 +329,6 @@ export function WizardShell() {
         </div>
       )}
 
-      {/* Step content */}
       <main
         className={`mx-auto px-6 pb-12 ${
           currentStep === 4 ? "max-w-6xl" : "max-w-4xl"
@@ -415,7 +371,6 @@ export function WizardShell() {
         )}
       </main>
 
-      {/* Settings dialog */}
       <Dialog open={showSettings} onOpenChange={setShowSettings}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
@@ -452,7 +407,7 @@ export function WizardShell() {
                 value={falKey}
                 onChange={(e) => {
                   setFalKey(e.target.value);
-                  localStorage.setItem("stp-fal-key", e.target.value);
+                  localStorage.setItem(FAL_KEY_STORAGE, e.target.value);
                 }}
                 className="w-full rounded-lg border bg-background px-3 py-2.5 text-sm font-mono placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
               />
@@ -464,7 +419,6 @@ export function WizardShell() {
         </DialogContent>
       </Dialog>
 
-      {/* About dialog */}
       <Dialog open={showAbout} onOpenChange={setShowAbout}>
         <DialogContent className="sm:max-w-3xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
@@ -488,7 +442,6 @@ export function WizardShell() {
               generate professional documents for every department, and create visual assets — all from a single JSON file.
             </p>
 
-            {/* How it works */}
             <div>
               <h3 className="text-sm font-semibold text-foreground mb-3">How it works</h3>
               <div className="grid grid-cols-4 gap-3">
@@ -507,7 +460,6 @@ export function WizardShell() {
               </div>
             </div>
 
-            {/* Documents */}
             <div>
               <h3 className="text-sm font-semibold text-foreground mb-3">Documents generated</h3>
               <div className="space-y-2.5">
@@ -531,7 +483,6 @@ export function WizardShell() {
               </div>
             </div>
 
-            {/* Powered by */}
             <div className="flex items-center gap-4 pt-3 border-t text-[11px] text-muted-foreground">
               <span>Powered by Claude (Anthropic) + FLUX Schnell (fal.ai)</span>
               <span className="flex-1" />
