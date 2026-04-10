@@ -1,9 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
 
-const client = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
-
 const MAX_RETRIES = 3;
 
 async function sleep(ms: number) {
@@ -12,8 +8,11 @@ async function sleep(ms: number) {
 
 export async function generateDocument(
   systemPrompt: string,
-  jsonData: string
+  jsonData: string,
+  apiKey: string
 ): Promise<string> {
+  const client = new Anthropic({ apiKey });
+
   for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
     try {
       const message = await client.messages.create({
@@ -39,10 +38,13 @@ export async function generateDocument(
         (error instanceof Anthropic.APIError && error.status === 429);
 
       if (isRateLimit && attempt < MAX_RETRIES) {
-        // Exponential backoff: 15s, 30s, 60s
         const waitMs = 15000 * Math.pow(2, attempt);
         await sleep(waitMs);
         continue;
+      }
+
+      if (error instanceof Anthropic.AuthenticationError) {
+        throw new Error("Invalid API key. Please check your Claude API key and try again.");
       }
 
       throw error;

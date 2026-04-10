@@ -8,11 +8,11 @@ const SLUG = "scene-breakdown";
 
 export async function POST(request: NextRequest) {
   try {
-    const { jsonData } = await request.json();
+    const { jsonData, apiKey } = await request.json();
 
-    if (!jsonData) {
+    if (!jsonData || !apiKey) {
       return NextResponse.json(
-        { error: "Missing jsonData in request body" },
+        { error: "Missing jsonData or apiKey in request body" },
         { status: 400 }
       );
     }
@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
     }
 
     const trimmed = trimForSceneBreakdown(jsonData);
-    const markdown = await generateDocument(SCENE_BREAKDOWN_PROMPT, trimmed);
+    const markdown = await generateDocument(SCENE_BREAKDOWN_PROMPT, trimmed, apiKey);
     setCache(SLUG, jsonData, markdown);
 
     return NextResponse.json({ content: markdown });

@@ -51,17 +51,24 @@ const INITIAL_DOCS: DocumentResult[] = [
 export function WizardShell() {
   const [hydrated, setHydrated] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
+  const [apiKey, setApiKey] = useState<string>("");
   const [jsonData, setJsonData] = useState<string>("");
   const [documents, setDocuments] = useState<DocumentResult[]>(INITIAL_DOCS);
   const [reports, setReports] = useState<SavedReport[]>([]);
   const [activeReportId, setActiveReportId] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
-  // Load reports on mount
+  // Load reports and API key on mount
   useEffect(() => {
     setReports(loadReports());
+    setApiKey(localStorage.getItem("stp-api-key") || "");
     setHydrated(true);
   }, []);
+
+  const handleApiKeyChange = (key: string) => {
+    setApiKey(key);
+    localStorage.setItem("stp-api-key", key);
+  };
 
   const handleJsonSubmit = (json: string) => {
     setJsonData(json);
@@ -157,11 +164,11 @@ export function WizardShell() {
 
   // Regenerate a specific document via the API
   const handleDocumentRewrite = async (slug: string) => {
-    if (!jsonData) return;
+    if (!jsonData || !apiKey) return;
     const res = await fetch(`/api/generate/${slug}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ jsonData }),
+      body: JSON.stringify({ jsonData, apiKey }),
     });
     if (!res.ok) throw new Error("Rewrite failed");
     const data = await res.json();
@@ -380,7 +387,11 @@ export function WizardShell() {
           }`}
         >
           {currentStep === 1 && (
-            <StepInstructions onNext={() => setCurrentStep(2)} />
+            <StepInstructions
+              apiKey={apiKey}
+              onApiKeyChange={handleApiKeyChange}
+              onNext={() => setCurrentStep(2)}
+            />
           )}
           {currentStep === 2 && (
             <StepJsonInput
@@ -390,6 +401,7 @@ export function WizardShell() {
           )}
           {currentStep === 3 && (
             <StepGenerating
+              apiKey={apiKey}
               jsonData={jsonData}
               documents={documents}
               setDocuments={setDocuments}
