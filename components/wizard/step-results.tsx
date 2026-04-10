@@ -14,6 +14,7 @@ import type { SavedImage } from "@/lib/reports";
 
 type StepResultsProps = {
   documents: DocumentResult[];
+  jsonData?: string;
   onStartOver: () => void;
   onDocumentUpdate?: (slug: string, newContent: string) => void;
   onDocumentRewrite?: (slug: string) => Promise<void>;
@@ -25,7 +26,7 @@ type StepResultsProps = {
   onPosterImagesChange: (images: Record<number, SavedImage>) => void;
 };
 
-export function StepResults({ documents, onStartOver, onDocumentUpdate, onDocumentRewrite, storyboardImages, onStoryboardImagesChange, promptOverrides, onPromptOverridesChange, posterImages, onPosterImagesChange }: StepResultsProps) {
+export function StepResults({ documents, jsonData, onStartOver, onDocumentUpdate, onDocumentRewrite, storyboardImages, onStoryboardImagesChange, promptOverrides, onPromptOverridesChange, posterImages, onPosterImagesChange }: StepResultsProps) {
   const completedDocs = documents.filter((doc) => doc.status === "done");
   const failedDocs = documents.filter((doc) => doc.status === "error");
   const [activeSlug, setActiveSlug] = useState(
@@ -105,13 +106,19 @@ export function StepResults({ documents, onStartOver, onDocumentUpdate, onDocume
               {activeDoc?.content && (() => {
                 switch (activeDoc.slug) {
                   case "scene-breakdown":
-                    return <SceneBreakdownViewer content={activeDoc.content} />;
+                    return (
+                      <SceneBreakdownViewer
+                        content={activeDoc.content}
+                        onContentChange={onDocumentUpdate ? (c) => onDocumentUpdate("scene-breakdown", c) : undefined}
+                      />
+                    );
                   case "production-matrices":
                     return <ProductionMatricesViewer content={activeDoc.content} />;
                   case "marketing-brief":
                     return (
                       <MarketingBriefViewer
                         content={activeDoc.content}
+                        jsonData={jsonData}
                         onContentChange={onDocumentUpdate ? (c) => onDocumentUpdate("marketing-brief", c) : undefined}
                         onRewrite={onDocumentRewrite ? () => onDocumentRewrite("marketing-brief") : undefined}
                       />
