@@ -449,10 +449,10 @@ export function ProductionMatricesViewer({ content }: { content: string }) {
         countLabel={characters.length === 1 ? "character" : "characters"}
       >
         <div className="space-y-3">
-          {characters.map((char) => {
+          {characters.map((char, i) => {
             const sceneCount = char.scenes.split(",").filter(Boolean).length;
             return (
-              <div key={char.name} className="rounded-xl border p-4">
+              <div key={`${char.name}-${i}`} className="rounded-xl border p-4">
                 <div className="flex items-start gap-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-full bg-foreground/5 text-sm font-bold shrink-0">
                     {char.name.charAt(0)}
