@@ -16,13 +16,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const cached = getCached(SLUG);
+    const cached = getCached(SLUG, jsonData);
     if (cached) {
       return NextResponse.json({ content: cached });
     }
 
     const markdown = await generateDocument(PRODUCTION_MATRICES_PROMPT, jsonData);
-    setCache(SLUG, markdown);
+    setCache(SLUG, jsonData, markdown);
 
     return NextResponse.json({ content: markdown });
   } catch (error) {

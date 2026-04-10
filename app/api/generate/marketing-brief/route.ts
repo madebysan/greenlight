@@ -17,14 +17,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const cached = getCached(SLUG);
+    const cached = getCached(SLUG, jsonData);
     if (cached) {
       return NextResponse.json({ content: cached });
     }
 
     const trimmed = trimForMarketingBrief(jsonData);
     const markdown = await generateDocument(MARKETING_BRIEF_PROMPT, trimmed);
-    setCache(SLUG, markdown);
+    setCache(SLUG, jsonData, markdown);
 
     return NextResponse.json({ content: markdown });
   } catch (error) {
