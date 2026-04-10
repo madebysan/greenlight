@@ -11,6 +11,7 @@ import { StoryboardViewer } from "@/components/viewers/storyboard-viewer";
 import { PosterConceptsViewer } from "@/components/viewers/poster-concepts-viewer";
 import type { DocumentResult } from "./wizard-shell";
 import type { SavedImage } from "@/lib/reports";
+import { downloadBlob } from "@/lib/utils";
 
 const TAB_LABELS: Record<string, string> = {
   "scene-breakdown": "Scene Breakdown",
@@ -47,13 +48,7 @@ export function StepResults({ documents, jsonData, onStartOver, onDocumentUpdate
 
   const handleDownloadOne = (doc: DocumentResult) => {
     if (!doc.content) return;
-    const blob = new Blob([doc.content], { type: "text/markdown" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${doc.slug}.md`;
-    a.click();
-    URL.revokeObjectURL(url);
+    downloadBlob(doc.content, `${doc.slug}.md`, "text/markdown");
   };
 
   return (

@@ -23,7 +23,9 @@ export type SavedProject = {
   portraits?: Record<string, SavedImage>;
 };
 
-const PROJECT_KEY = "greenlight-project";
+export const PROJECT_KEY = "greenlight-project";
+export const API_KEY_STORAGE = "stp-api-key";
+export const FAL_KEY_STORAGE = "stp-fal-key";
 
 export function loadProject(): SavedProject | null {
   if (typeof window === "undefined") return null;
@@ -41,6 +43,12 @@ export function saveProject(project: SavedProject): void {
   } catch {
     // Storage full — nothing to prune in single-project mode; give up silently.
   }
+}
+
+export function updateProject(patch: Partial<SavedProject>): void {
+  const current = loadProject();
+  if (!current) return;
+  saveProject({ ...current, ...patch });
 }
 
 export function clearProject(): void {
