@@ -62,6 +62,7 @@ export function WizardShell() {
   const [renameValue, setRenameValue] = useState("");
   const [storyboardImages, setStoryboardImages] = useState<Record<number, SavedImage>>({});
   const [promptOverrides, setPromptOverrides] = useState<Record<number, string>>({});
+  const [posterImages, setPosterImages] = useState<Record<number, SavedImage>>({});
 
   // Load reports and API key on mount
   useEffect(() => {
@@ -119,6 +120,7 @@ export function WizardShell() {
     );
     setStoryboardImages(report.images || {});
     setPromptOverrides(report.promptOverrides || {});
+    setPosterImages(report.posterImages || {});
     setCurrentStep(4);
   };
 
@@ -162,6 +164,7 @@ export function WizardShell() {
     setActiveReportId(null);
     setStoryboardImages({});
     setPromptOverrides({});
+    setPosterImages({});
   };
 
   const handleRenameReport = (id: string, newTitle: string) => {
@@ -187,15 +190,16 @@ export function WizardShell() {
     handleViewReport(duplicate);
   };
 
-  // Save storyboard images/prompts to the active report
-  const updateReportExtras = useCallback(
-    (images: Record<number, SavedImage>, overrides: Record<number, string>) => {
+  // Save all extras to the active report
+  const persistExtras = useCallback(
+    (extras: { images?: Record<number, SavedImage>; overrides?: Record<number, string>; posters?: Record<number, SavedImage> }) => {
       if (!activeReportId) return;
       const current = loadReports();
       const idx = current.findIndex((r) => r.id === activeReportId);
       if (idx < 0) return;
-      current[idx].images = images;
-      current[idx].promptOverrides = overrides;
+      if (extras.images !== undefined) current[idx].images = extras.images;
+      if (extras.overrides !== undefined) current[idx].promptOverrides = extras.overrides;
+      if (extras.posters !== undefined) current[idx].posterImages = extras.posters;
       try {
         localStorage.setItem("stp-reports", JSON.stringify(current));
       } catch {}
@@ -206,17 +210,25 @@ export function WizardShell() {
   const handleImagesChange = useCallback(
     (images: Record<number, SavedImage>) => {
       setStoryboardImages(images);
-      updateReportExtras(images, promptOverrides);
+      persistExtras({ images });
     },
-    [promptOverrides, updateReportExtras]
+    [persistExtras]
   );
 
   const handlePromptOverridesChange = useCallback(
     (overrides: Record<number, string>) => {
       setPromptOverrides(overrides);
-      updateReportExtras(storyboardImages, overrides);
+      persistExtras({ overrides });
     },
-    [storyboardImages, updateReportExtras]
+    [persistExtras]
+  );
+
+  const handlePosterImagesChange = useCallback(
+    (posters: Record<number, SavedImage>) => {
+      setPosterImages(posters);
+      persistExtras({ posters });
+    },
+    [persistExtras]
   );
 
   // Update a specific document's content (e.g., after editing synopsis)
@@ -527,6 +539,8 @@ export function WizardShell() {
               onStoryboardImagesChange={handleImagesChange}
               promptOverrides={promptOverrides}
               onPromptOverridesChange={handlePromptOverridesChange}
+              posterImages={posterImages}
+              onPosterImagesChange={handlePosterImagesChange}
             />
           )}
         </main>
