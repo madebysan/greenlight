@@ -79,19 +79,19 @@ function scenesToMarkdown(title: string, overview: Overview, scenes: Scene[]): s
 }
 
 const INT_EXT_STYLES = {
-  INT: "bg-amber-100 text-amber-800 border-amber-200",
-  EXT: "bg-sky-100 text-sky-800 border-sky-200",
+  INT: "bg-amber-500/15 text-amber-400 border-amber-500/20",
+  EXT: "bg-sky-500/15 text-sky-400 border-sky-500/20",
   "": "bg-muted text-muted-foreground",
 };
 
 const TIME_STYLES: Record<string, string> = {
-  NIGHT: "bg-indigo-100 text-indigo-800",
-  DAY: "bg-yellow-50 text-yellow-800",
-  MORNING: "bg-orange-50 text-orange-800",
-  AFTERNOON: "bg-amber-50 text-amber-800",
-  EVENING: "bg-purple-50 text-purple-800",
-  DAWN: "bg-pink-50 text-pink-800",
-  DUSK: "bg-violet-50 text-violet-800",
+  NIGHT: "bg-indigo-500/15 text-indigo-400",
+  DAY: "bg-yellow-500/15 text-yellow-400",
+  MORNING: "bg-orange-500/15 text-orange-400",
+  AFTERNOON: "bg-amber-500/15 text-amber-400",
+  EVENING: "bg-purple-500/15 text-purple-400",
+  DAWN: "bg-pink-500/15 text-pink-400",
+  DUSK: "bg-violet-500/15 text-violet-400",
 };
 
 const EMPHASIS_FIELDS = new Set(["Key Visual Moment", "Emotional Beat"]);

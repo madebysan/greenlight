@@ -393,7 +393,7 @@ export function PosterConceptsViewer({ content, savedImages, onImagesChange }: P
                                 onClick={(e) => { e.stopPropagation(); copyAIPrompt(concept); }}
                                 className={`inline-flex items-center gap-1 text-[11px] font-medium px-2 py-1 rounded-md transition-colors ${
                                   isCopied
-                                    ? "bg-green-50 text-green-700"
+                                    ? "bg-emerald-500/15 text-emerald-400"
                                     : "text-muted-foreground hover:text-foreground hover:bg-muted"
                                 }`}
                               >
