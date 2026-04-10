@@ -10,15 +10,20 @@ import { MarketingBriefViewer } from "@/components/viewers/marketing-brief-viewe
 import { StoryboardViewer } from "@/components/viewers/storyboard-viewer";
 import { PosterConceptsViewer } from "@/components/viewers/poster-concepts-viewer";
 import type { DocumentResult } from "./wizard-shell";
+import type { SavedImage } from "@/lib/reports";
 
 type StepResultsProps = {
   documents: DocumentResult[];
   onStartOver: () => void;
   onDocumentUpdate?: (slug: string, newContent: string) => void;
   onDocumentRewrite?: (slug: string) => Promise<void>;
+  storyboardImages: Record<number, SavedImage>;
+  onStoryboardImagesChange: (images: Record<number, SavedImage>) => void;
+  promptOverrides: Record<number, string>;
+  onPromptOverridesChange: (overrides: Record<number, string>) => void;
 };
 
-export function StepResults({ documents, onStartOver, onDocumentUpdate, onDocumentRewrite }: StepResultsProps) {
+export function StepResults({ documents, onStartOver, onDocumentUpdate, onDocumentRewrite, storyboardImages, onStoryboardImagesChange, promptOverrides, onPromptOverridesChange }: StepResultsProps) {
   const completedDocs = documents.filter((doc) => doc.status === "done");
   const failedDocs = documents.filter((doc) => doc.status === "error");
   const [activeSlug, setActiveSlug] = useState(
@@ -110,7 +115,15 @@ export function StepResults({ documents, onStartOver, onDocumentUpdate, onDocume
                       />
                     );
                   case "storyboard-prompts":
-                    return <StoryboardViewer content={activeDoc.content} />;
+                    return (
+                      <StoryboardViewer
+                        content={activeDoc.content}
+                        savedImages={storyboardImages}
+                        onImagesChange={onStoryboardImagesChange}
+                        savedPromptOverrides={promptOverrides}
+                        onPromptOverridesChange={onPromptOverridesChange}
+                      />
+                    );
                   case "poster-concepts":
                     return <PosterConceptsViewer content={activeDoc.content} />;
                   default:

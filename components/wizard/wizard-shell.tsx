@@ -19,6 +19,7 @@ import { StepGenerating } from "./step-generating";
 import { StepResults } from "./step-results";
 import {
   type SavedReport,
+  type SavedImage,
   loadReports,
   saveReport,
   deleteReport,
@@ -57,6 +58,8 @@ export function WizardShell() {
   const [reports, setReports] = useState<SavedReport[]>([]);
   const [activeReportId, setActiveReportId] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [storyboardImages, setStoryboardImages] = useState<Record<number, SavedImage>>({});
+  const [promptOverrides, setPromptOverrides] = useState<Record<number, string>>({});
 
   // Load reports and API key on mount
   useEffect(() => {
@@ -112,6 +115,8 @@ export function WizardShell() {
         status: d.status as DocumentResult["status"],
       }))
     );
+    setStoryboardImages(report.images || {});
+    setPromptOverrides(report.promptOverrides || {});
     setCurrentStep(4);
   };
 
@@ -153,7 +158,41 @@ export function WizardShell() {
     setJsonData("");
     setDocuments(INITIAL_DOCS);
     setActiveReportId(null);
+    setStoryboardImages({});
+    setPromptOverrides({});
   };
+
+  // Save storyboard images/prompts to the active report
+  const updateReportExtras = useCallback(
+    (images: Record<number, SavedImage>, overrides: Record<number, string>) => {
+      if (!activeReportId) return;
+      const current = loadReports();
+      const idx = current.findIndex((r) => r.id === activeReportId);
+      if (idx < 0) return;
+      current[idx].images = images;
+      current[idx].promptOverrides = overrides;
+      try {
+        localStorage.setItem("stp-reports", JSON.stringify(current));
+      } catch {}
+    },
+    [activeReportId]
+  );
+
+  const handleImagesChange = useCallback(
+    (images: Record<number, SavedImage>) => {
+      setStoryboardImages(images);
+      updateReportExtras(images, promptOverrides);
+    },
+    [promptOverrides, updateReportExtras]
+  );
+
+  const handlePromptOverridesChange = useCallback(
+    (overrides: Record<number, string>) => {
+      setPromptOverrides(overrides);
+      updateReportExtras(storyboardImages, overrides);
+    },
+    [storyboardImages, updateReportExtras]
+  );
 
   // Update a specific document's content (e.g., after editing synopsis)
   const handleDocumentUpdate = (slug: string, newContent: string) => {
@@ -414,6 +453,10 @@ export function WizardShell() {
               onStartOver={handleNewReport}
               onDocumentUpdate={handleDocumentUpdate}
               onDocumentRewrite={handleDocumentRewrite}
+              storyboardImages={storyboardImages}
+              onStoryboardImagesChange={handleImagesChange}
+              promptOverrides={promptOverrides}
+              onPromptOverridesChange={handlePromptOverridesChange}
             />
           )}
         </main>
