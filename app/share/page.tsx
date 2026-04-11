@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { ShareableView } from "@/components/share/shareable-view";
 import { loadProject, type SavedProject } from "@/lib/reports";
+import { DEMO_PROJECT } from "@/lib/demo-project";
 
 export default function SharePage() {
   const [project, setProject] = useState<SavedProject | null>(null);
@@ -10,7 +11,12 @@ export default function SharePage() {
 
   useEffect(() => {
     /* eslint-disable react-hooks/set-state-in-effect */
-    setProject(loadProject());
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("source") === "demo") {
+      setProject(DEMO_PROJECT);
+    } else {
+      setProject(loadProject());
+    }
     setHydrated(true);
     /* eslint-enable react-hooks/set-state-in-effect */
   }, []);

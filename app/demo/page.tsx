@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { RotateCcw, Sun, Moon, Info } from "lucide-react";
+import { RotateCcw, Sun, Moon, Info, Share2 } from "lucide-react";
 import { DEMO_PROJECT } from "@/lib/demo-project";
 import { StepResults } from "@/components/wizard/step-results";
 import { HeaderButton, MoreMenu } from "@/components/wizard/header-menu";
@@ -115,6 +115,12 @@ function DemoContent({ project }: { project: SavedProject }) {
               />
               <MoreMenu
                 items={[
+                  {
+                    icon: <Share2 size={14} />,
+                    label: "Share",
+                    onClick: () => window.open("/share?source=demo", "_blank"),
+                  },
+                  "divider",
                   {
                     icon: theme === "dark" ? <Sun size={14} /> : <Moon size={14} />,
                     label: theme === "dark" ? "Switch to light mode" : "Switch to dark mode",
