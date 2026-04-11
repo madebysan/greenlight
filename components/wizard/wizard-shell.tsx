@@ -6,6 +6,7 @@ import { parseStoryboardPrompts } from "@/components/viewers/storyboard-viewer";
 import { parsePosterConcepts } from "@/components/viewers/poster-concepts-viewer";
 import { HeaderButton, MoreMenu } from "./header-menu";
 import { AboutDialog } from "./about-dialog";
+import { findCachedProject } from "@/lib/cached-projects";
 import {
   Dialog,
   DialogContent,
@@ -66,6 +67,9 @@ export function WizardShell() {
   const [portraits, setPortraits] = useState<Record<string, SavedImage>>({});
   const [propImages, setPropImages] = useState<Record<string, SavedImage>>({});
   const [disabledItems, setDisabledItems] = useState<Record<string, boolean>>({});
+  // Holds cached documents when the submitted JSON's title matches a
+  // pre-cached project. Triggers fake-progression mode in StepGenerating.
+  const [prefilledDocs, setPrefilledDocs] = useState<DocumentResult[] | null>(null);
   const [theme, setTheme] = useState<"dark" | "light">("dark");
 
   // Hydrate from localStorage on mount.
@@ -105,6 +109,31 @@ export function WizardShell() {
 
   const handleJsonSubmit = (json: string) => {
     setJsonData(json);
+
+    // Check if this film title matches a pre-cached project. If so, we'll
+    // fake the generation step using the cached documents. Fresh image state
+    // — we deliberately don't restore images so the demo walkthrough still
+    // shows image generation as a live step.
+    try {
+      const parsed = JSON.parse(json);
+      const cached = findCachedProject(parsed.title || "");
+      if (cached) {
+        setPrefilledDocs(
+          cached.documents.map((d) => ({
+            name: d.name,
+            slug: d.slug,
+            status: d.status as DocumentResult["status"],
+            content: d.content,
+            error: d.error,
+          })),
+        );
+      } else {
+        setPrefilledDocs(null);
+      }
+    } catch {
+      setPrefilledDocs(null);
+    }
+
     setCurrentStep(3);
   };
 
@@ -357,6 +386,28 @@ export function WizardShell() {
     }
   };
 
+  const [savingCached, setSavingCached] = useState<"idle" | "saving" | "saved">(
+    "idle",
+  );
+  const handleSaveCached = async () => {
+    const current = loadProject();
+    if (!current) return;
+    setSavingCached("saving");
+    try {
+      const res = await fetch("/api/save-cached", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(current),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      setSavingCached("saved");
+      setTimeout(() => setSavingCached("idle"), 2500);
+    } catch (e) {
+      console.error("Save to cache failed", e);
+      setSavingCached("idle");
+    }
+  };
+
   const toggleTheme = () => {
     const next = theme === "dark" ? "light" : "dark";
     setTheme(next);
@@ -523,6 +574,25 @@ export function WizardShell() {
                         onClick: handleSaveDemo,
                       }
                     : null,
+                  process.env.NODE_ENV === "development" &&
+                  hasActiveProject &&
+                  documents.some((d) => d.status === "done")
+                    ? {
+                        icon:
+                          savingCached === "saved" ? (
+                            <Check size={14} />
+                          ) : (
+                            <Bookmark size={14} />
+                          ),
+                        label:
+                          savingCached === "saving"
+                            ? "Saving to cache..."
+                            : savingCached === "saved"
+                            ? "Cached by title"
+                            : "Save to cache (dev)",
+                        onClick: handleSaveCached,
+                      }
+                    : null,
                 ]}
               />
             </div>
@@ -593,6 +663,7 @@ export function WizardShell() {
             documents={documents}
             setDocuments={setDocuments}
             onComplete={handleGenerationComplete}
+            prefilledDocs={prefilledDocs || undefined}
           />
         )}
         {currentStep === 4 && (
