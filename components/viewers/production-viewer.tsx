@@ -151,7 +151,7 @@ export function ProductionViewer({
         </p>
       </div>
 
-      <div className="grid grid-cols-3 gap-3 mb-6">
+      <div className="grid grid-cols-3 gap-px bg-border/60 border border-border/60 rounded-[4px] overflow-hidden mb-6">
         <StatCard label="Hero Props" value={heroPropsCount} sub={`of ${propsMaster.length} tracked`} />
         <StatCard label="Wardrobe Changes" value={totalWardrobeChanges} sub="across the cast" />
         <StatCard label="Scene Setups" value={uniqueSceneLocations} sub={`across ${scenes.length} scenes`} />
@@ -264,12 +264,14 @@ export function ProductionViewer({
 
 function StatCard({ label, value, sub }: { label: string; value: number; sub: string }) {
   return (
-    <div className="rounded-xl border bg-card/40 px-4 py-3">
-      <div className="text-[10px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">
+    <div className="bg-background px-5 py-5 flex flex-col gap-2">
+      <div className="font-mono text-[9px] uppercase tracking-[0.15em] text-muted-foreground">
         {label}
       </div>
-      <div className="text-2xl font-semibold tabular-nums text-foreground mt-1">{value}</div>
-      <div className="text-[11px] text-muted-foreground mt-0.5">{sub}</div>
+      <div className="text-[32px] font-semibold tabular-nums text-foreground leading-none tracking-tight">
+        {value}
+      </div>
+      <div className="text-[11px] text-muted-foreground">{sub}</div>
     </div>
   );
 }

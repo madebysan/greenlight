@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { RefreshCw, Loader2 } from "lucide-react";
 import { PosterConceptsViewer } from "@/components/viewers/poster-concepts-viewer";
 import { TitleTreatment } from "@/components/viewers/title-treatment";
+import { SectionHead } from "@/components/ui/section-head";
 import { replaceMarkdownSection } from "@/lib/markdown-utils";
 import type { SavedImage } from "@/lib/reports";
 
@@ -106,29 +107,30 @@ export function KeyArtViewer({
       </div>
 
       {tab === "identity" && (
-        <div className="space-y-10">
+        <div className="space-y-12">
           <section>
-            <div className="flex items-center gap-3 mb-4">
-              <h2 className="text-[11px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">
-                Color Palette
-              </h2>
-              <div className="flex-1 h-px bg-border" />
-              {onMoodContentUpdate && (
-                <button
-                  onClick={handleReshufflePalette}
-                  disabled={reshufflingPalette}
-                  className="inline-flex items-center gap-1 text-[10px] font-medium text-muted-foreground hover:text-foreground disabled:opacity-50 transition-colors"
-                  title="Reshuffle color palette"
-                >
-                  {reshufflingPalette ? (
-                    <Loader2 size={11} className="animate-spin" />
-                  ) : (
-                    <RefreshCw size={11} />
-                  )}
-                  Reshuffle
-                </button>
-              )}
-            </div>
+            <SectionHead
+              index={1}
+              meta={
+                onMoodContentUpdate ? (
+                  <button
+                    onClick={handleReshufflePalette}
+                    disabled={reshufflingPalette}
+                    className="inline-flex items-center gap-1 text-[10px] font-medium text-muted-foreground hover:text-foreground disabled:opacity-50 transition-colors"
+                    title="Reshuffle color palette"
+                  >
+                    {reshufflingPalette ? (
+                      <Loader2 size={11} className="animate-spin" />
+                    ) : (
+                      <RefreshCw size={11} />
+                    )}
+                    Reshuffle
+                  </button>
+                ) : null
+              }
+            >
+              Color Palette
+            </SectionHead>
 
             {palette.length === 0 ? (
               <p className="text-[13px] text-muted-foreground py-4">
@@ -165,12 +167,7 @@ export function KeyArtViewer({
           </section>
 
           <section>
-            <div className="flex items-center gap-3 mb-4">
-              <h2 className="text-[11px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">
-                Title Treatment
-              </h2>
-              <div className="flex-1 h-px bg-border" />
-            </div>
+            <SectionHead index={2}>Title Treatment</SectionHead>
             <TitleTreatment title={title} />
           </section>
         </div>
