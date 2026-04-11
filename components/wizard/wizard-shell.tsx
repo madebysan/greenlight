@@ -517,7 +517,7 @@ export function WizardShell() {
             <div>
               <h1 className="text-lg font-bold tracking-tight">Greenlight</h1>
               <p className="text-[13px] text-muted-foreground">
-                AI-powered pre-production bible generator
+                A 1st AD&apos;s first pass.
               </p>
             </div>
 
@@ -775,14 +775,14 @@ export function WizardShell() {
               </div>
               <div>
                 <DialogTitle className="text-lg">Greenlight</DialogTitle>
-                <p className="text-[12px] text-muted-foreground mt-0.5">AI-powered pre-production bible generator</p>
+                <p className="text-[12px] text-muted-foreground mt-0.5">A 1st AD&apos;s first pass.</p>
               </div>
             </div>
           </DialogHeader>
 
           <div className="space-y-6 py-3 text-[13px] leading-relaxed">
             <p className="text-foreground/70">
-              Turn any screenplay into a complete production bible. Extract structured data,
+              Turn any screenplay into a complete first-pass breakdown. Extract structured data,
               generate professional documents for every department, and create visual assets — all from a single JSON file.
             </p>
 

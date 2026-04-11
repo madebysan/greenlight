@@ -50,6 +50,8 @@ export function trimForOverview(jsonString: string): string {
   const data = parseData(jsonString);
   return JSON.stringify({
     title: data.title,
+    writer: data.writer,
+    based_on: data.based_on,
     genre: data.genre,
     setting_period: data.setting_period,
     tone: data.tone,

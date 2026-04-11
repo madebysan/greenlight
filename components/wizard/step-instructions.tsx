@@ -67,12 +67,12 @@ export function StepInstructions({ onNext }: StepInstructionsProps) {
           {
             num: "3",
             title: "Generate",
-            desc: "Paste the JSON here and generate your production bible — scene breakdowns, matrices, marketing brief, and more",
+            desc: "Paste the JSON here and generate the full breakdown — scenes, locations, cast, key art, and more",
           },
           {
             num: "4",
             title: "Review & Use",
-            desc: "Review your production bible and use it to guide every stage of making your film",
+            desc: "Review the first-pass breakdown and use it to brief every department",
           },
         ].map((step) => (
           <div
