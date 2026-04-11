@@ -149,7 +149,11 @@ export function PosterConceptsViewer({ content, savedImages, onImagesChange }: P
     });
   };
 
-  const generatePosterImage = async (concept: PosterConcept) => {
+  // Fetch one poster image. Caller is responsible for merging into the
+  // accumulated saved state — see generateAllPosters for the batch pattern.
+  // Avoids the stale-closure bug where sequential spreads would wipe each
+  // other's work in the parent.
+  const fetchPosterImage = async (concept: PosterConcept): Promise<{ url: string } | null> => {
     setLocalImages((prev) => ({ ...prev, [concept.number]: { status: "generating" } }));
     const prompt = [
       concept.composition,
@@ -165,9 +169,17 @@ export function PosterConceptsViewer({ content, savedImages, onImagesChange }: P
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const { url } = await res.json();
       setLocalImages((prev) => ({ ...prev, [concept.number]: { status: "done", url } }));
-      onImagesChange({ ...savedImages, [concept.number]: { status: "done", url } });
+      return { url };
     } catch {
       setLocalImages((prev) => ({ ...prev, [concept.number]: { status: "error" } }));
+      return null;
+    }
+  };
+
+  const generatePosterImage = async (concept: PosterConcept) => {
+    const result = await fetchPosterImage(concept);
+    if (result) {
+      onImagesChange({ ...savedImages, [concept.number]: { status: "done", url: result.url } });
     }
   };
 
@@ -179,9 +191,16 @@ export function PosterConceptsViewer({ content, savedImages, onImagesChange }: P
     setGeneratingAll(true);
     setGenAllProgress({ done: 0, total: toGenerate.length });
 
+    let accumulated: Record<number, SavedImage> = { ...savedImages };
+
     for (let i = 0; i < toGenerate.length; i++) {
       if (cancelRef.current) break;
-      await generatePosterImage(toGenerate[i]);
+      const concept = toGenerate[i];
+      const result = await fetchPosterImage(concept);
+      if (result) {
+        accumulated = { ...accumulated, [concept.number]: { status: "done", url: result.url } };
+        onImagesChange(accumulated);
+      }
       setGenAllProgress({ done: i + 1, total: toGenerate.length });
     }
 
@@ -222,7 +241,7 @@ export function PosterConceptsViewer({ content, savedImages, onImagesChange }: P
         return (
           <section key={category} className="mb-8">
             <div className="flex items-center gap-3 mb-4">
-              <h2 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">
+              <h2 className="text-[11px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">
                 {category}
               </h2>
               <div className="flex-1 h-px bg-border" />
