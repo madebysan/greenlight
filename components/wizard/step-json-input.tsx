@@ -18,8 +18,8 @@ const OUTPUT_DOCS = [
   { name: "Scenes", desc: "Scene-by-scene map of the film" },
   { name: "Locations", desc: "Unique locations with visual moments and set requirements" },
   { name: "Cast & Crew", desc: "Characters with arcs plus scope-based crew roles" },
-  { name: "Production", desc: "Cross-referenced props, wardrobe, and effects catalog" },
-  { name: "Visuals", desc: "Storyboard frames and poster concepts for your art team" },
+  { name: "Production Design", desc: "Cross-referenced props and wardrobe catalog" },
+  { name: "Key Art", desc: "Posters, title treatment, and the film's visual identity" },
 ];
 
 export function StepJsonInput({ onSubmit, onBack }: StepJsonInputProps) {
