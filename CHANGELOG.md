@@ -5,6 +5,55 @@ Updated every session via `/save-session`.
 
 ---
 
+## 2026-04-11 (session 3)
+
+Peec.ai aesthetic port across every viewer. The app went from "well-structured dark dashboard" to "editorial dark mode that feels cinematic and deliberate."
+
+### Features
+
+#### Visual system
+- **peec.ai-inspired design language** — warm canvas tokens, inset-ring `shadow-paper` elevation (no borders), 80% body copy opacity, `font-light` display weights, tight `-0.025em` tracking. Dark-first translation of a light-mode reference.
+- **`SectionLabelPill` + `InlineChip`** — new reusable components (`components/ui/inline-chip.tsx`) for eyebrow labels and inline prose chips. Used on every viewer as the signature peec.ai label pattern.
+- **`SectionHead` with optional label pill** — extended (`components/ui/section-head.tsx`) to render floating `SectionLabelPill` above numbered section titles.
+- **`DESIGN-PEEC.md`** — deep peec.ai design reference (tokens, patterns, component recipes, phased redesign plan) committed as part of the visual system docs.
+
+#### Every viewer rebuilt
+- Overview / Mood & Tone / Scenes / Locations / Cast & Crew / Production Design — each got its own label pill eyebrow, `font-light` title, section pills, and `shadow-paper` cards.
+- **Key Art split into 2 tabs** — `Identity` (color palette + title treatment) and `Posters` (AI poster concepts). Deleted `key-art-viewer.tsx`, added `identity-viewer.tsx` + `posters-viewer.tsx`.
+
+#### Stat grid shrink
+- Stat grids switched from `grid-cols-6` (stretching `1fr`) to `inline-grid grid-cols-[repeat(N,Xpx)]` so cells hug content instead of the container.
+- Leading-number parsing (`/^(\d[\d.,]*)/`) so "5 unique locations" displays as "5" + label instead of overflowing.
+- Labels wrap to 2 lines uniformly via `max-w-[11ch]` for consistent cell heights.
+- Applied to: Overview (6 × 120px), Scenes (3 × 140px), Production Design (3 × 160px).
+
+#### Image prompt customization
+- **`lib/image-prompts.ts`** — shared module with `ImagePromptKind`, `DEFAULT_IMAGE_PROMPTS`, `getStylePrefix()`. Overrides persist to localStorage.
+- **Settings dialog expanded** with 4 textareas (storyboard / portrait / prop / poster) with per-field Reset buttons.
+- **All 4 image API routes** now accept `stylePrefix` in body and fall back to defaults. Bulk generate loop in `wizard-shell.tsx` threads `getStylePrefix(kind)` through every call.
+
+#### Loading UI
+- **`step-generating.tsx` fully rewritten** — call-sheet pattern with `[◉ PRE-PRODUCTION BIBLE]` label, film-strip segmented progress bar, per-document elapsed time tracking via `docTimesRef`, cinema vocabulary (Queued / Rolling / In the can), shimmer sweep animation on the active row.
+
+#### Logo & favicon
+- New logo: 4 black corner triangles forming diamond negative space on a white tile.
+- `public/logo.svg` with `fill="currentColor"` + white tile wrapper in header/demo/about.
+- `app/icon.svg` favicon with baked-in white background (replaced `app/icon.png`).
+
+#### Crew → Insights
+- **`suggestCrewRoles()` → `computeInsights()`** in `cast-and-crew-viewer.tsx`. Dropped 8 generic baseline roles entirely. Replaced with 15 situational heuristics that only fire when the script justifies them: stunts, VFX, practical makeup, weapons, pyro, water, intimacy, animals, picture cars, night shoots, exteriors, location density, large ensemble, minors, movement/music, period piece.
+- Each insight card: lightbulb icon, title, mono signal chip with real counts, recommendation in line-producer voice.
+- Empty state for scripts with no specialty needs.
+- Demo screenplay fires 9 insights on first render.
+
+### Fixes
+- Stat value overflow — leading-number regex extract so numeric stat values render cleanly alongside wrapping labels.
+- Playwright `getByText("Settings")` strict-mode violation — switched to `getByRole` with `exact: true` in QA scripts.
+
+### Status: committed (modifications via auto-hook), untracked new files pending single checkpoint commit
+
+---
+
 ## 2026-04-11 (session 2)
 
 Massive iteration session. Full tab restructure, new routes, visual content generation, layout exploration. Net result: the app became a real portfolio piece instead of a wizard demo.
