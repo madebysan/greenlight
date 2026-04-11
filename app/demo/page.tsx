@@ -90,9 +90,9 @@ function DemoContent({ project }: { project: SavedProject }) {
       <header className="relative z-50 border-b border-border/60 bg-background/80 backdrop-blur-md">
         <div className="mx-auto px-6 py-4 max-w-6xl">
           <div className="flex items-center gap-3">
-            <div className="h-9 w-9 shrink-0">
+            <div className="h-9 w-9 shrink-0 rounded-[8px] bg-white flex items-center justify-center shadow-pill text-black">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/logo.png" alt="Greenlight" className="w-full h-full object-contain" />
+              <img src="/logo.svg" alt="Greenlight" className="w-[70%] h-[70%]" />
             </div>
             <div>
               <h1 className="text-[17px] font-medium tracking-[-0.02em]">

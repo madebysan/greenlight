@@ -515,9 +515,9 @@ export function WizardShell() {
       <header className="relative z-50 border-b bg-background/95 backdrop-blur-sm">
         <div className={`mx-auto px-6 py-4 ${currentStep === 4 ? "max-w-6xl" : "max-w-4xl"}`}>
           <div className="flex items-center gap-3">
-            <div className="h-9 w-9 shrink-0">
+            <div className="h-9 w-9 shrink-0 rounded-[8px] bg-white flex items-center justify-center shadow-pill text-black">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/logo.png" alt="Greenlight" className="w-full h-full object-contain" />
+              <img src="/logo.svg" alt="Greenlight" className="w-[70%] h-[70%]" />
             </div>
             <div>
               <h1 className="text-lg font-bold tracking-tight">Greenlight</h1>
