@@ -43,12 +43,15 @@ type StepResultsProps = {
   onPosterImagesChange: (images: Record<number, SavedImage>) => void;
   portraits: Record<string, SavedImage>;
   onPortraitsChange: (portraits: Record<string, SavedImage>) => void;
+  disabledItems: Record<string, boolean>;
+  onDisabledItemsChange: (items: Record<string, boolean>) => void;
 };
 
 export function StepResults({
   documents,
   jsonData,
   onStartOver,
+  onDocumentUpdate,
   storyboardImages,
   onStoryboardImagesChange,
   promptOverrides,
@@ -57,6 +60,8 @@ export function StepResults({
   onPosterImagesChange,
   portraits,
   onPortraitsChange,
+  disabledItems,
+  onDisabledItemsChange,
 }: StepResultsProps) {
   const [activeTab, setActiveTab] = useState<TabKey>("overview");
 
@@ -158,7 +163,15 @@ export function StepResults({
           <div className="overflow-y-auto p-6">
             {activeTab === "overview" && (
               overviewContent ? (
-                <OverviewViewer content={overviewContent} jsonData={jsonData} />
+                <OverviewViewer
+                  content={overviewContent}
+                  jsonData={jsonData}
+                  onContentUpdate={
+                    onDocumentUpdate
+                      ? (c) => onDocumentUpdate("overview", c)
+                      : undefined
+                  }
+                />
               ) : (
                 <GenerationPending label="Overview" />
               )
@@ -166,7 +179,15 @@ export function StepResults({
 
             {activeTab === "mood-and-tone" && (
               moodContent ? (
-                <MoodAndToneViewer content={moodContent} />
+                <MoodAndToneViewer
+                  content={moodContent}
+                  jsonData={jsonData}
+                  onContentUpdate={
+                    onDocumentUpdate
+                      ? (c) => onDocumentUpdate("mood-and-tone", c)
+                      : undefined
+                  }
+                />
               ) : (
                 <GenerationPending label="Mood & Tone" />
               )
@@ -189,6 +210,8 @@ export function StepResults({
                 jsonData={jsonData}
                 portraits={portraits}
                 onPortraitsChange={onPortraitsChange}
+                disabledItems={disabledItems}
+                onDisabledItemsChange={onDisabledItemsChange}
               />
             )}
 
