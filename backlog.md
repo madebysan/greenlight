@@ -155,6 +155,21 @@ Sample data lives in `lib/sample-data.ts` as exported const strings. A24 scripts
 
 - **PDF export** — current MD export handles text fine but loses generated images (mood frames, storyboards, posters, portraits). PDF would bundle everything into one shareable file.
   - Existing per-document MD export stays as-is for text-only workflows
+  - **Partially shipped:** `/share` route is a full-bible print-friendly page — Cmd+P → Save as PDF works. Not yet wired into a single "Export PDF" button with programmatic generation.
+
+- **Export / Import project as .greenlight.zip** — save full project state to a file, drop it back in later to restore.
+  - **Export** creates a `.zip` with:
+    - `greenlight-project.json` — the full `SavedProject` (screenplay JSON + all generated markdown + image URL references + prompt overrides + disabled items + title font selection)
+    - `screenplay.json` — standalone copy of the raw Stage-0 extraction for human readability
+    - `overview.md`, `mood-and-tone.md`, `scene-breakdown.md`, `storyboard-prompts.md`, `poster-concepts.md` — individual markdown files, extracted for people browsing the zip in Finder
+    - `README.txt` — short note explaining what the file is and how to re-import
+  - **Import** reads the zip, parses `greenlight-project.json`, overwrites `localStorage[greenlight-project]`, reloads the app
+  - **File format v1 — Option A (URL-only):** image URLs point at `/api/serve-image/...` as-is. Works on the same machine because `.cache/images/` is untouched. Cross-machine images 404 (regenerate via "Generate all images"). Ship this first — 80% of the value, minimal effort.
+  - **File format v2 — Option C2 (images in zip + dev-only import API):** zip includes images; import API writes them to `.cache/images/`. Lets you move a project between machines via USB / Dropbox. Dev-only because Vercel filesystem is read-only at runtime.
+  - **File format v3 — Option C1 (images in zip + IndexedDB):** images unpacked into browser IndexedDB, viewers resolve IDs to blob URLs. Works cross-machine *and* in production. Biggest refactor — every `<img>` tag needs to route through a resolver.
+  - **PDF in the export:** skip it. No client-side API generates a PDF of the print dialog's output. If needed, user runs `/share` → Print → Save as PDF as a separate step.
+  - **Dependency:** `jszip` (~90KB gzipped) for both export and import.
+  - **Priority:** zero demo value (nobody clicks this in a 5-minute walkthrough) but real indie-filmmaker value. Backlogged until after the interview.
 
 ---
 
