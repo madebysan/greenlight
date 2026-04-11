@@ -220,12 +220,12 @@ export function ProductionViewer({
               <SectionLabel>By Character</SectionLabel>
               <div className="grid grid-cols-2 gap-3">
                 {characters.map((c) => (
-                  <div key={c.name} className="rounded-lg border bg-card/40 px-4 py-3">
+                  <div key={c.name} className="rounded-[10px] border border-border/60 hover:border-border bg-card/30 px-4 py-3 transition-colors">
                     <div className="flex items-baseline justify-between gap-2">
-                      <span className="text-[13px] font-semibold uppercase tracking-wide text-foreground">
+                      <span className="text-[13px] font-semibold uppercase tracking-[0.04em] text-foreground">
                         {c.name}
                       </span>
-                      <span className="text-[11px] tabular-nums text-muted-foreground">
+                      <span className="font-mono text-[10px] uppercase tracking-[0.12em] tabular-nums text-muted-foreground">
                         {c.wardrobe_changes ?? 0} {c.wardrobe_changes === 1 ? "change" : "changes"}
                       </span>
                     </div>
@@ -244,9 +244,9 @@ export function ProductionViewer({
                 {wardrobeBySceneAndChars.map((w, i) => (
                   <div
                     key={`${w.scene}-${i}`}
-                    className="rounded-lg border bg-card/30 px-4 py-3 flex items-start gap-3"
+                    className="rounded-[10px] border border-border/60 hover:border-border bg-card/30 px-4 py-3 flex items-start gap-3 transition-colors"
                   >
-                    <span className="text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-md bg-muted text-muted-foreground shrink-0">
+                    <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.08em] px-2 py-[3px] rounded-[4px] bg-muted text-muted-foreground shrink-0">
                       S{w.scene}
                     </span>
                     <span className="text-[13px] leading-[1.6] text-foreground/80">{w.note}</span>
@@ -323,8 +323,8 @@ function PropCard({
   generatingAll: boolean;
 }) {
   return (
-    <div className="rounded-xl border bg-card/40 p-5 flex gap-5">
-      <div className="w-24 h-24 rounded-lg shrink-0 bg-muted/40 border border-border/60 overflow-hidden flex items-center justify-center relative group">
+    <div className="rounded-[10px] border border-border/60 hover:border-border bg-card/30 p-5 flex gap-5 transition-colors">
+      <div className="w-24 h-24 rounded-md shrink-0 bg-muted/40 border border-border/60 overflow-hidden flex items-center justify-center relative group">
         {imageState.status === "done" && imageState.url ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={imageState.url} alt={prop.item} className="w-full h-full object-cover" />
@@ -362,29 +362,29 @@ function PropCard({
       </div>
 
       <div className="flex-1 min-w-0">
-        <div className="flex items-start justify-between gap-4 mb-1">
+        <div className="flex items-start justify-between gap-4 mb-1.5">
           <div className="flex items-center gap-2">
-            <h2 className="text-base font-semibold capitalize text-foreground">{prop.item}</h2>
+            <h2 className="text-[15px] font-semibold capitalize text-foreground tracking-tight">{prop.item}</h2>
             {prop.hero_prop && (
-              <span className="inline-flex items-center gap-1 text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-500/90">
+              <span className="inline-flex items-center gap-1 font-mono text-[10px] font-semibold uppercase tracking-[0.08em] px-2 py-[3px] rounded-[4px] bg-amber-500/15 text-amber-400">
                 <Star size={10} className="fill-current" />
                 Hero
               </span>
             )}
           </div>
-          <span className="text-[11px] text-muted-foreground shrink-0">
+          <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground shrink-0 tabular-nums">
             {prop.scenes.length} {prop.scenes.length === 1 ? "scene" : "scenes"}
           </span>
         </div>
         {prop.notes && (
-          <p className="text-[13px] leading-[1.6] text-foreground/70 mt-1">{prop.notes}</p>
+          <p className="text-[13px] leading-[1.6] text-foreground/80 mt-1">{prop.notes}</p>
         )}
         {prop.scenes.length > 0 && (
           <div className="flex flex-wrap gap-1.5 mt-3">
             {prop.scenes.map((sn) => (
               <span
                 key={sn}
-                className="text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-md bg-muted text-muted-foreground"
+                className="font-mono text-[10px] font-semibold uppercase tracking-[0.08em] px-2 py-[3px] rounded-[4px] bg-muted text-muted-foreground"
               >
                 S{sn}
               </span>

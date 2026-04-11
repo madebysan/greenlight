@@ -97,19 +97,19 @@ function scenesToMarkdown(title: string, overview: Overview, scenes: Scene[]): s
 }
 
 const INT_EXT_STYLES = {
-  INT: "bg-amber-500/15 text-amber-400 border-amber-500/20",
-  EXT: "bg-sky-500/15 text-sky-400 border-sky-500/20",
+  INT: "bg-amber-500/15 text-amber-400",
+  EXT: "bg-sky-500/15 text-sky-400",
   "": "bg-muted text-muted-foreground",
 };
 
 const TIME_STYLES: Record<string, string> = {
-  NIGHT: "bg-indigo-500/15 text-indigo-400",
-  DAY: "bg-yellow-500/15 text-yellow-400",
-  MORNING: "bg-orange-500/15 text-orange-400",
-  AFTERNOON: "bg-amber-500/15 text-amber-400",
-  EVENING: "bg-purple-500/15 text-purple-400",
-  DAWN: "bg-pink-500/15 text-pink-400",
-  DUSK: "bg-violet-500/15 text-violet-400",
+  NIGHT: "bg-indigo-500/15 text-indigo-300",
+  DAY: "bg-yellow-500/15 text-yellow-300",
+  MORNING: "bg-orange-500/15 text-orange-300",
+  AFTERNOON: "bg-amber-500/15 text-amber-300",
+  EVENING: "bg-purple-500/15 text-purple-300",
+  DAWN: "bg-pink-500/15 text-pink-300",
+  DUSK: "bg-violet-500/15 text-violet-300",
 };
 
 const EMPHASIS_FIELDS = new Set(["Key Visual Moment", "Emotional Beat"]);
@@ -550,10 +550,10 @@ export function SceneBreakdownViewer({
             return (
               <div
                 key={scene.number}
-                className={`rounded-xl border transition-colors ${
+                className={`rounded-[10px] border transition-colors ${
                   isExpanded
-                    ? "bg-card/50 border-border"
-                    : "bg-card/30 border-border/60 hover:bg-card/50"
+                    ? "bg-card/60 border-border"
+                    : "bg-card/30 border-border/60 hover:border-border"
                 }`}
               >
                 <div className="flex items-center gap-3 px-4 py-3">
@@ -561,24 +561,24 @@ export function SceneBreakdownViewer({
                     onClick={() => toggleScene(scene.number)}
                     className="flex items-center gap-3 flex-1 min-w-0 text-left"
                   >
-                    <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-foreground/5 text-xs font-bold shrink-0 tabular-nums">
-                      {scene.number}
+                    <span className="flex h-[26px] w-[26px] items-center justify-center rounded-md bg-muted font-mono text-[11px] font-semibold shrink-0 tabular-nums">
+                      {scene.number.toString().padStart(2, "0")}
                     </span>
                     {scene.intExt && (
-                      <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded border ${INT_EXT_STYLES[scene.intExt]}`}>
+                      <span className={`font-mono text-[10px] font-semibold tracking-[0.08em] px-2 py-[3px] rounded-[4px] ${INT_EXT_STYLES[scene.intExt]}`}>
                         {scene.intExt}
                       </span>
                     )}
-                    <span className="text-sm font-semibold flex-1 truncate">
+                    <span className="text-[14px] font-semibold tracking-wide uppercase flex-1 truncate">
                       {scene.slugLine.replace(/^(INT|EXT)\.\s*/, "").replace(/\s*-\s*(NIGHT|DAY|MORNING|AFTERNOON|EVENING|DAWN|DUSK|CONTINUOUS)\s*$/i, "")}
                     </span>
                     {scene.timeOfDay && (
-                      <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded ${TIME_STYLES[scene.timeOfDay.toUpperCase()] || "bg-muted text-muted-foreground"}`}>
+                      <span className={`font-mono text-[10px] font-semibold tracking-[0.08em] uppercase px-2 py-[3px] rounded-[4px] ${TIME_STYLES[scene.timeOfDay.toUpperCase()] || "bg-muted text-muted-foreground"}`}>
                         {scene.timeOfDay}
                       </span>
                     )}
                     {pages && (
-                      <span className="text-[11px] text-muted-foreground tabular-nums whitespace-nowrap">pp. {pages}</span>
+                      <span className="font-mono text-[11px] text-muted-foreground tabular-nums whitespace-nowrap">pp. {pages}</span>
                     )}
                   </button>
 
@@ -618,57 +618,68 @@ export function SceneBreakdownViewer({
                 )}
 
                 {isExpanded && !isEditing && (
-                  <div className="px-5 pb-5 pt-4 border-t border-border/60">
+                  <div className="px-5 pb-6 pt-5 border-t border-border/60 space-y-5">
                     {(location || characters) && (
-                      <div className="flex flex-wrap gap-1.5 mb-4">
+                      <div className="flex flex-wrap gap-1.5">
                         {location && (
-                          <span className="inline-flex items-center gap-1 text-[11px] bg-muted/60 rounded-full px-2.5 py-1">
-                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-muted-foreground">
-                              <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
-                              <circle cx="12" cy="10" r="3" />
-                            </svg>
+                          <span className="inline-flex items-center gap-1.5 font-mono text-[11px] bg-muted border border-border/60 rounded-md px-2.5 py-1 text-foreground/85">
+                            <span className="text-muted-foreground">◉</span>
                             {location}
                           </span>
                         )}
                         {characters && characters.split(",").map((char) => (
-                          <span key={char.trim()} className="inline-flex items-center gap-1 text-[11px] bg-muted/60 rounded-full px-2.5 py-1">
-                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-muted-foreground">
-                              <circle cx="12" cy="8" r="5" />
-                              <path d="M20 21a8 8 0 0 0-16 0" />
-                            </svg>
+                          <span key={char.trim()} className="inline-flex items-center gap-1.5 font-mono text-[11px] bg-muted border border-border/60 rounded-md px-2.5 py-1 text-foreground/85">
+                            <span className="text-muted-foreground">◉</span>
                             {char.trim()}
                           </span>
                         ))}
                       </div>
                     )}
 
-                    {scene.fields
-                      .filter((f) => !SKIP_FIELDS.has(f.label) && f.label !== "Characters" && f.label !== "Pages")
-                      .map((field) => {
-                        if (EMPHASIS_FIELDS.has(field.label)) {
-                          return (
-                            <div key={field.label} className="mb-4">
-                              <div className="text-[10px] uppercase tracking-widest text-muted-foreground font-semibold mb-1.5">
+                    {(() => {
+                      const emphasisFields = scene.fields.filter(
+                        (f) => EMPHASIS_FIELDS.has(f.label) && f.value && f.value !== "None",
+                      );
+                      const detailFields = scene.fields.filter(
+                        (f) =>
+                          !SKIP_FIELDS.has(f.label) &&
+                          f.label !== "Characters" &&
+                          f.label !== "Pages" &&
+                          !EMPHASIS_FIELDS.has(f.label) &&
+                          f.value &&
+                          f.value !== "None" &&
+                          f.value.trim(),
+                      );
+                      return (
+                        <>
+                          {emphasisFields.map((field) => (
+                            <div key={field.label}>
+                              <div className="font-mono text-[10px] uppercase tracking-[0.15em] text-muted-foreground mb-2">
                                 {field.label}
                               </div>
-                              <p className="text-[13px] leading-[1.7] text-foreground/85">
+                              <p className="text-[14px] leading-[1.6] text-foreground/90">
                                 {field.value}
                               </p>
                             </div>
-                          );
-                        }
-                        if (field.value === "None" || !field.value.trim()) return null;
-                        return (
-                          <div key={field.label} className="flex gap-3 mb-2">
-                            <span className="text-[10px] uppercase tracking-widest text-muted-foreground font-semibold shrink-0 w-24 pt-0.5">
-                              {field.label}
-                            </span>
-                            <span className="text-[12px] text-foreground/75 leading-[1.65] flex-1">
-                              {field.value}
-                            </span>
-                          </div>
-                        );
-                      })}
+                          ))}
+
+                          {detailFields.length > 0 && (
+                            <dl className="grid grid-cols-[110px_1fr] gap-x-5 gap-y-3 pt-4 border-t border-border/60">
+                              {detailFields.map((field) => (
+                                <div key={field.label} className="contents">
+                                  <dt className="font-mono text-[9px] uppercase tracking-[0.18em] text-muted-foreground pt-0.5">
+                                    {field.label}
+                                  </dt>
+                                  <dd className="m-0 text-[13px] leading-[1.55] text-foreground/85">
+                                    {field.value}
+                                  </dd>
+                                </div>
+                              ))}
+                            </dl>
+                          )}
+                        </>
+                      );
+                    })()}
 
                     {/* Storyboard frame — inline with the rest of the scene */}
                     {storyboardByNumber[scene.number] && (
@@ -772,19 +783,16 @@ function StoryboardSection({
   const promptVisible = isEditingPrompt || isShowingPrompt;
 
   return (
-    <div className="mt-4 pt-4 border-t border-border/60">
-      <div className="flex items-center gap-3 mb-3">
-        <div className="text-[10px] uppercase tracking-widest text-muted-foreground font-semibold">
-          Storyboard Frame
-        </div>
-        <div className="flex-1 h-px bg-border/60" />
+    <div className="pt-5 mt-1 border-t border-border/60">
+      <div className="font-mono text-[10px] uppercase tracking-[0.15em] text-muted-foreground mb-4">
+        Storyboard Frame
       </div>
 
-      <div className="flex gap-4">
-        {/* Left: image or placeholder + action buttons — fixed width */}
-        <div className="shrink-0 w-[280px]">
+      <div className="grid grid-cols-[320px_1fr] gap-6 items-start">
+        {/* Left: image or placeholder + action link row */}
+        <div>
           {imageState.status === "done" && imageState.url ? (
-            <div className="relative group aspect-video rounded-lg overflow-hidden border border-border/60 bg-muted/30">
+            <div className="relative group aspect-video rounded-md overflow-hidden border border-border/60 bg-muted/30">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={imageState.url}
@@ -796,19 +804,19 @@ function StoryboardSection({
                 download={`scene-${sceneNumber}.png`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="absolute top-1.5 right-1.5 opacity-0 group-hover:opacity-100 transition-opacity inline-flex items-center gap-1 text-[10px] font-medium px-2 py-1 rounded bg-black/70 text-white hover:bg-black/90"
+                className="absolute top-1.5 right-1.5 opacity-0 group-hover:opacity-100 transition-opacity inline-flex items-center gap-1 font-mono text-[10px] px-2 py-1 rounded bg-black/70 text-white hover:bg-black/90"
               >
                 <Download size={10} />
                 Save
               </a>
             </div>
           ) : imageState.status === "generating" ? (
-            <div className="aspect-video rounded-lg border border-border/60 bg-muted/20 flex items-center justify-center gap-2 text-[11px] text-muted-foreground">
+            <div className="aspect-video rounded-md border border-border/60 bg-muted/20 flex items-center justify-center gap-2 text-[11px] text-muted-foreground">
               <Loader2 size={14} className="animate-spin" />
               Generating frame…
             </div>
           ) : imageState.status === "error" ? (
-            <div className="aspect-video rounded-lg border border-destructive/30 bg-destructive/5 flex flex-col items-center justify-center gap-1 text-[11px] text-destructive/80">
+            <div className="aspect-video rounded-md border border-destructive/30 bg-destructive/5 flex flex-col items-center justify-center gap-1 text-[11px] text-destructive/80">
               <span>{imageState.error || "Generation failed"}</span>
               <button
                 onClick={onGenerate}
@@ -821,74 +829,75 @@ function StoryboardSection({
             <button
               onClick={onGenerate}
               disabled={generatingAll}
-              className="aspect-video w-full rounded-lg border border-dashed border-border/80 bg-muted/10 hover:bg-muted/20 hover:border-foreground/30 flex flex-col items-center justify-center gap-1.5 text-[11px] text-muted-foreground hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="aspect-video w-full rounded-md border border-dashed border-border/80 bg-muted/10 hover:bg-muted/20 hover:border-foreground/30 flex flex-col items-center justify-center gap-1.5 text-[11px] text-muted-foreground hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               <ImageIcon size={18} />
               Generate frame
             </button>
           )}
 
-          {/* Action row — appears below the image/placeholder */}
-          <div className="flex items-center gap-0.5 mt-2 flex-wrap">
+          {/* Action row — mono underline links */}
+          <div className="flex flex-wrap gap-x-4 gap-y-1.5 mt-3 font-mono text-[10px]">
             {imageState.status === "done" && (
-              <IconButton
-                icon={<RefreshCw size={12} />}
+              <FrameLink
+                icon={<RefreshCw size={11} />}
                 label="Regenerate image"
                 onClick={onGenerate}
               />
             )}
-            <IconButton
-              icon={<Loader2 size={12} className={regenState === "loading" ? "animate-spin" : "hidden"} />}
-              fallbackIcon={<RefreshCw size={12} />}
-              label={regenState === "loading" ? "Rewriting..." : "Rewrite prompt"}
+            <FrameLink
+              icon={
+                regenState === "loading" ? (
+                  <Loader2 size={11} className="animate-spin" />
+                ) : (
+                  <RefreshCw size={11} />
+                )
+              }
+              label={regenState === "loading" ? "Rewriting…" : "Rewrite prompt"}
               onClick={onRegenPrompt}
               disabled={regenState === "loading" || isEditingPrompt}
             />
-            <IconButton
-              icon={<FileText size={12} />}
+            <FrameLink
+              icon={<FileText size={11} />}
               label={isEditingPrompt ? "Editing…" : "Edit prompt"}
               onClick={isEditingPrompt ? onCancelEditPrompt : onStartEditPrompt}
               active={isEditingPrompt}
             />
-            <IconButton
-              icon={isCopied ? <Check size={12} /> : <Copy size={12} />}
+            <FrameLink
+              icon={isCopied ? <Check size={11} /> : <Copy size={11} />}
               label={isCopied ? "Copied" : "Copy prompt"}
               onClick={onCopyPrompt}
             />
           </div>
         </div>
 
-        {/* Right/bottom: metadata chips + collapsible/editable prompt */}
-        <div className="flex-1 min-w-0">
+        {/* Right: metadata as a dl + show prompt link */}
+        <div className="min-w-0">
           {(storyboard.camera || storyboard.lighting || storyboard.mood) && (
-            <div className="flex flex-col gap-1.5">
-              {storyboard.camera && (
-                <Meta label="Camera" value={storyboard.camera} />
-              )}
-              {storyboard.lighting && (
-                <Meta label="Lighting" value={storyboard.lighting} />
-              )}
+            <dl className="grid grid-cols-[80px_1fr] gap-x-4 gap-y-3">
+              {storyboard.camera && <Meta label="Camera" value={storyboard.camera} />}
+              {storyboard.lighting && <Meta label="Lighting" value={storyboard.lighting} />}
               {storyboard.mood && <Meta label="Mood" value={storyboard.mood} />}
-            </div>
+            </dl>
           )}
 
           {!isEditingPrompt && !isShowingPrompt && (
             <button
               onClick={onToggleShowPrompt}
-              className="mt-3 text-[10px] font-medium text-muted-foreground/70 hover:text-foreground transition-colors underline underline-offset-2"
+              className="mt-4 font-mono text-[10px] text-muted-foreground hover:text-foreground transition-colors underline underline-offset-[3px] decoration-border"
             >
-              Show prompt
+              Show prompt →
             </button>
           )}
 
           {promptVisible && (
-            <div className="mt-3">
+            <div className="mt-4">
               {isEditingPrompt ? (
                 <div className="space-y-2">
                   <textarea
                     value={editText}
                     onChange={(e) => setEditText(e.target.value)}
-                    className="w-full text-[12px] leading-[1.7] text-foreground/80 bg-muted/30 border border-border/60 rounded-lg p-3 resize-none focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                    className="w-full font-mono text-[12px] leading-[1.7] text-foreground/85 bg-muted/30 border border-border/60 rounded-md p-3 resize-none focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                     rows={Math.max(3, editText.split("\n").length + 1)}
                     autoFocus
                   />
@@ -909,12 +918,12 @@ function StoryboardSection({
                 </div>
               ) : (
                 <div>
-                  <p className="text-[11px] leading-[1.65] text-foreground/70 bg-muted/20 rounded-lg p-3 border border-border/40">
+                  <p className="font-mono text-[11px] leading-[1.65] text-foreground/75 bg-muted/20 rounded-md p-3 border border-border/40">
                     {storyboard.prompt}
                   </p>
                   <button
                     onClick={onToggleShowPrompt}
-                    className="mt-1.5 text-[10px] font-medium text-muted-foreground/70 hover:text-foreground transition-colors underline underline-offset-2"
+                    className="mt-2 font-mono text-[10px] text-muted-foreground hover:text-foreground transition-colors underline underline-offset-[3px] decoration-border"
                   >
                     Hide prompt
                   </button>
@@ -928,27 +937,14 @@ function StoryboardSection({
   );
 }
 
-function Meta({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex items-baseline gap-2 text-[11px]">
-      <span className="text-muted-foreground font-mono uppercase tracking-wider text-[9px] w-14 shrink-0">
-        {label}
-      </span>
-      <span className="text-foreground/75 leading-[1.55]">{value}</span>
-    </div>
-  );
-}
-
-function IconButton({
+function FrameLink({
   icon,
-  fallbackIcon,
   label,
   onClick,
   disabled,
   active,
 }: {
   icon: React.ReactNode;
-  fallbackIcon?: React.ReactNode;
   label: string;
   onClick: () => void;
   disabled?: boolean;
@@ -958,16 +954,26 @@ function IconButton({
     <button
       onClick={onClick}
       disabled={disabled}
-      title={label}
-      className={`inline-flex items-center gap-1.5 text-[10px] font-medium px-2 py-1.5 rounded-md border transition-colors ${
+      className={`inline-flex items-center gap-1.5 transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
         active
-          ? "bg-primary/10 text-primary border-primary/30"
-          : "border-transparent text-muted-foreground hover:text-foreground hover:bg-muted/60 hover:border-border/60"
-      } disabled:opacity-40 disabled:cursor-not-allowed`}
+          ? "text-foreground"
+          : "text-muted-foreground hover:text-foreground"
+      }`}
     >
-      {fallbackIcon && icon}
-      {!fallbackIcon && icon}
-      <span>{label}</span>
+      {icon}
+      <span className="underline underline-offset-[3px] decoration-border">{label}</span>
     </button>
   );
 }
+
+function Meta({ label, value }: { label: string; value: string }) {
+  return (
+    <>
+      <dt className="font-mono text-[9px] uppercase tracking-[0.18em] text-muted-foreground pt-0.5">
+        {label}
+      </dt>
+      <dd className="m-0 text-[13px] leading-[1.55] text-foreground/85">{value}</dd>
+    </>
+  );
+}
+

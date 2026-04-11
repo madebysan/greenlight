@@ -141,7 +141,7 @@ export function KeyArtViewer({
                 {palette.map((c) => (
                   <div
                     key={c.hex}
-                    className="flex items-start gap-3 rounded-lg border border-border/60 bg-card/30 px-3 py-2.5"
+                    className="flex items-start gap-3 rounded-[10px] border border-border/60 hover:border-border bg-card/30 px-3 py-3 transition-colors"
                   >
                     <div
                       className="w-10 h-10 rounded-md border border-border/60 shrink-0"
@@ -149,14 +149,14 @@ export function KeyArtViewer({
                     />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-baseline gap-2 flex-wrap">
-                        <span className="text-[12px] font-semibold text-foreground leading-tight">
+                        <span className="text-[13px] font-semibold text-foreground leading-tight">
                           {c.name}
                         </span>
-                        <span className="text-[9px] font-mono text-muted-foreground uppercase">
+                        <span className="font-mono text-[9px] uppercase tracking-[0.12em] text-muted-foreground">
                           {c.hex}
                         </span>
                       </div>
-                      <p className="text-[11px] text-foreground/65 leading-[1.55] mt-0.5 line-clamp-2">
+                      <p className="text-[12px] text-foreground/70 leading-[1.55] mt-1 line-clamp-2">
                         {c.description}
                       </p>
                     </div>

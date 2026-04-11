@@ -289,7 +289,7 @@ export function CastAndCrewViewer({
               return (
                 <div
                   key={char.name}
-                  className={`rounded-xl border bg-card/40 p-5 flex gap-5 relative group/card transition-opacity ${
+                  className={`rounded-[10px] border border-border/60 bg-card/30 hover:border-border p-5 flex gap-5 relative group/card transition-all ${
                     isDisabled ? "opacity-40" : ""
                   }`}
                 >
@@ -300,7 +300,7 @@ export function CastAndCrewViewer({
                   >
                     {isDisabled ? <Eye size={13} /> : <EyeOff size={13} />}
                   </button>
-                  <div className="w-24 h-24 rounded-lg shrink-0 bg-muted/40 border border-border/60 overflow-hidden flex items-center justify-center relative group">
+                  <div className="w-24 h-24 rounded-md shrink-0 bg-muted/40 border border-border/60 overflow-hidden flex items-center justify-center relative group">
                     {portrait?.status === "done" && portrait.url ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
@@ -342,25 +342,25 @@ export function CastAndCrewViewer({
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h2 className="text-sm font-semibold text-foreground uppercase tracking-wide">
+                    <h2 className="text-[14px] font-semibold text-foreground uppercase tracking-[0.04em]">
                       {char.name}
                     </h2>
-                    <p className="text-[12px] text-foreground/70 mt-1 leading-relaxed">
+                    <p className="text-[13px] text-foreground/80 mt-1.5 leading-[1.55]">
                       {char.description}
                     </p>
                     {char.arc_summary && (
-                      <p className="text-[12px] text-muted-foreground/90 italic mt-2 leading-relaxed">
+                      <p className="text-[12px] text-muted-foreground/90 italic mt-2 leading-[1.55]">
                         {char.arc_summary}
                       </p>
                     )}
-                    <div className="flex items-center gap-3 mt-3 text-[11px] text-muted-foreground">
-                      <span>
+                    <div className="flex items-center gap-2 mt-3 font-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
+                      <span className="tabular-nums">
                         {char.scenes_present?.length || 0} scenes
                       </span>
                       {char.wardrobe_changes !== undefined && char.wardrobe_changes > 0 && (
                         <>
-                          <span>·</span>
-                          <span>{char.wardrobe_changes} wardrobe changes</span>
+                          <span className="opacity-50">·</span>
+                          <span className="tabular-nums">{char.wardrobe_changes} wardrobe changes</span>
                         </>
                       )}
                     </div>
@@ -384,13 +384,13 @@ export function CastAndCrewViewer({
               return (
                 <div
                   key={r.role}
-                  className={`rounded-lg border bg-card/40 px-4 py-3 flex items-start gap-3 relative group/card transition-opacity ${
+                  className={`rounded-[10px] border border-border/60 bg-card/30 hover:border-border px-4 py-3 flex items-start gap-3 relative group/card transition-all ${
                     isDisabled ? "opacity-40" : ""
                   }`}
                 >
                   <div className="flex-1 min-w-0">
-                    <div className="text-sm font-semibold text-foreground">{r.role}</div>
-                    <div className="text-[12px] text-muted-foreground mt-0.5 leading-relaxed">
+                    <div className="text-[13px] font-semibold text-foreground uppercase tracking-[0.04em]">{r.role}</div>
+                    <div className="text-[12px] text-muted-foreground mt-1 leading-[1.55]">
                       {r.note}
                     </div>
                   </div>
