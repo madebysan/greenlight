@@ -459,7 +459,7 @@ export function WizardShell() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b bg-background/95 backdrop-blur-sm">
+      <header className="relative z-50 border-b bg-background/95 backdrop-blur-sm">
         <div className={`mx-auto px-6 py-4 ${currentStep === 4 ? "max-w-6xl" : "max-w-4xl"}`}>
           <div className="flex items-center gap-3">
             <div className="h-9 w-9 shrink-0">
