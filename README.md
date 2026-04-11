@@ -35,12 +35,13 @@ Five concrete problems an indie filmmaker hits the moment they commit to a scrip
 
 | Tab | Who It's For | What It Does |
 |---|---|---|
-| **Overview** | You, investors, collaborators you're recruiting | Logline, synopsis, genre, themes, comparables, scope-at-a-glance |
-| **Mood & Tone** | DP, production designer, composer | Style narrative, color palette, music direction, reference adjectives, tone imagery |
-| **Scenes** | You, 1st AD | Per-scene map of the film — what happens and where |
-| **Locations** | Location scout, production team | Unique locations grouped, with scenes-per-location and key visual moments |
-| **Cast & Crew** | Casting, producers | Characters (with AI portraits) + scope-based crew roles the film will require |
-| **Visuals** | Art department | Poster concepts and storyboard frames as discussion starters |
+| **Overview** | You, investors, collaborators you're recruiting | Logline, taglines, synopsis, film identity, themes, scope-at-a-glance, poster carousel |
+| **Mood & Tone** | DP, production designer, composer | Atmosphere prose, tonal descriptors, reference points, music & sound direction with real soundtrack references (TMDB posters), and Similar Moods film grid |
+| **Scenes** | You, 1st AD | Per-scene map with inline storyboard frames. Sequence or Location grouping. Every scene gets a generated key-visual frame. |
+| **Locations** | Location scout, production team | Unique locations grouped, with scenes-per-location, time variations, set requirements, and key visual moments |
+| **Cast & Crew** | Casting, producers | Characters (with AI portraits) + scope-based crew roles. Each card can be disabled if you don't need that role. |
+| **Production Design** | Art department | Cross-referenced props and wardrobe pulled from every scene. Each prop gets a reference sketch. |
+| **Key Art** | Marketing, pitch meetings | Color palette (reshuffleable), title treatment with full Google Fonts catalog, and 15 poster concepts across 5 categories |
 
 ## What It Is Not
 
@@ -58,7 +59,7 @@ Five concrete problems an indie filmmaker hits the moment they commit to a scrip
 
 ## Image Generation
 
-Mood imagery, storyboard frames, poster concepts, and character portraits are generated using FLUX Schnell (fal.ai) in a consistent black-and-white felt-tip marker production art style. All images are saved locally to `.cache/images/` and persist with your project.
+Storyboard frames, poster concepts, character portraits, and prop references are generated using FLUX Schnell (fal.ai) in a consistent black-and-white felt-tip marker production art style so every asset in the bible looks like it came from the same hand. Images are saved locally to `.cache/images/` and persist with your project. Use **Generate all images** in the More menu to batch-generate everything missing across every tab in one click.
 
 ## Setup
 
@@ -72,26 +73,29 @@ Open [http://localhost:3001](http://localhost:3001).
 
 ### API Keys
 
-Configure via **Settings** in the sidebar:
+Configure via **Settings** in the More menu (3-dot button in the header):
 
 | Key | Purpose | Get one at |
 |-----|---------|-----------|
 | Claude API Key | Document generation, prompt rewriting | [console.anthropic.com](https://console.anthropic.com/settings/keys) |
-| fal.ai API Key | Image generation (mood, storyboards, posters, portraits) | [fal.ai/dashboard](https://fal.ai/dashboard/keys) |
+| fal.ai API Key | Image generation (mood, storyboards, posters, portraits, props) | [fal.ai/dashboard](https://fal.ai/dashboard/keys) |
+| TMDB API Key | Real poster lookups on Similar Moods and Soundtrack References | [themoviedb.org/settings/api](https://www.themoviedb.org/settings/api) |
 
 Or set them in `.env.local` for local development:
 
 ```
 ANTHROPIC_API_KEY=sk-ant-...
 FAL_KEY=...
+TMDB_API_KEY=...
 ```
 
 ## Tech Stack
 
 - **Framework:** Next.js 16, React 19, Tailwind CSS 4, shadcn/ui
 - **AI:** Claude Haiku 4.5 (Anthropic), FLUX Schnell (fal.ai)
-- **Fonts:** Space Grotesk + Space Mono
-- **Theme:** Dark mode, Runway-inspired aesthetic
+- **Data:** TMDB REST API for film reference lookups
+- **Fonts:** Space Grotesk + Space Mono (UI), full Google Fonts catalog for title treatment
+- **Theme:** Dark default with light mode toggle
 
 ---
 
