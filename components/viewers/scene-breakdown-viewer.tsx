@@ -661,7 +661,7 @@ export function SceneBreakdownViewer({
                               <div className="text-[10px] uppercase tracking-widest text-muted-foreground font-semibold mb-1.5">
                                 {field.label}
                               </div>
-                              <p className="text-[13px] leading-[1.7] text-foreground/85 max-w-[68ch]">
+                              <p className="text-[13px] leading-[1.7] text-foreground/85">
                                 {field.value}
                               </p>
                             </div>
