@@ -4,161 +4,85 @@ Greenlight is a portfolio project built to impress A24's creative team in a job 
 
 ---
 
-## Done this session (2026-04-11)
+## Done this session (2026-04-11, session 3 — peec.ai redesign)
 
-A very large iteration session. Summary by area:
+### The big pass: peec.ai aesthetic port
+Rebuilt the visual system across every viewer using peec.ai as inspiration (research captured in `DESIGN-PEEC.md`). Dark-mode translation of: warm canvas (not pure black), inset-ring `shadow-paper` layered elevation instead of borders, 80% body copy opacity, `font-light` display weights with tight `-0.025em` tracking, section label pills with icons, flat underline tabs.
 
-### Tabs & information architecture
-- **Storyboards merged into Scenes tab** — fully inline in each expanded scene card (image + metadata + action buttons, prompt collapsed by default)
-- **Production tab renamed to Production Design** — VFX/stunts sub-tab removed, Stunt Coordinator added to crew scope heuristic
-- **Visuals tab renamed to Key Art** with Identity (palette + title treatment) and Posters sub-tabs
-- **Color Palette moved** from Mood & Tone → Key Art → Identity
-- **Comparable Films moved** from Overview → Mood & Tone → renamed **Similar Moods**
-- **Reference Points reordered** to sit directly below Tonal Descriptors in Mood & Tone
-- **Scenes header** got a Sequence/Location toggle that groups scenes by location when active
-- **Locations and Posters tabs** got Expand all / Collapse all controls
+- **`app/globals.css`** — warm canvas/ink tokens (light + dark), `@layer utilities` for `shadow-paper`, `shadow-paper-hover`, `shadow-pill`, `shadow-cascade`, `bg-grid-pattern`. Typography tightening in `@layer base`.
+- **`components/ui/section-head.tsx`** (new) — accepts optional `label` + `labelIcon` props, renders floating `SectionLabelPill` above the numbered section title.
+- **`components/ui/inline-chip.tsx`** (new) — `InlineChip` for prose nouns, `SectionLabelPill` floating eyebrow tag. Dark + light tone variants.
 
-### Overview
-- **Film Identity moved into the hero** below logline/taglines (left column, next to poster carousel)
-- **PosterCarousel** added to the hero right column — prev/next through generated posters with counter
-- **Taglines** card in hero with Shuffle button (generates 3 new via `/api/regenerate-section`)
-- **Writer** field added to stage-0 prompt + `trimForOverview` + rendered in Film Identity and Crew list
-- Character Presence / Story Shape chart added then deliberately removed (not actionable)
+### Every viewer rebuilt
+- **Overview** — `[◉ Overview]` pill, 44px `font-light` title, section pills for Synopsis / Themes / Scope, stat grid cells shrunk to `inline-grid grid-cols-[repeat(6,120px)]` with leading-number parsing so "5 unique locations" displays cleanly.
+- **Mood & Tone** — `[◉ Atmosphere]` pill, 44px title, 5 section pills, Similar Moods + Soundtrack cards on `shadow-paper`.
+- **Scenes** — `[◉ Scene Breakdown]` pill, 32px title, section pills for Breakdown / Scenes, stat grid 140px cells, scene cards on `shadow-paper`.
+- **Locations** — `[◉ Geography]` pill, location cards on `shadow-paper`, INT/EXT chips as pills.
+- **Cast & Crew** — `[◉ People]` pill, character cards on `shadow-paper`, flattened tab underline.
+- **Production Design** — `[◉ Art Department]` pill, stat grid 160px cells with `max-w-[11ch]` labels, prop/wardrobe cards on `shadow-paper`.
+- **Key Art split into two tabs** — `Identity` (color palette + title treatment) and `Posters`. Deleted the old `key-art-viewer.tsx` host.
 
-### Mood & Tone
-- **Soundtrack References** — 4 film scores looked up via TMDB, horizontal 2-col card grid with 14×21 posters
-- **Similar Moods** — 4 mood-aligned films via TMDB, same horizontal 2-col design as Soundtracks
-- **Color palette** compact 2-col layout, with Reshuffle button
-- **Music & Sound** Shuffle button regenerates prose + soundtracks
-- **Section order:** Atmosphere → Tonal Descriptors → Reference Points → Music & Sound (+ Soundtracks) → Similar Moods (palette now lives in Key Art)
+### Image prompt customization
+Users can now tweak the hardcoded sketch-style image prompts in Settings.
+- **`lib/image-prompts.ts`** (new) — `ImagePromptKind`, `DEFAULT_IMAGE_PROMPTS`, `loadImagePrompts()`, `saveImagePrompts()`, `getStylePrefix()`. Overrides persisted to localStorage.
+- **Settings dialog** — 4 textareas (storyboard / portrait / prop / poster) with per-field Reset buttons.
+- **All 4 image API routes** now accept `stylePrefix` in body and fall back to `DEFAULT_IMAGE_PROMPTS[kind]`.
+- **Bulk generate loop** in `wizard-shell.tsx` passes `getStylePrefix(kind)` to every API call.
 
-### Key Art (new tab, replaces Visuals)
-- **Title Treatment** feature — full Google Fonts catalog (1929 families, filtered by category) with per-slot shuffle + shuffle-both. Selected pair persists to localStorage.
-- **Color Palette** rendered here
-- **Poster Concepts** as second sub-tab
+### Loading UI rewrite
+`components/wizard/step-generating.tsx` fully rewritten. Call-sheet pattern with `[◉ PRE-PRODUCTION BIBLE]` label, film-strip segmented progress bar, per-document elapsed time tracking via `docTimesRef`, cinema vocabulary (Queued / Rolling / In the can / Failed), and shimmer sweep on the active row via inline `<style jsx>` animation.
 
-### Production Design
-- **Prop reference image generation** — `/api/generate-prop` with sketch style matching portraits. Per-prop + bulk generate. Persisted as `propImages` on SavedProject.
+### Logo + favicon
+New logo: 4 black corner triangles forming a diamond negative space on a white tile.
+- `public/logo.svg` — uses `fill="currentColor"` for theme adaptability
+- `app/icon.svg` — favicon with baked-in white background (old `app/icon.png` deleted)
+- Header / demo / about logo wrapped in white rounded tile so the mark stays visible in dark mode
 
-### Cast & Crew
-- **Disable toggle** on each cast/crew card (hover-reveals eye icon → 40% opacity, persists)
-- **Writer** surfaced as a crew role when present in JSON
+### Font audit
+Scanned all 17 viewer files for `font-semibold` / `font-bold` stragglers — found 72. Ladder proposed (28 legitimate uppercase meta labels kept, 44 stragglers to normalize) — **execution paused, waiting on user scope preference**.
 
-### Scenes
-- Sequence/Location toggle
-- Storyboard image generation fully inline
-- "Generate all frames" header button
-- Stats row (13 scenes / 86 pages / 5 unique locations)
-
-### Header & navigation
-- **Consolidated header** — Start Over + 3-dot More menu (all other actions live in the menu)
-- **More menu** contains: Generate all images · Share · Download all · Download JSON · Theme toggle · Settings · About · Save as demo (dev) · Save to cache (dev)
-- **Header progress pill** appears while Generate all images is running (with cancel)
-- **Logo** swapped to custom pinwheel mark (public/logo.png + app/icon.png as favicon)
-- **Tagline** set to "A 1st AD's first pass." everywhere
-- **Dark/light theme toggle** with inline init script to prevent FOUC
-
-### /share route
-- **Full bible** rewritten from a one-pager to a complete print-friendly page
-- **Table of contents** after the hero, dynamic based on which sections have content
-- **Writer credit** beneath the title, hero poster removed
-- Renders every tab's content flat (no collapsibles, no sub-tabs): Taglines, Synopsis, Film Identity, Themes, Scope, Atmosphere, Tonal Descriptors, Reference Points, Music & Sound + Soundtracks, Color Palette, Similar Moods, Scenes (with storyboards), Locations, Cast, Production Design · Props, Poster Concepts
-- Reuses parsers from all the viewers (no duplicated parsing logic)
-- Print stylesheet with `break-inside: avoid` on every card
-
-### /demo route
-- Standalone page backed by `lib/demo-project.ts` (committed snapshot)
-- **Save as demo (dev)** menu item writes to the file + copies images to `public/demo-images/`
-- Full Greenlight header (logo + title + tagline + Start Over + More menu with theme toggle + About)
-
-### Fake-generation cache
-- **`lib/cached-projects.ts`** — Record of pre-cached projects keyed by normalized title
-- **`/api/save-cached`** — dev-only endpoint, upserts the current project (strips images) into cached-projects.ts
-- **Title-match lookup** on JSON submit → if found, StepGenerating fake-progresses through 5 steps (~11s total) instead of real API calls (~3 min)
-- EEAAO cached this session as the first entry
-
-### Text / prose polish
-- **Prose width caps removed** from Mood & Tone atmosphere/music, Overview synopsis/themes/complexity, and Scenes expanded cards (was max-w-[68ch], now fills container)
-- **Title treatment secondary font** bumped to 20px
-
-### New API routes
-- `/api/generate-prop`
-- `/api/regenerate-section` (taglines, color-palette, music)
-- `/api/save-cached`
-- `/api/save-demo`
-- `/api/tmdb-search`
-
-### New components
-- `components/viewers/cast-and-crew-viewer.tsx`
-- `components/viewers/key-art-viewer.tsx`
-- `components/viewers/locations-viewer.tsx`
-- `components/viewers/mood-and-tone-viewer.tsx`
-- `components/viewers/overview-viewer.tsx`
-- `components/viewers/poster-carousel.tsx`
-- `components/viewers/production-viewer.tsx`
-- `components/viewers/title-treatment.tsx`
-- `components/wizard/about-dialog.tsx`
-- `components/wizard/header-menu.tsx`
-- `components/share/shareable-view.tsx`
-- `app/share/page.tsx`
-- `app/demo/page.tsx`
-
-### New libs
-- `lib/cached-projects.ts`
-- `lib/demo-project.ts`
-- `lib/google-fonts-catalog.json` (1929 families from `fonts.google.com/metadata/fonts`)
-- `lib/markdown-utils.ts`
-- `lib/prompts/mood-and-tone.ts`
-- `lib/prompts/overview.ts`
-- `lib/title-fonts.ts`
-
-### Layout exploration (unshipped, session-end)
-- Ran the `/explore` skill on the Home / Extract Screenplay Data page with Shuffle Layout mode
-- Produced 4 standalone HTML variants in `/tmp/explore-home/`:
-  1. Asymmetric Editorial — 7/5 magazine spread with prompt as a brutalist hero card
-  2. Dense Grid — 12-col everything-above-the-fold with inline header stepper
-  3. Single-Column Narrative — centered 680px reading column with huge italic display hero
-  4. Sidebar Driven — dark 280px left rail with persistent stepper, main pane is a "working surface" with line numbers
-- User hasn't picked a direction yet — that's the next thing
+### Crew → Insights (end of session)
+The Crew section under Cast & Crew was replaced with situational production Insights.
+- `suggestCrewRoles()` → `computeInsights()` in `components/viewers/cast-and-crew-viewer.tsx`
+- Dropped the 8 generic baseline roles (writer, director, producer, DP, 1st AD, production designer, sound mixer, script supervisor)
+- Added 15 situational heuristics that only fire when the script justifies them: stunts, VFX, practical makeup, weapons, pyro, water/weather, intimacy, animals, picture cars, night shoots, heavy exteriors, location density (6+), large ensemble (6+), minors on set, movement/music, period piece
+- Each card has lightbulb icon + title + mono signal chip with real counts + recommendation in line-producer voice
+- Empty state card for scripts with no specialty situations
+- Demo screenplay fires 9 insights (stunt work × 17, practical makeup × 5, weapons × 13, pyro × 5, night × 10, exteriors × 6, large ensemble × 8, minors on set, movement/music)
+- Disabled-items key prefix `crew:` → `insight:`
 
 ---
 
 ## Current state
 
-- **Build status:** passing (tsc --noEmit clean)
-- **Type checks:** clean
-- **All 6 tabs functional:** Overview, Mood & Tone, Scenes, Locations, Cast & Crew, Production Design, Key Art
-- **/demo works:** renders the committed snapshot with full header
-- **/share works:** full-bible print-friendly view
-- **Fake-gen cache:** EEAAO cached, title-match fake progression working end-to-end
-- **Git state:** ~32 untracked files + `CLAUDE.md`, `presentation.md`, `public/logo.png`, `public/demo-images/`, `app/icon.png` all pending commit. Many auto-checkpoints have captured the two tracked files (`wizard-shell.tsx` and `step-instructions.tsx`).
+- **Build status:** passing (`tsc --noEmit` clean)
+- **Dev server:** running on :3001
+- **All tabs functional:** Overview / Mood & Tone / Scenes / Locations / Cast & Crew / Production Design / Identity / Posters (7 top-level tabs)
+- **Playwright QA:** verified Overview, Scenes, Production Design stat grids hug content correctly; verified Cast + Insights tabs render cleanly on the demo screenplay
+- **Git state:** modifications are auto-committed by a hook, but new files remain untracked. Pending untracked files listed below.
 
 ---
 
 ## Next steps
 
-- [ ] **User picks a home-page layout direction** from the 4 `/tmp/explore-home/*.html` variants (or combines elements across them)
-- [ ] **Apply the chosen layout** to the React project (`components/wizard/step-instructions.tsx`)
-- [ ] **Run `/explore` on other pages** — Overview, Mood & Tone, Scenes (user said "lets start with the home")
-- [ ] **Visual style pass** after layouts are settled — typography, color, spacing, micro-interactions. Deliberately held off until after layout decisions.
-- [ ] **A24 bonus-round validation** — pre-cache 2-3 A24 films beyond EEAAO (The Witch, Hereditary, The Lighthouse candidates). See `backlog.md` → Sample Data → Bonus-round samples.
-- [ ] **Commit the untracked files** — big single commit or grouped by area. User hasn't been asked yet.
+- [ ] **Commit untracked files** as a single peec.ai pass checkpoint (DESIGN-PEEC.md, app/icon.svg, inline-chip.tsx, section-head.tsx, identity-viewer.tsx, posters-viewer.tsx, image-prompts.ts, public/logo.svg)
+- [ ] **Font audit execution** — waiting on user scope preference. Options: (A) full normalization across all 17 files including shareable-view + document-viewer, or (B) scoped to in-app viewers only
+- [ ] **A24 bonus-round validation** — pre-cache 2-3 more A24 films beyond EEAAO (The Witch, Hereditary, The Lighthouse). See `backlog.md` → Sample Data
+- [ ] **Optional Insights bonuses** — could categorize (Safety / Specialty / Logistics) if the flat list feels long on a heavy script
 
 ---
 
 ## Decisions & context
 
-- **Deliberately skipped image caching in save-cached** — the fake-gen path shows only documents, then the user walks through image generation live so the demo stays honest about the pipeline
-- **Writer field flows through** the trimmer → Claude prompt → Film Identity → Crew list → /share hero
-- **Title treatment persists to localStorage** (not SavedProject) — survives tab switches but lives in browser state
-- **Storyboards did NOT get merged into Scenes at first** — the first attempt used a sub-tab. The second attempt (accepted) moved them fully inline into expanded scene cards.
-- **Prop images use sketch style** matching character portraits (matched after a "looks too photographic" note mid-session)
-- **Export/import project feature is backlogged** — URL-only (Option A), .greenlight.zip format planned, deferred until post-interview. See `backlog.md` → Export.
-- **No PDF export button** — `/share` + browser Print is the PDF path. The one-pager export was rejected in favor of the full bible at `/share`.
+- **Peec.ai is a light-mode reference, Greenlight is dark-first.** The translation required: warm dark canvas instead of pure black, inset-ring light shadows instead of drop shadows, 80% foreground opacity for body copy, flat underline tabs instead of pilled ones.
+- **Stat grids use `inline-grid` with fixed pixel column widths** (`grid-cols-[repeat(N,Xpx)]`) so they hug content instead of stretching to container width.
+- **Stat labels wrap to 2 lines uniformly** via `max-w-[11ch]` for consistent cell heights.
+- **Insights tab is for specialty hires only** — baseline roles (director, DP, producer, production designer) are assumed. This is the non-obvious stuff a line producer would flag on a first read. Framed as observations, not a crew list.
+- **Image prompts live in localStorage, not SavedProject** — they're a user preference, not part of the project data that gets shared via `/share`.
+- **Logo uses `currentColor`** so it adapts to theme, but we wrap it in a white tile to keep the mark visible in dark mode without re-coloring.
 
 ---
 
-## Dependencies added
+## Dependencies added this session
 
-- `TMDB_API_KEY` env var in `.env.local` (for /api/tmdb-search)
-- `lib/google-fonts-catalog.json` — 1929 families static data from Google Fonts public metadata endpoint
+- None. No new npm packages, env vars, or external services. Entirely internal refactor + new UI components.
