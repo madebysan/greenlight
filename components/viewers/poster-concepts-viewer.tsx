@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useRef } from "react";
 import { ImageIcon, Loader2, Download, Images } from "lucide-react";
+import { getStylePrefix } from "@/lib/image-prompts";
 
 type PosterImageState = { status: "idle" | "generating" | "done" | "error"; url?: string };
 
@@ -164,7 +165,10 @@ export function PosterConceptsViewer({ content, savedImages, onImagesChange }: P
       const res = await fetch("/api/generate-poster-image", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt }),
+        body: JSON.stringify({
+          prompt,
+          stylePrefix: getStylePrefix("poster"),
+        }),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const { url } = await res.json();

@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { Film } from "lucide-react";
+import { SectionLabelPill } from "@/components/ui/inline-chip";
 import type { DocumentResult } from "./wizard-shell";
 
 type StepGeneratingProps = {
@@ -15,27 +17,12 @@ type StepGeneratingProps = {
   prefilledDocs?: DocumentResult[];
 };
 
-const STATUS_ICON: Record<DocumentResult["status"], string> = {
-  pending: "\u25CB",    // empty circle
-  generating: "\u25CF", // filled circle
-  done: "\u2713",       // checkmark
-  error: "\u2717",      // x mark
-};
-
-const STATUS_COLOR: Record<DocumentResult["status"], string> = {
-  pending: "text-muted-foreground",
-  generating: "text-primary animate-pulse",
-  done: "text-emerald-400",
-  error: "text-destructive",
-};
-
 async function generateOne(
   doc: DocumentResult,
   jsonData: string,
   apiKey: string,
   setDocuments: React.Dispatch<React.SetStateAction<DocumentResult[]>>
 ): Promise<{ slug: string; content: string | null; error: string | null }> {
-  // Mark as generating
   setDocuments((prev) =>
     prev.map((d) =>
       d.slug === doc.slug ? { ...d, status: "generating" as const } : d
@@ -56,7 +43,6 @@ async function generateOne(
 
     const data = await res.json();
 
-    // Mark as done
     setDocuments((prev) =>
       prev.map((d) =>
         d.slug === doc.slug
@@ -65,7 +51,6 @@ async function generateOne(
       )
     );
 
-    // Auto-save to ~/Desktop/greenlight/
     fetch("/api/save-local", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -88,6 +73,13 @@ async function generateOne(
   }
 }
 
+function formatSeconds(ms: number): string {
+  const s = Math.floor(ms / 1000);
+  const m = Math.floor(s / 60);
+  const rem = s % 60;
+  return `${m}:${rem.toString().padStart(2, "0")}`;
+}
+
 export function StepGenerating({
   apiKey,
   jsonData,
@@ -97,20 +89,44 @@ export function StepGenerating({
   prefilledDocs,
 }: StepGeneratingProps) {
   const hasStarted = useRef(false);
+  const sessionStartRef = useRef<number>(Date.now());
+  // Per-document start and end times so we can show per-row elapsed.
+  const docTimesRef = useRef<Record<string, { start?: number; end?: number }>>({});
+  const [tick, setTick] = useState(0);
+
+  // Re-render every 200ms so elapsed counters update in real time.
+  useEffect(() => {
+    const interval = setInterval(() => setTick((t) => t + 1), 200);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Track start/end of each document's generation as its status changes.
+  useEffect(() => {
+    const now = Date.now();
+    for (const doc of documents) {
+      const entry = docTimesRef.current[doc.slug] || {};
+      if (doc.status === "generating" && !entry.start) {
+        entry.start = now;
+      }
+      if ((doc.status === "done" || doc.status === "error") && !entry.end) {
+        if (!entry.start) entry.start = now;
+        entry.end = now;
+      }
+      docTimesRef.current[doc.slug] = entry;
+    }
+  }, [documents]);
 
   useEffect(() => {
     if (hasStarted.current) return;
     hasStarted.current = true;
+    sessionStartRef.current = Date.now();
 
     async function fakeProgression() {
-      // Walk through each pending doc and replace it with the prefilled one
-      // with a deliberate delay so the animation reads as real generation.
       const FAKE_STEP_MS = 2200;
       const finalDocs: DocumentResult[] = documents.map((d) => ({ ...d }));
 
       for (let i = 0; i < documents.length; i++) {
         const doc = documents[i];
-        // Mark as generating
         setDocuments((prev) =>
           prev.map((d) =>
             d.slug === doc.slug ? { ...d, status: "generating" as const } : d,
@@ -119,7 +135,6 @@ export function StepGenerating({
 
         await new Promise((r) => setTimeout(r, FAKE_STEP_MS));
 
-        // Find the prefilled content for this slug
         const prefilled = prefilledDocs!.find((p) => p.slug === doc.slug);
         const nextDoc: DocumentResult = prefilled
           ? { ...doc, status: "done", content: prefilled.content, error: null }
@@ -137,8 +152,6 @@ export function StepGenerating({
     async function generateSequential() {
       const results: { slug: string; content: string | null; error: string | null }[] = [];
 
-      // Generate one at a time to avoid rate limits
-      // Minimum 800ms per doc so the UI animation is visible even with cached results
       for (const doc of documents) {
         const start = Date.now();
         const result = await generateOne(doc, jsonData, apiKey, setDocuments);
@@ -147,7 +160,6 @@ export function StepGenerating({
         if (elapsed < 800) await new Promise((r) => setTimeout(r, 800 - elapsed));
       }
 
-      // Build final state and advance
       const finalDocs = documents.map((doc) => {
         const result = results.find((r) => r.slug === doc.slug);
         if (result) {
@@ -172,69 +184,227 @@ export function StepGenerating({
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Use `tick` so the linter is happy (referenced) — it's our render trigger.
+  void tick;
+
   const doneCount = documents.filter((d) => d.status === "done").length;
   const errorCount = documents.filter((d) => d.status === "error").length;
-  const currentDoc = documents.find((d) => d.status === "generating");
-  const progress = ((doneCount + errorCount) / documents.length) * 100;
+  const completed = doneCount + errorCount;
+  const total = documents.length;
+  const progress = total > 0 ? completed / total : 0;
+  const sessionElapsed = Date.now() - sessionStartRef.current;
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h2 className="text-2xl font-semibold mb-2">Generating Documents</h2>
-        <p className="text-[15px] text-muted-foreground">
-          Creating your pre-production documents one at a time.
-          {currentDoc && (
-            <span className="text-foreground font-medium">
-              {" "}Currently generating: {currentDoc.name}
-            </span>
-          )}
+    <div className="max-w-3xl space-y-12">
+      <header>
+        <SectionLabelPill icon={<Film size={10} />} className="mb-4">
+          Pre-Production Bible
+        </SectionLabelPill>
+        <h1 className="text-[44px] font-light tracking-[-0.03em] leading-[1.02] mb-3 text-foreground">
+          Assembling documents
+        </h1>
+        <p className="text-[14px] text-foreground/70 max-w-[58ch] tracking-tight leading-[1.55]">
+          Claude is writing your project bible one document at a time. Each one
+          is saved to your local workspace the moment it&apos;s ready.
         </p>
-      </div>
+      </header>
 
-      {/* Progress bar */}
-      <div className="space-y-2">
-        <div className="flex items-center justify-between text-sm">
-          <span className="text-muted-foreground">{doneCount} of {documents.length} complete</span>
-          <span className="font-medium tabular-nums">{Math.round(progress)}%</span>
-        </div>
-        <div className="h-2 bg-muted rounded-full overflow-hidden">
-          <div
-            className="h-full bg-primary rounded-full transition-all duration-700 ease-out"
-            style={{ width: `${progress}%` }}
-          />
-        </div>
-      </div>
-
-      {/* Document list */}
-      <div className="space-y-2">
-        {documents.map((doc) => (
-          <div
-            key={doc.slug}
-            className={`flex items-center gap-3 rounded-xl border p-4 transition-all ${
-              doc.status === "generating"
-                ? "border-primary/30 bg-primary/5 shadow-sm"
-                : doc.status === "done"
-                  ? "bg-emerald-500/10 border-emerald-500/20"
-                  : doc.status === "error"
-                    ? "bg-destructive/5 border-destructive/20"
-                    : ""
-            }`}
-          >
-            <span className={`text-lg ${STATUS_COLOR[doc.status]}`}>
-              {STATUS_ICON[doc.status]}
+      {/* Film-strip progress marker */}
+      <section>
+        <div className="flex items-baseline justify-between mb-4">
+          <div className="flex items-baseline gap-3">
+            <span className="font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+              Progress
             </span>
-            <div className="flex-1">
-              <span className="text-sm font-medium">{doc.name}</span>
-              {doc.error && (
-                <p className="text-xs text-destructive mt-0.5">{doc.error}</p>
-              )}
-            </div>
-            <span className="text-xs text-muted-foreground capitalize">
-              {doc.status === "generating" ? "generating..." : doc.status}
+            <span className="font-mono text-[11px] text-foreground/90 tabular-nums tracking-tight">
+              <span className="text-foreground">{completed.toString().padStart(2, "0")}</span>
+              <span className="text-muted-foreground"> / {total.toString().padStart(2, "0")}</span>
             </span>
           </div>
-        ))}
-      </div>
+          <div className="flex items-baseline gap-4">
+            <span className="font-mono text-[11px] text-muted-foreground tabular-nums tracking-tight">
+              {formatSeconds(sessionElapsed)}
+            </span>
+            <span className="font-mono text-[11px] text-foreground tabular-nums tracking-tight">
+              {Math.round(progress * 100)}%
+            </span>
+          </div>
+        </div>
+
+        {/* Segmented progress bar — one cell per document, evokes a film strip */}
+        <div className="grid gap-px rounded-[6px] overflow-hidden bg-border/40" style={{ gridTemplateColumns: `repeat(${total}, 1fr)` }}>
+          {documents.map((doc) => {
+            const isDone = doc.status === "done";
+            const isError = doc.status === "error";
+            const isGenerating = doc.status === "generating";
+            return (
+              <div
+                key={doc.slug}
+                className={`h-1 relative overflow-hidden ${
+                  isDone
+                    ? "bg-foreground/90"
+                    : isError
+                      ? "bg-destructive/70"
+                      : isGenerating
+                        ? "bg-foreground/40"
+                        : "bg-muted/40"
+                }`}
+              >
+                {isGenerating && (
+                  <div className="absolute inset-0 shimmer-sweep" />
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* Call-sheet list of documents */}
+      <section>
+        <div className="font-mono text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground mb-4 flex items-baseline justify-between">
+          <span>Call Sheet</span>
+          <span className="text-[9px] tracking-[0.14em]">Document · Status · Elapsed</span>
+        </div>
+        <ol className="space-y-px">
+          {documents.map((doc, i) => {
+            const times = docTimesRef.current[doc.slug] || {};
+            const isGenerating = doc.status === "generating";
+            const isDone = doc.status === "done";
+            const isError = doc.status === "error";
+            const isPending = doc.status === "pending";
+
+            let elapsedLabel = "—";
+            if (isDone || isError) {
+              const elapsed = (times.end || Date.now()) - (times.start || Date.now());
+              const s = (elapsed / 1000).toFixed(1);
+              elapsedLabel = `${s}s`;
+            } else if (isGenerating && times.start) {
+              const elapsed = Date.now() - times.start;
+              const s = (elapsed / 1000).toFixed(1);
+              elapsedLabel = `${s}s`;
+            }
+
+            return (
+              <li
+                key={doc.slug}
+                className={`relative grid grid-cols-[auto_1fr_auto_auto] items-center gap-4 px-4 py-3.5 rounded-[8px] transition-all ${
+                  isGenerating
+                    ? "bg-card/60 shadow-paper-hover"
+                    : isDone
+                      ? "opacity-55"
+                      : isError
+                        ? "bg-destructive/5"
+                        : "opacity-30"
+                }`}
+              >
+                {/* Number */}
+                <span className="font-mono text-[10px] text-muted-foreground tabular-nums tracking-[0.1em] w-6">
+                  {(i + 1).toString().padStart(2, "0")}
+                </span>
+
+                {/* Name */}
+                <div className="min-w-0">
+                  <div className="text-[13px] font-medium uppercase tracking-[0.04em] text-foreground/90 truncate">
+                    {doc.name}
+                  </div>
+                  {doc.error && (
+                    <div className="text-[11px] text-destructive/80 mt-1 truncate">
+                      {doc.error}
+                    </div>
+                  )}
+                </div>
+
+                {/* Status */}
+                <div className="flex items-center gap-2 shrink-0">
+                  {isPending && (
+                    <>
+                      <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/40" />
+                      <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+                        Queued
+                      </span>
+                    </>
+                  )}
+                  {isGenerating && (
+                    <>
+                      <span className="h-1.5 w-1.5 rounded-full bg-foreground animate-pulse" />
+                      <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-foreground">
+                        Rolling
+                      </span>
+                    </>
+                  )}
+                  {isDone && (
+                    <>
+                      <span className="h-1.5 w-1.5 rounded-full bg-foreground/70" />
+                      <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+                        In the can
+                      </span>
+                    </>
+                  )}
+                  {isError && (
+                    <>
+                      <span className="h-1.5 w-1.5 rounded-full bg-destructive" />
+                      <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-destructive">
+                        Failed
+                      </span>
+                    </>
+                  )}
+                </div>
+
+                {/* Elapsed */}
+                <span className="font-mono text-[11px] text-muted-foreground tabular-nums tracking-tight w-12 text-right">
+                  {elapsedLabel}
+                </span>
+
+                {/* Sweep shimmer on the currently-rolling row */}
+                {isGenerating && (
+                  <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-[8px]">
+                    <div className="absolute inset-y-0 -left-1/2 w-1/2 shimmer-row" />
+                  </div>
+                )}
+              </li>
+            );
+          })}
+        </ol>
+      </section>
+
+      <style jsx>{`
+        @keyframes shimmer-sweep {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(100%); }
+        }
+        @keyframes shimmer-row {
+          0% { transform: translateX(-100%); opacity: 0; }
+          20% { opacity: 1; }
+          80% { opacity: 1; }
+          100% { transform: translateX(400%); opacity: 0; }
+        }
+        .shimmer-sweep {
+          background: linear-gradient(
+            90deg,
+            transparent 0%,
+            rgba(255, 255, 255, 0.6) 50%,
+            transparent 100%
+          );
+          animation: shimmer-sweep 1.4s ease-in-out infinite;
+        }
+        .shimmer-row {
+          background: linear-gradient(
+            90deg,
+            transparent 0%,
+            rgba(255, 255, 255, 0.06) 50%,
+            transparent 100%
+          );
+          animation: shimmer-row 2.2s ease-in-out infinite;
+        }
+        :global(:root:not(.dark)) .shimmer-row {
+          background: linear-gradient(
+            90deg,
+            transparent 0%,
+            rgba(23, 23, 23, 0.05) 50%,
+            transparent 100%
+          );
+        }
+      `}</style>
     </div>
   );
 }

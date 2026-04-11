@@ -3,21 +3,15 @@ import { fal } from "@fal-ai/client";
 import { writeFileSync, mkdirSync } from "fs";
 import { join } from "path";
 import { randomUUID } from "crypto";
+import { DEFAULT_IMAGE_PROMPTS } from "@/lib/image-prompts";
 
 fal.config({ credentials: process.env.FAL_KEY });
 
 const IMAGES_DIR = join(process.cwd(), ".cache", "images");
 
-const STYLE_PREFIX =
-  "Film poster concept sketch, production art style. " +
-  "Black felt-tip marker on white paper. " +
-  "Loose but confident linework, simple crosshatching for shadows, gestural figures with just enough detail to convey the composition. " +
-  "Strictly black and white only. No color whatsoever, pure black ink on white paper. " +
-  "No text, no words, no letters, no titles, no signatures, no watermarks, no dates. Image only.";
-
 export async function POST(request: NextRequest) {
   try {
-    const { prompt } = await request.json();
+    const { prompt, stylePrefix } = await request.json();
 
     if (!prompt) {
       return NextResponse.json(
@@ -25,6 +19,11 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+
+    const STYLE_PREFIX =
+      typeof stylePrefix === "string" && stylePrefix.trim()
+        ? stylePrefix.trim()
+        : DEFAULT_IMAGE_PROMPTS.poster;
 
     const posterPrompt = `${STYLE_PREFIX} ${prompt}`;
 

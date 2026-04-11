@@ -3,21 +3,15 @@ import { fal } from "@fal-ai/client";
 import { writeFileSync, mkdirSync } from "fs";
 import { join } from "path";
 import { randomUUID } from "crypto";
+import { DEFAULT_IMAGE_PROMPTS } from "@/lib/image-prompts";
 
 fal.config({ credentials: process.env.FAL_KEY });
 
 const IMAGES_DIR = join(process.cwd(), ".cache", "images");
 
-const STYLE_PREFIX =
-  "Character portrait sketch, production art style. " +
-  "Black felt-tip marker on white paper, head and shoulders only, centered in frame. " +
-  "Loose but confident linework, simple crosshatching for shadows. " +
-  "Strictly black and white only. No color whatsoever, pure black ink on white paper. " +
-  "No text, no labels, no signatures, no watermarks. Square composition.";
-
 export async function POST(request: NextRequest) {
   try {
-    const { description, name } = await request.json();
+    const { description, name, stylePrefix } = await request.json();
 
     if (!description) {
       return NextResponse.json(
@@ -25,6 +19,11 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+
+    const STYLE_PREFIX =
+      typeof stylePrefix === "string" && stylePrefix.trim()
+        ? stylePrefix.trim()
+        : DEFAULT_IMAGE_PROMPTS.portrait;
 
     const prompt = `${STYLE_PREFIX} Character: ${name || "Unknown"}. ${description}`;
 
