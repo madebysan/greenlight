@@ -162,7 +162,7 @@ export function ProductionViewer({
         </p>
       </div>
 
-      <div className="grid grid-cols-3 gap-px bg-border/50 rounded-[12px] overflow-hidden mb-8 shadow-paper">
+      <div className="inline-grid grid-cols-2 md:grid-cols-[repeat(3,160px)] gap-px bg-border/50 rounded-[12px] overflow-hidden mb-8 shadow-paper">
         <StatCard label="Hero Props" value={heroPropsCount} sub={`of ${propsMaster.length} tracked`} />
         <StatCard label="Wardrobe Changes" value={totalWardrobeChanges} sub="across the cast" />
         <StatCard label="Scene Setups" value={uniqueSceneLocations} sub={`across ${scenes.length} scenes`} />
