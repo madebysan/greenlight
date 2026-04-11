@@ -20,7 +20,7 @@ import type { SavedImage } from "@/lib/reports";
 
 type ImageState = { status: "idle" | "generating" | "done" | "error"; url?: string; error?: string };
 
-type Scene = {
+export type Scene = {
   number: number;
   slugLine: string;
   intExt: "INT" | "EXT" | "";
@@ -30,7 +30,7 @@ type Scene = {
 
 type Overview = { label: string; value: string }[];
 
-function parseSceneBreakdown(md: string): { title: string; overview: Overview; scenes: Scene[] } {
+export function parseSceneBreakdown(md: string): { title: string; overview: Overview; scenes: Scene[] } {
   const lines = md.split("\n");
   let title = "";
   const overview: Overview = [];
