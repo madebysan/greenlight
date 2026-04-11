@@ -16,7 +16,7 @@ const spaceMono = Space_Mono({
 
 export const metadata: Metadata = {
   title: "Greenlight",
-  description: "AI-powered pre-production bible generator",
+  description: "A 1st AD's first pass.",
 };
 
 // Inline script reads theme from localStorage before first paint so we
