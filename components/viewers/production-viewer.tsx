@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useMemo, useRef } from "react";
-import { Star, Camera, Loader2, RefreshCw, Images, X } from "lucide-react";
+import { Star, Camera, Loader2, RefreshCw, Images, X, Package } from "lucide-react";
+import { SectionLabelPill } from "@/components/ui/inline-chip";
 import type { SavedImage } from "@/lib/reports";
 
 type SubTab = "props" | "wardrobe";
@@ -144,20 +145,25 @@ export function ProductionViewer({
 
   return (
     <div className="max-w-4xl">
-      <div className="mb-6">
-        <h1 className="text-xl font-semibold tracking-tight mb-1">Production Design</h1>
-        <p className="text-[13px] text-muted-foreground">
+      <div className="mb-8">
+        <SectionLabelPill icon={<Package size={10} />} className="mb-3">
+          Art Department
+        </SectionLabelPill>
+        <h1 className="text-[32px] font-light tracking-[-0.025em] leading-[1.05] mb-2 text-foreground">
+          Production Design
+        </h1>
+        <p className="text-[13px] text-foreground/60 tracking-tight max-w-[60ch]">
           Cross-referenced props and wardrobe pulled from every scene. What your art department will source, build, or dress.
         </p>
       </div>
 
-      <div className="grid grid-cols-3 gap-px bg-border/60 border border-border/60 rounded-[4px] overflow-hidden mb-6">
+      <div className="grid grid-cols-3 gap-px bg-border/50 rounded-[12px] overflow-hidden mb-8 shadow-paper">
         <StatCard label="Hero Props" value={heroPropsCount} sub={`of ${propsMaster.length} tracked`} />
         <StatCard label="Wardrobe Changes" value={totalWardrobeChanges} sub="across the cast" />
         <StatCard label="Scene Setups" value={uniqueSceneLocations} sub={`across ${scenes.length} scenes`} />
       </div>
 
-      <div className="flex items-center gap-1 border-b border-border mb-6">
+      <div className="flex items-center gap-0 border-b border-border/60 mb-6">
         <SubTabButton active={tab === "props"} onClick={() => setTab("props")}>
           Props ({propsMaster.length})
         </SubTabButton>
@@ -220,9 +226,9 @@ export function ProductionViewer({
               <SectionLabel>By Character</SectionLabel>
               <div className="grid grid-cols-2 gap-3">
                 {characters.map((c) => (
-                  <div key={c.name} className="rounded-[10px] border border-border/60 hover:border-border bg-card/30 px-4 py-3 transition-colors">
+                  <div key={c.name} className="rounded-[12px] bg-card/40 shadow-paper hover:shadow-paper-hover px-4 py-3 transition-all">
                     <div className="flex items-baseline justify-between gap-2">
-                      <span className="text-[13px] font-semibold uppercase tracking-[0.04em] text-foreground">
+                      <span className="text-[13px] font-medium uppercase tracking-[0.04em] text-foreground">
                         {c.name}
                       </span>
                       <span className="font-mono text-[10px] uppercase tracking-[0.12em] tabular-nums text-muted-foreground">
@@ -244,7 +250,7 @@ export function ProductionViewer({
                 {wardrobeBySceneAndChars.map((w, i) => (
                   <div
                     key={`${w.scene}-${i}`}
-                    className="rounded-[10px] border border-border/60 hover:border-border bg-card/30 px-4 py-3 flex items-start gap-3 transition-colors"
+                    className="rounded-[12px] bg-card/40 shadow-paper hover:shadow-paper-hover px-4 py-3 flex items-start gap-3 transition-all"
                   >
                     <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.08em] px-2 py-[3px] rounded-[4px] bg-muted text-muted-foreground shrink-0">
                       S{w.scene}
@@ -264,14 +270,14 @@ export function ProductionViewer({
 
 function StatCard({ label, value, sub }: { label: string; value: number; sub: string }) {
   return (
-    <div className="bg-background px-5 py-5 flex flex-col gap-2">
-      <div className="font-mono text-[9px] uppercase tracking-[0.15em] text-muted-foreground">
+    <div className="bg-card/40 px-5 py-6 flex flex-col gap-2">
+      <div className="font-mono text-[9px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
         {label}
       </div>
-      <div className="text-[32px] font-semibold tabular-nums text-foreground leading-none tracking-tight">
+      <div className="text-[34px] font-light tabular-nums text-foreground leading-none tracking-[-0.03em]">
         {value}
       </div>
-      <div className="text-[11px] text-muted-foreground">{sub}</div>
+      <div className="text-[11px] text-foreground/60 tracking-tight">{sub}</div>
     </div>
   );
 }
@@ -296,13 +302,16 @@ function SubTabButton({
   return (
     <button
       onClick={onClick}
-      className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+      className={`relative px-3 py-3 text-[12px] font-medium tracking-tight transition-colors ${
         active
-          ? "border-primary text-foreground"
-          : "border-transparent text-muted-foreground hover:text-foreground"
+          ? "text-foreground"
+          : "text-muted-foreground hover:text-foreground"
       }`}
     >
       {children}
+      {active && (
+        <span className="absolute -bottom-px left-2 right-2 h-px bg-foreground" />
+      )}
     </button>
   );
 }
@@ -323,7 +332,7 @@ function PropCard({
   generatingAll: boolean;
 }) {
   return (
-    <div className="rounded-[10px] border border-border/60 hover:border-border bg-card/30 p-5 flex gap-5 transition-colors">
+    <div className="rounded-[12px] bg-card/40 shadow-paper hover:shadow-paper-hover p-5 flex gap-5 transition-all">
       <div className="w-24 h-24 rounded-md shrink-0 bg-muted/40 border border-border/60 overflow-hidden flex items-center justify-center relative group">
         {imageState.status === "done" && imageState.url ? (
           // eslint-disable-next-line @next/next/no-img-element

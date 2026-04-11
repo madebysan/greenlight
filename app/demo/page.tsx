@@ -87,7 +87,7 @@ function DemoContent({ project }: { project: SavedProject }) {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="relative z-50 border-b bg-background/95 backdrop-blur-sm">
+      <header className="relative z-50 border-b border-border/60 bg-background/80 backdrop-blur-md">
         <div className="mx-auto px-6 py-4 max-w-6xl">
           <div className="flex items-center gap-3">
             <div className="h-9 w-9 shrink-0">
@@ -95,13 +95,13 @@ function DemoContent({ project }: { project: SavedProject }) {
               <img src="/logo.png" alt="Greenlight" className="w-full h-full object-contain" />
             </div>
             <div>
-              <h1 className="text-lg font-bold tracking-tight">
+              <h1 className="text-[17px] font-medium tracking-[-0.02em]">
                 Greenlight{" "}
-                <span className="text-[11px] font-mono uppercase tracking-[0.15em] text-muted-foreground ml-1">
+                <span className="text-[10px] font-mono uppercase tracking-[0.14em] text-muted-foreground ml-1 align-middle">
                   · Demo
                 </span>
               </h1>
-              <p className="text-[13px] text-muted-foreground">A 1st AD&apos;s first pass.</p>
+              <p className="text-[12px] text-foreground/70 tracking-tight">A 1st AD&apos;s first pass.</p>
             </div>
 
             <div className="flex items-center gap-2 ml-auto">

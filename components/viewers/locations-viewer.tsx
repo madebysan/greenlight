@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, MapPin } from "lucide-react";
+import { SectionLabelPill } from "@/components/ui/inline-chip";
 
 type LocationData = {
   name: string;
@@ -62,25 +63,30 @@ export function LocationsViewer({ jsonData }: LocationsViewerProps) {
 
   return (
     <div className="max-w-4xl">
-      <div className="mb-6 flex items-start justify-between gap-4">
+      <div className="mb-8 flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-xl font-semibold tracking-tight mb-1">Locations</h1>
-          <p className="text-[13px] text-muted-foreground">
-            {locations.length} unique {locations.length === 1 ? "location" : "locations"} across{" "}
-            {scenes.length} {scenes.length === 1 ? "scene" : "scenes"}.
+          <SectionLabelPill icon={<MapPin size={10} />} className="mb-3">
+            Geography
+          </SectionLabelPill>
+          <h1 className="text-[32px] font-light tracking-[-0.025em] leading-[1.05] mb-2 text-foreground">
+            Locations
+          </h1>
+          <p className="text-[13px] text-foreground/60 tracking-tight">
+            <span className="tabular-nums">{locations.length}</span> unique {locations.length === 1 ? "location" : "locations"} across{" "}
+            <span className="tabular-nums">{scenes.length}</span> {scenes.length === 1 ? "scene" : "scenes"}.
           </p>
         </div>
-        <div className="flex items-center gap-1 shrink-0">
+        <div className="flex items-center gap-1 shrink-0 mt-10">
           <button
             onClick={expandAll}
-            className="text-[11px] text-muted-foreground hover:text-foreground px-2 py-1 rounded transition-colors"
+            className="text-[10px] font-mono uppercase tracking-[0.1em] text-muted-foreground hover:text-foreground px-2 py-1 rounded transition-colors"
           >
             Expand all
           </button>
           <span className="text-muted-foreground/30">|</span>
           <button
             onClick={collapseAll}
-            className="text-[11px] text-muted-foreground hover:text-foreground px-2 py-1 rounded transition-colors"
+            className="text-[10px] font-mono uppercase tracking-[0.1em] text-muted-foreground hover:text-foreground px-2 py-1 rounded transition-colors"
           >
             Collapse all
           </button>
@@ -96,10 +102,10 @@ export function LocationsViewer({ jsonData }: LocationsViewerProps) {
           return (
             <div
               key={loc.name}
-              className={`rounded-[10px] border transition-colors ${
+              className={`rounded-[12px] transition-all ${
                 isExpanded
-                  ? "bg-card/60 border-border"
-                  : "bg-card/30 border-border/60 hover:border-border"
+                  ? "bg-card/60 shadow-paper-hover"
+                  : "bg-card/30 shadow-paper hover:shadow-paper-hover"
               }`}
             >
               <button
@@ -107,7 +113,7 @@ export function LocationsViewer({ jsonData }: LocationsViewerProps) {
                 className="w-full text-left p-5 flex items-start justify-between gap-4"
               >
                 <div className="flex-1 min-w-0">
-                  <h2 className="text-[15px] font-semibold capitalize text-foreground flex items-center gap-2 tracking-tight">
+                  <h2 className="text-[15px] font-medium capitalize text-foreground flex items-center gap-2 tracking-tight">
                     <ChevronDown
                       size={14}
                       className={`text-muted-foreground transition-transform ${
@@ -123,7 +129,7 @@ export function LocationsViewer({ jsonData }: LocationsViewerProps) {
                   )}
                 </div>
                 <div className="flex flex-col items-end gap-1.5 shrink-0">
-                  <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.08em] px-2 py-[3px] rounded-[4px] bg-muted text-muted-foreground">
+                  <span className="font-mono text-[10px] font-medium uppercase tracking-[0.1em] px-2 py-[3px] rounded-full bg-white/[0.04] text-muted-foreground shadow-pill">
                     {loc.int_ext}
                   </span>
                   <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground tabular-nums">

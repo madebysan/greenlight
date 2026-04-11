@@ -132,22 +132,22 @@ export function StepResults({
       )}
 
       <div className="min-h-[600px]">
-        <div className="flex items-center gap-1 border-b mb-0">
+        <div className="flex items-center gap-0 border-b border-border/60 mb-0 -mx-1">
           {TABS.map((tab) => {
             const isActive = tab.key === activeTab;
             return (
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
-                className={`relative px-4 py-2.5 text-[13px] font-medium transition-colors rounded-t-lg ${
+                className={`relative px-3 py-3 text-[12px] font-medium transition-colors tracking-tight ${
                   isActive
-                    ? "text-foreground bg-muted/50"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted/30"
+                    ? "text-foreground"
+                    : "text-muted-foreground hover:text-foreground"
                 }`}
               >
                 {tab.label}
                 {isActive && (
-                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-full" />
+                  <span className="absolute -bottom-px left-2 right-2 h-px bg-foreground" />
                 )}
               </button>
             );
@@ -155,16 +155,16 @@ export function StepResults({
           {activeDocContent && (
             <button
               onClick={handleDownloadActive}
-              className="ml-auto flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground hover:bg-muted rounded-md px-2 py-1 transition-colors"
+              className="ml-auto flex items-center gap-1.5 text-[11px] font-mono uppercase tracking-[0.1em] text-muted-foreground hover:text-foreground px-2 py-1 transition-colors"
             >
-              <Download size={14} />
+              <Download size={12} />
               Download
             </button>
           )}
         </div>
 
-        <div className="rounded-b-lg border border-t-0 overflow-hidden">
-          <div className="overflow-y-auto p-6">
+        <div className="overflow-hidden">
+          <div className="overflow-y-auto py-8">
             {activeTab === "overview" && (
               overviewContent ? (
                 <OverviewViewer

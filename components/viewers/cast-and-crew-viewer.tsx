@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useRef, useMemo } from "react";
-import { Loader2, Camera, RefreshCw, Images, X, EyeOff, Eye } from "lucide-react";
+import { Loader2, Camera, RefreshCw, Images, X, EyeOff, Eye, Users } from "lucide-react";
+import { SectionLabelPill } from "@/components/ui/inline-chip";
 import type { SavedImage } from "@/lib/reports";
 
 type CharacterData = {
@@ -216,33 +217,44 @@ export function CastAndCrewViewer({
 
   return (
     <div className="max-w-4xl">
-      <div className="mb-6">
-        <h1 className="text-xl font-semibold tracking-tight mb-1">Cast & Crew</h1>
-        <p className="text-[13px] text-muted-foreground">
+      <div className="mb-8">
+        <SectionLabelPill icon={<Users size={10} />} className="mb-3">
+          People
+        </SectionLabelPill>
+        <h1 className="text-[32px] font-light tracking-[-0.025em] leading-[1.05] mb-2 text-foreground">
+          Cast & Crew
+        </h1>
+        <p className="text-[13px] text-foreground/60 tracking-tight max-w-[60ch]">
           Characters in the film and a scope-based read on the crew roles you&apos;ll need.
         </p>
       </div>
 
-      <div className="flex items-center gap-1 border-b border-border mb-6">
+      <div className="flex items-center gap-0 border-b border-border/60 mb-6">
         <button
           onClick={() => setTab("cast")}
-          className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+          className={`relative px-3 py-3 text-[12px] font-medium tracking-tight transition-colors ${
             tab === "cast"
-              ? "border-primary text-foreground"
-              : "border-transparent text-muted-foreground hover:text-foreground"
+              ? "text-foreground"
+              : "text-muted-foreground hover:text-foreground"
           }`}
         >
           Cast ({characters.length})
+          {tab === "cast" && (
+            <span className="absolute -bottom-px left-2 right-2 h-px bg-foreground" />
+          )}
         </button>
         <button
           onClick={() => setTab("crew")}
-          className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+          className={`relative px-3 py-3 text-[12px] font-medium tracking-tight transition-colors ${
             tab === "crew"
-              ? "border-primary text-foreground"
-              : "border-transparent text-muted-foreground hover:text-foreground"
+              ? "text-foreground"
+              : "text-muted-foreground hover:text-foreground"
           }`}
         >
           Crew ({crewRoles.length})
+          {tab === "crew" && (
+            <span className="absolute -bottom-px left-2 right-2 h-px bg-foreground" />
+          )}
         </button>
 
         {tab === "cast" && characters.length > 0 && (
@@ -289,7 +301,7 @@ export function CastAndCrewViewer({
               return (
                 <div
                   key={char.name}
-                  className={`rounded-[10px] border border-border/60 bg-card/30 hover:border-border p-5 flex gap-5 relative group/card transition-all ${
+                  className={`rounded-[12px] bg-card/40 shadow-paper hover:shadow-paper-hover p-5 flex gap-5 relative group/card transition-all ${
                     isDisabled ? "opacity-40" : ""
                   }`}
                 >
@@ -384,7 +396,7 @@ export function CastAndCrewViewer({
               return (
                 <div
                   key={r.role}
-                  className={`rounded-[10px] border border-border/60 bg-card/30 hover:border-border px-4 py-3 flex items-start gap-3 relative group/card transition-all ${
+                  className={`rounded-[12px] bg-card/40 shadow-paper hover:shadow-paper-hover px-4 py-3 flex items-start gap-3 relative group/card transition-all ${
                     isDisabled ? "opacity-40" : ""
                   }`}
                 >
