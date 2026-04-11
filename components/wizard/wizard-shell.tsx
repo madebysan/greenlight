@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, type ReactNode } from "react";
-import { Settings, Info, RotateCcw, FileText, Download, Share2 } from "lucide-react";
+import { Settings, Info, RotateCcw, FileText, Download, Share2, Sun, Moon } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -84,6 +84,7 @@ export function WizardShell() {
   const [posterImages, setPosterImages] = useState<Record<number, SavedImage>>({});
   const [portraits, setPortraits] = useState<Record<string, SavedImage>>({});
   const [disabledItems, setDisabledItems] = useState<Record<string, boolean>>({});
+  const [theme, setTheme] = useState<"dark" | "light">("dark");
 
   // Hydrate from localStorage on mount.
   // setState in an effect is intentional here: we need SSR to render a neutral
@@ -109,6 +110,7 @@ export function WizardShell() {
     }
     setApiKey(localStorage.getItem(API_KEY_STORAGE) || "");
     setFalKey(localStorage.getItem(FAL_KEY_STORAGE) || "");
+    setTheme(localStorage.getItem("greenlight-theme") === "light" ? "light" : "dark");
     setHydrated(true);
     /* eslint-enable react-hooks/set-state-in-effect */
   }, []);
@@ -193,6 +195,17 @@ export function WizardShell() {
     setDisabledItems(disabled);
     updateProject({ disabledItems: disabled });
   }, []);
+
+  const toggleTheme = () => {
+    const next = theme === "dark" ? "light" : "dark";
+    setTheme(next);
+    localStorage.setItem("greenlight-theme", next);
+    if (next === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  };
 
   const handleDocumentUpdate = (slug: string, newContent: string) => {
     const updated = documents.map((d) =>
@@ -286,6 +299,12 @@ export function WizardShell() {
                   title="Start a new project"
                 />
               )}
+              <HeaderButton
+                icon={theme === "dark" ? <Sun size={14} /> : <Moon size={14} />}
+                label={theme === "dark" ? "Light" : "Dark"}
+                onClick={toggleTheme}
+                title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+              />
               <HeaderButton
                 icon={<Settings size={14} />}
                 label="Settings"
