@@ -73,9 +73,9 @@ export function AboutDialog({ open, onOpenChange }: AboutDialogProps) {
       <DialogContent className="sm:max-w-3xl max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <div className="flex items-center gap-3 mb-1">
-            <div className="h-10 w-10 shrink-0">
+            <div className="h-10 w-10 shrink-0 rounded-[8px] bg-white flex items-center justify-center shadow-pill text-black">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/logo.png" alt="Greenlight" className="w-full h-full object-contain" />
+              <img src="/logo.svg" alt="Greenlight" className="w-[70%] h-[70%]" />
             </div>
             <div>
               <DialogTitle className="text-lg">Greenlight</DialogTitle>
