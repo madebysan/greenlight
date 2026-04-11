@@ -40,11 +40,11 @@ export type DocumentResult = {
 };
 
 const INITIAL_DOCS: DocumentResult[] = [
-  { name: "Scene Breakdown", slug: "scene-breakdown", status: "pending", content: null, error: null },
-  { name: "Production", slug: "production-matrices", status: "pending", content: null, error: null },
-  { name: "Marketing Brief", slug: "marketing-brief", status: "pending", content: null, error: null },
-  { name: "Storyboard", slug: "storyboard-prompts", status: "pending", content: null, error: null },
-  { name: "Posters", slug: "poster-concepts", status: "pending", content: null, error: null },
+  { name: "Overview", slug: "overview", status: "pending", content: null, error: null },
+  { name: "Mood & Tone", slug: "mood-and-tone", status: "pending", content: null, error: null },
+  { name: "Scenes", slug: "scene-breakdown", status: "pending", content: null, error: null },
+  { name: "Storyboards", slug: "storyboard-prompts", status: "pending", content: null, error: null },
+  { name: "Poster Concepts", slug: "poster-concepts", status: "pending", content: null, error: null },
 ];
 
 function HeaderButton({

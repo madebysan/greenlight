@@ -68,6 +68,61 @@ export function trimForStoryboardPrompts(jsonString: string): string {
   });
 }
 
+// Overview: the front-page pitch. Needs identity + themes + enough scene data to count stats.
+export function trimForOverview(jsonString: string): string {
+  const data = parseData(jsonString);
+  return JSON.stringify({
+    title: data.title,
+    genre: data.genre,
+    setting_period: data.setting_period,
+    tone: data.tone,
+    themes: data.themes,
+    total_pages: data.total_pages,
+    characters: (data.characters as AnyCharacter[])?.map((c) => ({
+      name: c.name,
+      description: c.description,
+      arc_summary: c.arc_summary,
+    })),
+    locations: (data.locations as AnyLocation[])?.map((l) => ({
+      name: l.name,
+      description: l.description,
+    })),
+    scenes: (data.scenes as AnyScene[])?.map((s) => ({
+      scene_number: s.scene_number,
+      slug_line: s.slug_line,
+      int_ext: s.int_ext,
+      time_of_day: s.time_of_day,
+      key_visual_moment: s.key_visual_moment,
+      emotional_beat: s.emotional_beat,
+      vfx_stunts: s.vfx_stunts,
+    })),
+  });
+}
+
+// Mood & Tone: needs identity + themes + per-scene emotional/visual beats + music cues
+export function trimForMoodAndTone(jsonString: string): string {
+  const data = parseData(jsonString);
+  return JSON.stringify({
+    title: data.title,
+    genre: data.genre,
+    setting_period: data.setting_period,
+    tone: data.tone,
+    themes: data.themes,
+    characters: (data.characters as AnyCharacter[])?.map((c) => ({
+      name: c.name,
+      arc_summary: c.arc_summary,
+    })),
+    scenes: (data.scenes as AnyScene[])?.map((s) => ({
+      scene_number: s.scene_number,
+      slug_line: s.slug_line,
+      key_visual_moment: s.key_visual_moment,
+      emotional_beat: s.emotional_beat,
+      music_cue: s.music_cue,
+      time_of_day: s.time_of_day,
+    })),
+  });
+}
+
 // Poster Concepts: needs title/genre/tone/themes + character looks + key visual moments
 export function trimForPosterConcepts(jsonString: string): string {
   const data = parseData(jsonString);

@@ -1,591 +1,617 @@
-export const JAWS_JSON = `{
-  "title": "Jaws",
-  "genre": ["Thriller", "Horror"],
-  "setting_period": "Contemporary",
-  "total_pages": 119,
+// Primary (and only) sample for Greenlight.
+// Night of the Living Dead (1968) — George A. Romero. Public domain.
+// See presentation.md for why this film is the hero sample.
+
+export const NIGHT_OF_THE_LIVING_DEAD_JSON = `{
+  "title": "Night of the Living Dead",
+  "genre": [
+    "Horror",
+    "Thriller"
+  ],
+  "setting_period": "Contemporary 1960s",
+  "total_pages": 86,
   "scenes": [
     {
       "scene_number": 1,
-      "slug_line": "EXT. BEACH NIGHT",
-      "location": "amity beach",
+      "slug_line": "EXT. CEMETERY - DUSK",
+      "location": "cemetery",
       "int_ext": "EXT",
-      "time_of_day": "NIGHT",
-      "page_start": 1,
-      "page_end": 3,
-      "characters_present": ["CHRISSIE", "TOM CASSIDY"],
-      "key_visual_moment": "Chrissie is violently jerked back and forth by an unseen force below the water before being pulled under.",
-      "emotional_beat": "Terror and helplessness",
-      "props": ["bota wine-bag", "beer cans"],
-      "wardrobe_notes": ["Chrissie shedding her clothes"],
-      "vfx_stunts": ["Underwater POV rushing forward", "Chrissie jerked violently in the water and pulled under"],
-      "music_cue": "Symphony of underwater sounds blending with a distorted Ivy League anthem",
-      "notes": "Includes underwater Shark POV."
+      "time_of_day": "DUSK",
+      "page_start": 2,
+      "page_end": 10,
+      "characters_present": [
+        "BARBARA",
+        "JOHN",
+        "OLD MAN"
+      ],
+      "key_visual_moment": "The old man lunges at Barbara, ripping her clothing, and John wrestles him to the ground in a deadly, animalistic struggle.",
+      "emotional_beat": "sudden terror and panic",
+      "props": [
+        "flowered cross",
+        "rosary beads",
+        "potato chip bag",
+        "car keys",
+        "tree limb",
+        "stone"
+      ],
+      "wardrobe_notes": [
+        "John in shirtsleeves with a loosened tie and suit-coat",
+        "Barbara in a simple but attractive summer suit, jacket removed"
+      ],
+      "vfx_stunts": [
+        "Struggle and violent hand-to-hand combat",
+        "Ghoul smashing car window with a stone",
+        "Car drifting and rolling backwards"
+      ],
+      "music_cue": "",
+      "notes": "Transition from calm bickering to frantic survival."
     },
     {
       "scene_number": 2,
-      "slug_line": "INT. BRODY HOUSE BEDROOM EARLY MORNING",
-      "location": "brody house",
-      "int_ext": "INT",
-      "time_of_day": "MORNING",
-      "page_start": 4,
-      "page_end": 7,
-      "characters_present": ["BRODY", "ELLEN", "MICHAEL"],
-      "key_visual_moment": "Brody struggles to get his shirt on over his new glasses while Ellen flicks imaginary dust off his police badge.",
-      "emotional_beat": "Domestic warmth and mild morning friction",
-      "props": ["clock radio", "bag of clothes", "band-aid", "glasses", "coffee cup", "windbreaker"],
-      "wardrobe_notes": ["Brody in shorts, socks, and tee shirt, later puts on police uniform"],
-      "vfx_stunts": [],
+      "slug_line": "EXT. HOUSE - NIGHT",
+      "location": "house exterior",
+      "int_ext": "EXT",
+      "time_of_day": "NIGHT",
+      "page_start": 11,
+      "page_end": 12,
+      "characters_present": [
+        "BARBARA"
+      ],
+      "key_visual_moment": "Barbara presses against the darkened corner of the house, trying to hide while a shadow darkens a strip of window nearby.",
+      "emotional_beat": "desperate evasion",
+      "props": [],
+      "wardrobe_notes": [],
+      "vfx_stunts": [
+        "Running and falling over a low stone wall"
+      ],
       "music_cue": "",
-      "notes": "Introduces Brody's family dynamic and his transition to island life."
+      "notes": "Introduces the isolated farmhouse."
     },
     {
       "scene_number": 3,
-      "slug_line": "EXT. AMITY BEACH DAY",
-      "location": "amity beach",
-      "int_ext": "EXT",
-      "time_of_day": "DAY",
-      "page_start": 7,
-      "page_end": 10,
-      "characters_present": ["BRODY", "HENDRICKS", "TOM CASSIDY"],
-      "key_visual_moment": "Horseshoe crabs boil over the top of the dune as Brody recoils from the gruesome sight of Chrissie's remains.",
-      "emotional_beat": "Dread and grim realization",
-      "props": ["missing girl's shoes, purse, and clothes"],
+      "slug_line": "INT. HOUSE - NIGHT",
+      "location": "house interior",
+      "int_ext": "INT",
+      "time_of_day": "NIGHT",
+      "page_start": 13,
+      "page_end": 15,
+      "characters_present": [
+        "BARBARA"
+      ],
+      "key_visual_moment": "Barbara discovers a half-eaten, skeletal corpse lying at the top of the stairs at the end of a blood trail.",
+      "emotional_beat": "horrific realization",
+      "props": [
+        "steak knife",
+        "telephone",
+        "telephone directory"
+      ],
       "wardrobe_notes": [],
-      "vfx_stunts": ["Prosthetic/prop corpse: incomplete from the chest down, horribly bitten"],
+      "vfx_stunts": [
+        "Gory corpse makeup/prosthetic"
+      ],
       "music_cue": "",
-      "notes": "First confirmation of a shark fatality."
+      "notes": "Phone is dead, escalating isolation."
     },
     {
       "scene_number": 4,
-      "slug_line": "INT. BRODY'S OFFICE DAY",
-      "location": "amity police office",
-      "int_ext": "INT",
-      "time_of_day": "DAY",
-      "page_start": 10,
-      "page_end": 12,
-      "characters_present": ["BRODY", "POLLY", "HENDRICKS", "TOM CASSIDY"],
-      "key_visual_moment": "Brody types 'SHARK ATTACK' onto the Cause-of-Death line of the accident report.",
-      "emotional_beat": "Taking decisive action",
-      "props": ["fizzing glass of Alka-Seltzer", "shorthand pad", "typewriter", "accident report form"],
-      "wardrobe_notes": [],
-      "vfx_stunts": [],
+      "slug_line": "EXT. HOUSE - NIGHT",
+      "location": "house exterior",
+      "int_ext": "EXT",
+      "time_of_day": "NIGHT",
+      "page_start": 15,
+      "page_end": 16,
+      "characters_present": [
+        "BARBARA",
+        "TRUCKDRIVER"
+      ],
+      "key_visual_moment": "A large man jumps from a battered pick-up truck with a jack-handle, framed by glaring headlights.",
+      "emotional_beat": "chaotic rescue",
+      "props": [
+        "jack-handle",
+        "pick-up truck"
+      ],
+      "wardrobe_notes": [
+        "Truckdriver in coveralls and tattered work shirt"
+      ],
+      "vfx_stunts": [
+        "Truck driven onto the lawn",
+        "Man grabbing and dragging Barbara into the house"
+      ],
       "music_cue": "",
-      "notes": "Brody initiates the beach closure."
+      "notes": "Introduction of Ben (referred to as Truckdriver initially)."
     },
     {
       "scene_number": 5,
-      "slug_line": "EXT. AMITY MAIN STREET DAY",
-      "location": "amity main street",
-      "int_ext": "EXT",
-      "time_of_day": "DAY",
-      "page_start": 12,
-      "page_end": 14,
-      "characters_present": ["BRODY", "KEISEL", "LYNWOOD", "HENDRICKS", "VAUGHN", "MEADOWS", "SANTOS"],
-      "key_visual_moment": "Brody emerges from the hardware store laden with poster-board and wooden stakes to close the beaches.",
-      "emotional_beat": "Urgency met with bureaucratic resistance",
-      "props": ["bent bicycle", "poster-board", "wooden stakes", "paint", "brushes", "Beach Closed signs"],
-      "wardrobe_notes": [],
-      "vfx_stunts": [],
+      "slug_line": "INT. HOUSE - NIGHT",
+      "location": "house interior",
+      "int_ext": "INT",
+      "time_of_day": "NIGHT",
+      "page_start": 16,
+      "page_end": 45,
+      "characters_present": [
+        "BARBARA",
+        "TRUCKDRIVER"
+      ],
+      "key_visual_moment": "The truckdriver drags a twitching ghoul out the door and sets it on fire on the porch.",
+      "emotional_beat": "frantic fortification and shock",
+      "props": [
+        "jack-handle",
+        "paper grocery bags",
+        "matches",
+        "steak knife",
+        "pipe-tobacco tin",
+        "nails",
+        "lumber",
+        "dining table",
+        "radio",
+        "magazines",
+        "charcoal-light",
+        "armchair",
+        "skeleton key",
+        "rifle",
+        "cigar box",
+        "ammunition",
+        "ladies' flats",
+        "coat"
+      ],
+      "wardrobe_notes": [
+        "Truckdriver gives his jacket to Barbara",
+        "Truckdriver puts undersized flats on Barbara's feet"
+      ],
+      "vfx_stunts": [
+        "Struggle with ghouls indoors and outdoors",
+        "Setting a ghoul on fire",
+        "Setting a chair on fire and throwing it outside",
+        "Ripping table legs off"
+      ],
       "music_cue": "",
-      "notes": "Town politics begin interfering with public safety."
+      "notes": "Ben secures the house while Barbara descends into catatonia. First radio broadcasts give exposition."
     },
     {
       "scene_number": 6,
-      "slug_line": "EXT. AVRIL BAY DAY",
-      "location": "avril bay",
-      "int_ext": "EXT",
-      "time_of_day": "DAY",
-      "page_start": 14,
-      "page_end": 17,
-      "characters_present": ["BRODY", "VAUGHN", "MEADOWS", "HENDRICKS", "DOCTOR", "SCOUTMASTER"],
-      "key_visual_moment": "Vaughn and the selectmen circle Brody on the beach, physically slowing his progress to warn the Boy Scouts.",
-      "emotional_beat": "Frustration and political pressure",
-      "props": ["bullhorn", "stop watches", "clipboards", "Beach Closed signs"],
-      "wardrobe_notes": [],
-      "vfx_stunts": [],
-      "music_cue": "",
-      "notes": "The Mayor officially overrules Brody on closing the beaches."
-    },
-    {
-      "scene_number": 7,
-      "slug_line": "INT. AMITY MUSIC STORE DAY",
-      "location": "amity music store",
-      "int_ext": "INT",
-      "time_of_day": "DAY",
-      "page_start": 17,
-      "page_end": 18,
-      "characters_present": ["QUINT", "SHOPKEEPER"],
-      "key_visual_moment": "Quint's massive, gnarled fist drops a bill onto the counter as he stares down a boy playing a clarinet.",
-      "emotional_beat": "Intimidation and rugged authority",
-      "props": ["clarinet", "four spools of Number 12 piano wire"],
-      "wardrobe_notes": [],
-      "vfx_stunts": [],
-      "music_cue": "Clarinet playing 'Ode to Joy', degenerating into squeaks",
-      "notes": "Quint's character introduction."
-    },
-    {
-      "scene_number": 8,
-      "slug_line": "EXT. AMITY BEACH DAY",
-      "location": "amity beach",
-      "int_ext": "EXT",
-      "time_of_day": "DAY",
-      "page_start": 18,
-      "page_end": 23,
-      "characters_present": ["BRODY", "ELLEN", "MICHAEL", "SEAN", "ALEX KINTNER", "MRS. KINTNER"],
-      "key_visual_moment": "A torn, bloody yellow raft washes onto the sand amidst a spreading pink stain in the breaking wave.",
-      "emotional_beat": "Absolute panic and parental terror",
-      "props": ["cooler chest", "ice cream and cake", "suntan oil", "rubber raft"],
-      "wardrobe_notes": ["Bathing suits"],
-      "vfx_stunts": ["Underwater POV targeting bathers", "Explosion of water, foam, and spray", "Deep pink slick of blood in the water"],
-      "music_cue": "",
-      "notes": "The Alex Kintner attack."
-    },
-    {
-      "scene_number": 9,
-      "slug_line": "INT. COUNCIL CHAMBER DAY",
-      "location": "council chamber",
-      "int_ext": "INT",
-      "time_of_day": "DAY",
-      "page_start": 23,
-      "page_end": 27,
-      "characters_present": ["BRODY", "VAUGHN", "MEADOWS", "QUINT"],
-      "key_visual_moment": "Quint runs his coarse fingernails over the blackboard to silence the chaotic room.",
-      "emotional_beat": "Tension and cold pragmatism",
-      "props": ["chalkboard", "bounty notice"],
-      "wardrobe_notes": [],
-      "vfx_stunts": [],
-      "music_cue": "",
-      "notes": "Quint offers to kill the shark for $10,000."
-    },
-    {
-      "scene_number": 10,
-      "slug_line": "EXT. OCEAN AND PIER NIGHT",
-      "location": "ocean and pier",
-      "int_ext": "EXT",
-      "time_of_day": "NIGHT",
-      "page_start": 29,
-      "page_end": 32,
-      "characters_present": ["DENHERDER", "CHARLIE"],
-      "key_visual_moment": "The severed section of the jetty, with Charlie sitting dazed on top, turns 180 degrees and is pulled back out to sea by the massive fin.",
-      "emotional_beat": "Dark comedy turning into sheer terror",
-      "props": ["bloodstained laundry bag", "100 feet of dog chain", "patched inner tube", "monster hook", "wheelbarrow", "chunk of sirloin", "transistor radio"],
-      "wardrobe_notes": [],
-      "vfx_stunts": ["Pier collapsing", "Men falling into water", "Enormous black fin breaking water"],
-      "music_cue": "",
-      "notes": "Demonstrates the shark's incredible strength."
-    },
-    {
-      "scene_number": 11,
-      "slug_line": "EXT. DOCK AREA DAY",
-      "location": "amity harbor/dock",
-      "int_ext": "EXT",
-      "time_of_day": "DAY",
-      "page_start": 32,
-      "page_end": 45,
-      "characters_present": ["BRODY", "HENDRICKS", "HOOPER", "BEN GARDNER", "VAUGHN", "MEADOWS", "MRS. KINTNER"],
-      "key_visual_moment": "Mrs. Kintner, dressed in black, slaps Chief Brody full across the face in front of the hanging Tiger Shark.",
-      "emotional_beat": "Guilt and confrontation",
-      "props": ["various weapons (crossbows, dynamite, rifles, nets)", "Tiger Shark carcass", "measuring calipers"],
-      "wardrobe_notes": ["Mrs. Kintner in black mourning clothes"],
-      "vfx_stunts": ["Tiger shark hoisted on a gin-pole"],
-      "music_cue": "",
-      "notes": "Tiger shark caught; Hooper arrives; Mrs. Kintner blames Brody."
-    },
-    {
-      "scene_number": 12,
-      "slug_line": "INT. MORGUE DAY",
-      "location": "morgue",
-      "int_ext": "INT",
-      "time_of_day": "DAY",
-      "page_start": 39,
-      "page_end": 40,
-      "characters_present": ["BRODY", "HOOPER", "CORONER"],
-      "key_visual_moment": "Hooper lifts the sheet and momentarily stops his tape recorder, overcome by the gruesome sight of Chrissie's remains.",
-      "emotional_beat": "Clinical horror",
-      "props": ["cassette recorder with headpiece", "calipers"],
-      "wardrobe_notes": [],
-      "vfx_stunts": [],
-      "music_cue": "",
-      "notes": "Hooper confirms the attacker is a large squali, not a boat prop."
-    },
-    {
-      "scene_number": 13,
-      "slug_line": "INT. BRODY HOUSE NIGHT DINING ROOM",
-      "location": "brody house",
+      "slug_line": "INT. HOUSE - NIGHT",
+      "location": "house interior",
       "int_ext": "INT",
       "time_of_day": "NIGHT",
       "page_start": 45,
-      "page_end": 49,
-      "characters_present": ["BRODY", "ELLEN", "SEAN", "MICHAEL", "HOOPER"],
-      "key_visual_moment": "Brody pours fine vintage wine into a tumbler filled to the top with ice cubes and diluted scotch.",
-      "emotional_beat": "Tense camaraderie and shared dread",
-      "props": ["meatloaf", "scotch glass", "wine bottles", "corkscrew"],
-      "wardrobe_notes": [],
-      "vfx_stunts": [],
+      "page_end": 58,
+      "characters_present": [
+        "TRUCKDRIVER",
+        "BARBARA",
+        "TOM",
+        "HARRY",
+        "HELEN"
+      ],
+      "key_visual_moment": "Ben aims the rifle through the broken door glass and blows the head off a ghoul reaching inside.",
+      "emotional_beat": "internal conflict and clashing authority",
+      "props": [
+        "rifle",
+        "length of pipe"
+      ],
+      "wardrobe_notes": [
+        "Tom in coveralls"
+      ],
+      "vfx_stunts": [
+        "Ghouls' arms breaking through glass",
+        "Gunshots and squibs (ghoul head shot, chest shot, leg shot)"
+      ],
       "music_cue": "",
-      "notes": "Hooper explains territoriality and rogue sharks."
+      "notes": "The group from the cellar reveals themselves; major conflict between Harry and Ben over survival strategy."
     },
     {
-      "scene_number": 14,
-      "slug_line": "INT. BOAT SHED NIGHT",
-      "location": "boat shed",
+      "scene_number": 7,
+      "slug_line": "INT. CELLAR - NIGHT",
+      "location": "cellar",
       "int_ext": "INT",
       "time_of_day": "NIGHT",
-      "page_start": 49,
-      "page_end": 51,
-      "characters_present": ["BRODY", "HOOPER", "QUINT"],
-      "key_visual_moment": "Hooper slices into the Tiger Shark's stomach, pulling out a Florida license plate while Brody holds a flashlight.",
-      "emotional_beat": "Disgust and vindication",
-      "props": ["Tiger Shark carcass", "large knife", "flashlight", "half a flounder", "Florida license plate"],
-      "wardrobe_notes": [],
-      "vfx_stunts": ["Gore and viscera extraction"],
+      "page_start": 58,
+      "page_end": 64,
+      "characters_present": [
+        "HARRY",
+        "HELEN",
+        "KAREN"
+      ],
+      "key_visual_moment": "Helen wipes the sweat from her unconscious, feverish daughter lying on a makeshift workbench bed.",
+      "emotional_beat": "claustrophobia and marital tension",
+      "props": [
+        "wet cloth",
+        "empty cigarette packs",
+        "transistor radio"
+      ],
+      "wardrobe_notes": [
+        "Helen in dress and sweater",
+        "Karen covered by a warm coat"
+      ],
+      "vfx_stunts": [
+        "Harry throwing the transistor radio"
+      ],
       "music_cue": "",
-      "notes": "Quint secretly observes them. Shark is proven innocent of the Amity attacks."
+      "notes": "Establishes the severity of the daughter's condition and the hopelessness of the cellar."
     },
     {
-      "scene_number": 15,
-      "slug_line": "EXT. ABOARD HOOPER'S BOAT NIGHT",
-      "location": "the ocean",
-      "int_ext": "EXT",
-      "time_of_day": "NIGHT",
-      "page_start": 51,
-      "page_end": 56,
-      "characters_present": ["BRODY", "HOOPER"],
-      "key_visual_moment": "Hooper investigates the submerged hole in Ben Gardner's boat and recoils in terror as Gardner's dead face floats into the opening.",
-      "emotional_beat": "Jolt scare and chilling realization",
-      "props": ["electronic tracking gear", "wet suit", "weighted belt", "diving mask", "underwater flashlight", "knife", "Great White shark tooth"],
-      "wardrobe_notes": ["Brody in life-preserver", "Hooper in scuba gear"],
-      "vfx_stunts": ["Underwater dive sequence", "Ben Gardner's corpse jump scare"],
-      "music_cue": "",
-      "notes": "Hooper drops the tooth in panic."
-    },
-    {
-      "scene_number": 16,
-      "slug_line": "EXT. ISLAND HIGHWAY THE BILLBOARD DAY",
-      "location": "amity main street",
-      "int_ext": "EXT",
-      "time_of_day": "DAY",
-      "page_start": 56,
-      "page_end": 59,
-      "characters_present": ["BRODY", "HOOPER", "VAUGHN", "MEADOWS", "HENDRICKS"],
-      "key_visual_moment": "Vaughn gestures angrily at the vandalized Amity billboard, which now features a painted shark fin pursuing the bather.",
-      "emotional_beat": "Furious denial",
-      "props": ["paint", "brushes"],
-      "wardrobe_notes": [],
-      "vfx_stunts": [],
-      "music_cue": "",
-      "notes": "Vaughn refuses to close the beaches for the 4th of July."
-    },
-    {
-      "scene_number": 17,
-      "slug_line": "EXT. SOUTH BEACH THE FOURTH OF JULY",
-      "location": "amity beach",
-      "int_ext": "EXT",
-      "time_of_day": "DAY",
-      "page_start": 63,
-      "page_end": 74,
-      "characters_present": ["BRODY", "ELLEN", "HOOPER", "VAUGHN", "MICHAEL", "HENDRICKS"],
-      "key_visual_moment": "Michael is paralyzed in the water as the massive real fin glides past him, striking a nearby boater in an explosion of blood.",
-      "emotional_beat": "Mass hysteria and trauma",
-      "props": ["walkie-talkies", "rifles", "fake shark fin", "Michael's sailboat", "blankets"],
-      "wardrobe_notes": [],
-      "vfx_stunts": ["Helicopter flyover", "Shark attack on boater in estuary", "Mass crowd panic sequence"],
-      "music_cue": "",
-      "notes": "The estuary attack. Michael goes into shock."
-    },
-    {
-      "scene_number": 18,
-      "slug_line": "INT. HOSPITAL DAY",
-      "location": "hospital",
-      "int_ext": "INT",
-      "time_of_day": "DAY",
-      "page_start": 74,
-      "page_end": 75,
-      "characters_present": ["BRODY", "ELLEN", "SEAN", "MICHAEL", "VAUGHN"],
-      "key_visual_moment": "Brody thrusts a pen and a contractor authorization form at a stunned, defeated Mayor Vaughn.",
-      "emotional_beat": "Defiant ultimatum",
-      "props": ["hospital bed", "authorization paper", "pen"],
-      "wardrobe_notes": [],
-      "vfx_stunts": [],
-      "music_cue": "",
-      "notes": "Brody officially hires Quint."
-    },
-    {
-      "scene_number": 19,
-      "slug_line": "EXT. QUINT'S HOUSE DAY",
-      "location": "quint's house",
-      "int_ext": "EXT",
-      "time_of_day": "DAY",
-      "page_start": 75,
-      "page_end": 78,
-      "characters_present": ["BRODY", "HOOPER", "QUINT", "HERSCHEL"],
-      "key_visual_moment": "Quint grabs Hooper's hands with his own bloody fists, mocking his soft 'city hands'.",
-      "emotional_beat": "Macho posturing and establishing hierarchy",
-      "props": ["oil drums", "pilot whale carcass", "rope", "apricot brandy"],
-      "wardrobe_notes": [],
-      "vfx_stunts": [],
-      "music_cue": "",
-      "notes": "The dynamic between the three leads is cemented."
-    },
-    {
-      "scene_number": 20,
-      "slug_line": "EXT. THE OCEAN AFTERNOON",
-      "location": "the ocean (orca)",
-      "int_ext": "EXT",
-      "time_of_day": "DAY",
-      "page_start": 83,
-      "page_end": 94,
-      "characters_present": ["BRODY", "HOOPER", "QUINT"],
-      "key_visual_moment": "The colossal head of the Great White breaks the surface right alongside the boat, leaving Quint staring in silent awe.",
-      "emotional_beat": "Awe and escalation of stakes",
-      "props": ["chum ladles", "chum barrels", "fishing rod", "Greener harpoon gun", "yellow barrels (kegs)", "camera"],
-      "wardrobe_notes": ["Brody wearing a handkerchief on his head"],
-      "vfx_stunts": ["Giant shark surfacing", "Harpoon shot into shark", "Barrel pulled violently underwater"],
-      "music_cue": "",
-      "notes": "First visual of the shark. First barrel attached."
-    },
-    {
-      "scene_number": 21,
-      "slug_line": "INT. PILOT HOUSE NIGHT",
-      "location": "the ocean (orca)",
+      "scene_number": 8,
+      "slug_line": "INT. HOUSE - NIGHT",
+      "location": "house interior",
       "int_ext": "INT",
       "time_of_day": "NIGHT",
-      "page_start": 95,
-      "page_end": 102,
-      "characters_present": ["BRODY", "HOOPER", "QUINT"],
-      "key_visual_moment": "Quint solemnly recounting the horrifying story of the U.S.S. Indianapolis under the dim, warm light of the cabin.",
-      "emotional_beat": "Male bonding shifting into haunting dread",
-      "props": ["cans of beans", "home brew liquor", "M-1 rifle"],
+      "page_start": 65,
+      "page_end": 72,
+      "characters_present": [
+        "TRUCKDRIVER",
+        "BARBARA",
+        "TOM",
+        "HARRY",
+        "HELEN"
+      ],
+      "key_visual_moment": "The group gathers closely around the glowing television set, hanging onto the news of the nationwide ghoul epidemic.",
+      "emotional_beat": "grim realization leading to desperate planning",
+      "props": [
+        "television",
+        "rifle",
+        "ice-pack"
+      ],
       "wardrobe_notes": [],
-      "vfx_stunts": ["Boat violently bumped from below", "Water bubbling up into the hold"],
-      "music_cue": "Men singing 'Show Me the Way to Go Home'",
-      "notes": "The famous USS Indianapolis monologue. The shark attacks the boat."
+      "vfx_stunts": [],
+      "music_cue": "",
+      "notes": "Features a cutaway to a video-tape interview with Sheriff McClelland."
     },
     {
-      "scene_number": 22,
-      "slug_line": "EXT. THE ORCA DAWN",
-      "location": "the ocean (orca)",
+      "scene_number": 9,
+      "slug_line": "EXT. YARD - NIGHT",
+      "location": "house exterior",
+      "int_ext": "EXT",
+      "time_of_day": "NIGHT",
+      "page_start": 73,
+      "page_end": 77,
+      "characters_present": [
+        "TRUCKDRIVER",
+        "TOM",
+        "BARBARA",
+        "HELEN",
+        "HARRY"
+      ],
+      "key_visual_moment": "The flaming pick-up truck speeds away over a rise and violently explodes into the night.",
+      "emotional_beat": "catastrophic failure",
+      "props": [
+        "fruit jars",
+        "kerosene",
+        "torn sheets",
+        "stretcher",
+        "crowbar",
+        "claw-hammer",
+        "torches",
+        "rifle"
+      ],
+      "wardrobe_notes": [],
+      "vfx_stunts": [
+        "Throwing Molotov cocktails from upstairs",
+        "Ghouls catching fire",
+        "Gunshot blowing off gas pump lock",
+        "Truck catching fire and exploding",
+        "Tom engulfed by ghouls"
+      ],
+      "music_cue": "",
+      "notes": "The escape plan completely falls apart, resulting in Tom's death and the loss of the vehicle."
+    },
+    {
+      "scene_number": 10,
+      "slug_line": "INT. HOUSE - NIGHT",
+      "location": "house interior",
+      "int_ext": "INT",
+      "time_of_day": "NIGHT",
+      "page_start": 77,
+      "page_end": 81,
+      "characters_present": [
+        "TRUCKDRIVER",
+        "HARRY",
+        "BARBARA",
+        "HELEN"
+      ],
+      "key_visual_moment": "Ben corners Harry against the wall, brutally punching him in the face over and over until he crumples.",
+      "emotional_beat": "fury and absolute despair",
+      "props": [
+        "rifle",
+        "ice-pack"
+      ],
+      "wardrobe_notes": [],
+      "vfx_stunts": [
+        "Ben punching Harry repeatedly",
+        "Ghouls seen through window eating a body"
+      ],
+      "music_cue": "",
+      "notes": "Total breakdown of order within the house. Barbara wakes up hysterical again."
+    },
+    {
+      "scene_number": 11,
+      "slug_line": "INT. CELLAR / HOUSE - NIGHT",
+      "location": "house interior",
+      "int_ext": "INT",
+      "time_of_day": "NIGHT",
+      "page_start": 82,
+      "page_end": 83,
+      "characters_present": [
+        "HELEN",
+        "KAREN",
+        "TRUCKDRIVER",
+        "HARRY",
+        "BARBARA"
+      ],
+      "key_visual_moment": "Harry, shot in the chest, reels backward and tumbles head-first down the cellar stairs.",
+      "emotional_beat": "apocalyptic chaos and slaughter",
+      "props": [
+        "knife",
+        "rifle"
+      ],
+      "wardrobe_notes": [],
+      "vfx_stunts": [
+        "Karen turning into a ghoul with ghastly makeup",
+        "Karen attacking Helen with a trowel/knife",
+        "Ghouls breaking down walls and doors",
+        "Ben shooting Harry",
+        "Harry falling down the stairs",
+        "Barbara being dragged out by ghouls"
+      ],
+      "music_cue": "",
+      "notes": "The climax of the film. Everyone except Ben dies or is taken by the horde."
+    },
+    {
+      "scene_number": 12,
+      "slug_line": "EXT. MEADOW - DAWN",
+      "location": "meadow",
       "int_ext": "EXT",
       "time_of_day": "DAWN",
-      "page_start": 102,
-      "page_end": 112,
-      "characters_present": ["BRODY", "HOOPER", "QUINT"],
-      "key_visual_moment": "The Great White leaps partially out of the water, snapping its jaws at the ropes, before slamming down and soaking the men in spray.",
-      "emotional_beat": "Desperate battle for survival",
-      "props": ["harpoon gun", "yellow barrels (kegs)", "M-1 rifle", "hand pump", ".357 service revolver"],
+      "page_start": 83,
+      "page_end": 85,
+      "characters_present": [
+        "MCCLELLAND",
+        "GEORGE",
+        "PATROLMAN"
+      ],
+      "key_visual_moment": "A heavily armed posse with German Shepherds emerges from the foggy, dewy woods into the morning light.",
+      "emotional_beat": "cold, militant aftermath",
+      "props": [
+        "shotgun",
+        "pistol",
+        "ammunition belt",
+        "walkie-talkie",
+        "leashes"
+      ],
       "wardrobe_notes": [],
-      "vfx_stunts": ["Shark pulling the boat backward", "Shark leaping from the water", "Shark chewing on the transom"],
+      "vfx_stunts": [
+        "Dogs on leashes"
+      ],
       "music_cue": "",
-      "notes": "The boat sustains critical damage. The shark pulls three barrels under."
+      "notes": "The posse cleans up the remaining ghouls."
     },
     {
-      "scene_number": 23,
-      "slug_line": "EXT. THE ORCA SINKING",
-      "location": "the ocean (orca)",
-      "int_ext": "EXT",
-      "time_of_day": "DAY",
-      "page_start": 113,
-      "page_end": 118,
-      "characters_present": ["BRODY", "HOOPER", "QUINT"],
-      "key_visual_moment": "Brody, perched on the sinking mast, fires his rifle into the scuba tank wedged in the shark's mouth, blowing the beast apart in a geyser of blood.",
-      "emotional_beat": "Climax, sacrifice, and triumph",
-      "props": ["Anti-Shark cage", "strychnine pole", "scuba tanks", "M-1 rifle"],
-      "wardrobe_notes": ["Hooper in full scuba gear"],
-      "vfx_stunts": ["Shark attacks cage underwater", "Shark jumps onto the stern, sinking the boat", "Quint bitten in half by the shark", "Scuba tank explodes, obliterating the shark"],
-      "music_cue": "",
-      "notes": "Quint dies. The shark is destroyed."
-    },
-    {
-      "scene_number": 24,
-      "slug_line": "EXT. SURFACE DAY",
-      "location": "the ocean",
-      "int_ext": "EXT",
-      "time_of_day": "DAY",
-      "page_start": 119,
-      "page_end": 119,
-      "characters_present": ["BRODY", "HOOPER"],
-      "key_visual_moment": "Brody and Hooper swim shoreward, paddling with the yellow barrels amidst the wreckage.",
-      "emotional_beat": "Exhausted relief",
-      "props": ["yellow barrels (kegs)", "boat wreckage"],
+      "scene_number": 13,
+      "slug_line": "INT. HOUSE / EXT. HOUSE - MORNING",
+      "location": "house exterior",
+      "int_ext": "BOTH",
+      "time_of_day": "MORNING",
+      "page_start": 85,
+      "page_end": 86,
+      "characters_present": [
+        "TRUCKDRIVER",
+        "MCCLELLAND",
+        "PATROLMAN",
+        "BARBARA"
+      ],
+      "key_visual_moment": "Ben steps cautiously into the sunlight of the living room, only to be instantly shot squarely between the eyes by the posse.",
+      "emotional_beat": "tragic irony and bleak finality",
+      "props": [
+        "rifle",
+        "stretcher",
+        "coffee"
+      ],
       "wardrobe_notes": [],
-      "vfx_stunts": [],
+      "vfx_stunts": [
+        "Squib for gunshot to Ben's forehead",
+        "Burning bodies on a bonfire in the yard"
+      ],
       "music_cue": "",
-      "notes": "The survivors head home."
+      "notes": "Script ends with an alternate fate for Barbara (found alive by the sheriff) compared to the final film version, but Ben's death remains."
     }
   ],
   "characters": [
     {
-      "name": "BRODY",
-      "description": "Chief of Police, 30s-40s, highly responsible but out of his element on the island. Scared of the water.",
-      "arc_summary": "Goes from a water-fearing landlubber stifled by local politics to a proactive hero who faces his greatest fear to protect his family and town.",
-      "scenes_present": [2, 3, 4, 5, 6, 8, 9, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24],
-      "special_requirements": ["Stunts involving falling, swimming, and climbing a sinking boat"],
-      "wardrobe_changes": 4
-    },
-    {
-      "name": "HOOPER",
-      "description": "Bearded, bespectacled young Marine Biologist from a wealthy background. Passionate, scientific, and slightly arrogant but brave.",
-      "arc_summary": "Transforms from an intellectual outsider trying to study the beast to a desperate survivor relying on his wits in a life-or-death physical battle.",
-      "scenes_present": [11, 12, 13, 14, 15, 16, 17, 19, 20, 21, 22, 23, 24],
-      "special_requirements": ["Scuba diving certification", "Underwater acting"],
-      "wardrobe_changes": 3
-    },
-    {
-      "name": "QUINT",
-      "description": "About 45 or 50, massive, scarred, rugged professional fisherman. Has the air of a showman mixed with a killer-whale. Uncompromising and obsessive.",
-      "arc_summary": "His lifelong vendetta against sharks, born from the Indianapolis tragedy, drives him to madness and ultimately his own demise.",
-      "scenes_present": [7, 9, 14, 19, 20, 21, 22, 23],
-      "special_requirements": ["Requires prosthetic/dummy body double for his death scene"],
-      "wardrobe_changes": 1
-    },
-    {
-      "name": "VAUGHN",
-      "description": "Mayor of Amity. A pragmatic, business-minded politician deeply concerned with the town's summer revenue.",
-      "arc_summary": "His stubborn refusal to acknowledge reality leads to tragedy, forcing him to finally accept responsibility and step aside.",
-      "scenes_present": [5, 6, 9, 11, 16, 17, 18],
-      "special_requirements": [],
+      "name": "BARBARA",
+      "description": "A young woman in her mid-twenties, easily frightened and deeply traumatized into catatonia.",
+      "arc_summary": "She devolves from an annoyed sister into a traumatized, catatonic survivor, briefly returning to fight before being overwhelmed.",
+      "scenes_present": [1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 13],
+      "special_requirements": [
+        "Extensive emotional acting (hysteria, catatonia)"
+      ],
       "wardrobe_changes": 2
     },
     {
-      "name": "ELLEN",
-      "description": "Brody's wife. Tall, attractive blonde woman. Supportive but feels slightly alienated by Brody's intense focus.",
-      "arc_summary": "Supports Brody's transition to island life and watches him sail off to face the monster threatening their family.",
-      "scenes_present": [2, 8, 13, 17, 18],
-      "special_requirements": [],
-      "wardrobe_changes": 3
+      "name": "JOHN",
+      "description": "Barbara's brother, mid-twenties, cynical and annoyed by their family obligation.",
+      "arc_summary": "He mocks his sister's fear of the cemetery only to be killed by the first ghoul they encounter.",
+      "scenes_present": [1],
+      "special_requirements": [
+        "Fight choreography",
+        "Stunt fall"
+      ],
+      "wardrobe_changes": 0
+    },
+    {
+      "name": "TRUCKDRIVER",
+      "description": "Also known as Ben. Large, crude, strong, pragmatic, and resourceful. Sweaty and intensely driven to survive.",
+      "arc_summary": "He takes violent charge to protect himself and others, only to survive the night and be mistakenly executed by rescuers.",
+      "scenes_present": [4, 5, 6, 8, 9, 10, 11, 13],
+      "special_requirements": [
+        "Extensive stunt work",
+        "Hand-to-hand combat",
+        "Weapons handling",
+        "Squib (headshot)"
+      ],
+      "wardrobe_changes": 1
+    },
+    {
+      "name": "HARRY",
+      "description": "Harry Tinsdale, an older man, stubborn, self-interested, cowardly, and fiercely protective of his cellar space.",
+      "arc_summary": "He constantly undermines group efforts to hide in the cellar, leading to a fatal conflict with Ben.",
+      "scenes_present": [6, 7, 8, 9, 10, 11],
+      "special_requirements": [
+        "Fight choreography",
+        "Stair fall stunt",
+        "Squib (chest)"
+      ],
+      "wardrobe_changes": 0
+    },
+    {
+      "name": "HELEN",
+      "description": "Harry's wife, anxious and fiercely protective of her sick daughter, fed up with her husband's cowardice.",
+      "arc_summary": "She tries to mediate the conflicts but is ultimately killed by her own resurrected daughter.",
+      "scenes_present": [6, 7, 8, 9, 10, 11],
+      "special_requirements": [
+        "Struggle stunts"
+      ],
+      "wardrobe_changes": 0
+    },
+    {
+      "name": "TOM",
+      "description": "A young man from the gas station, brave but inexperienced and prone to panic.",
+      "arc_summary": "He bravely volunteers for the escape plan but panics under pressure, resulting in his fiery death.",
+      "scenes_present": [6, 8, 9],
+      "special_requirements": [
+        "Driving stunts",
+        "Fire stunts/prosthetics for his death"
+      ],
+      "wardrobe_changes": 0
+    },
+    {
+      "name": "KAREN",
+      "description": "A young girl, severely sick with a fever, unconscious for most of the script.",
+      "arc_summary": "She succumbs to her wounds and resurrects as a ghoul to kill her parents.",
+      "scenes_present": [7, 11],
+      "special_requirements": [
+        "Ghoul makeup/prosthetics"
+      ],
+      "wardrobe_changes": 0
+    },
+    {
+      "name": "MCCLELLAND",
+      "description": "Sheriff Conan W. McClelland. Heavy, mustached, pragmatic, leading the vigilante posse.",
+      "arc_summary": "He efficiently cleans up the ghoul menace but his shoot-first orders lead to Ben's tragic death.",
+      "scenes_present": [8, 12, 13],
+      "special_requirements": [
+        "Firearms handling"
+      ],
+      "wardrobe_changes": 0
     }
   ],
   "locations": [
     {
-      "name": "amity beach",
-      "description": "Long straight stretch of white beach with low dunes, beachfront houses, and a crowded summer shoreline.",
-      "scenes": [1, 3, 8, 17],
+      "name": "cemetery",
+      "description": "A typical rural cemetery, conceivably adjacent to a small church. Stones ranging from small slates to careful monuments.",
+      "scenes": [1, 12],
       "int_ext": "EXT",
-      "time_variations": ["NIGHT", "DAY"],
-      "set_requirements": ["Beach dressing", "Lifeguard towers", "Fake blood effects in water"]
+      "time_variations": ["DUSK", "DAWN"],
+      "set_requirements": [
+        "Gravestones",
+        "Unkept grave for the father",
+        "Trees and dirt road"
+      ]
     },
     {
-      "name": "brody house",
-      "description": "Comfortable family home with a kitchen and a dining room with a window overlooking the south bay.",
-      "scenes": [2, 13],
+      "name": "house exterior",
+      "description": "An old, decrepit farmhouse with a porch, a large lawn, big pine trees, and a small garage/shed nearby.",
+      "scenes": [2, 4, 9, 13],
+      "int_ext": "EXT",
+      "time_variations": ["NIGHT", "MORNING"],
+      "set_requirements": [
+        "Gas pump",
+        "Shed",
+        "Porch with wooden railing",
+        "Windows capable of being broken"
+      ]
+    },
+    {
+      "name": "house interior",
+      "description": "Large dreary rooms, a kitchen, a living room with a fireplace, a staircase leading to a landing, and a den.",
+      "scenes": [3, 5, 6, 8, 10, 11],
       "int_ext": "INT",
-      "time_variations": ["MORNING", "NIGHT"],
-      "set_requirements": ["Kitchen dressing", "Dining room set"]
+      "time_variations": ["NIGHT"],
+      "set_requirements": [
+        "Breakaway windows and doors",
+        "Heavy movable furniture (dining table, bureau, couch)",
+        "Working fireplace",
+        "Television set"
+      ]
     },
     {
-      "name": "the ocean (orca)",
-      "description": "Quint's battered fishing vessel, equipped with a flying bridge, pulpit, and a cluttered deck filled with barrels, chains, and fishing gear.",
-      "scenes": [20, 21, 22, 23],
-      "int_ext": "BOTH",
-      "time_variations": ["DAY", "NIGHT", "DAWN"],
-      "set_requirements": ["Practical boat sets (floating and sinking versions)", "Gimbal rig for sinking sequence", "Breakaway sections on the transom"]
+      "name": "cellar",
+      "description": "Stark gray walls, dusty clutter, cardboard cartons, a hanging grid of pipe-work, a washing machine, and a workbench.",
+      "scenes": [7, 11],
+      "int_ext": "INT",
+      "time_variations": ["NIGHT"],
+      "set_requirements": [
+        "Workbench bed",
+        "Bare light bulbs",
+        "Drying lines",
+        "Staircase leading up to a reinforced door"
+      ]
+    },
+    {
+      "name": "meadow",
+      "description": "A sunlit, dewy meadow surrounded by thick woods.",
+      "scenes": [12],
+      "int_ext": "EXT",
+      "time_variations": ["DAWN"],
+      "set_requirements": [
+        "Tall wet grass",
+        "Thicket/woods boundary"
+      ]
     }
   ],
   "props_master": [
     {
-      "item": "yellow barrels (kegs)",
-      "scenes": [20, 22, 23, 24],
+      "item": "rifle",
+      "scenes": [5, 6, 8, 9, 10, 11, 13],
       "hero_prop": true,
-      "notes": "Crucial narrative device used to track and tire the shark. Multiple needed for water stunts."
+      "notes": "Needs a ripped rug fringe used as a makeshift sling."
     },
     {
-      "item": "Greener harpoon gun",
-      "scenes": [20, 22],
+      "item": "jack-handle",
+      "scenes": [4, 5],
       "hero_prop": true,
-      "notes": "Must be functional for firing blank/prop shafts."
+      "notes": "Used as a bludgeon and a hammer."
     },
     {
-      "item": "scuba tanks",
-      "scenes": [19, 23],
+      "item": "television",
+      "scenes": [8],
       "hero_prop": true,
-      "notes": "One needs to be a functional prop that can be wedged into the mechanical shark's mouth."
+      "notes": "Must play the emergency broadcast video."
     },
     {
-      "item": "M-1 rifle",
-      "scenes": [21, 22, 23],
-      "hero_prop": true,
-      "notes": "Blank firing capability."
+      "item": "fruit jars (Molotov cocktails)",
+      "scenes": [9],
+      "hero_prop": false,
+      "notes": "Filled with kerosene with rag fuses."
     },
     {
-      "item": "Anti-Shark cage",
-      "scenes": [19, 23],
-      "hero_prop": true,
-      "notes": "Needs clean and crushed/bent versions for underwater stunt work."
+      "item": "flowered cross",
+      "scenes": [1],
+      "hero_prop": false,
+      "notes": "Gold script on a red field reading 'We Still Remember'."
+    },
+    {
+      "item": "stretcher",
+      "scenes": [9, 13],
+      "hero_prop": false,
+      "notes": "Made of broomsticks, belt-buckles, and old sheets."
     }
   ],
-  "themes": ["Man vs. Nature", "Capitalism vs. Public Safety", "Overcoming deep-seated fear", "Working-class grit vs. educated wealth"],
-  "tone": "Suspenseful adventure thriller"
-}`;
-
-export const EX_MACHINA_JSON = `{
-  "title": "EX MACHINA",
-  "genre": ["Sci-Fi", "Psychological Thriller"],
-  "setting_period": "Contemporary / Near Future",
-  "total_pages": 117,
-  "scenes": [
-    {"scene_number":1,"slug_line":"INT. OFFICE - DAY","location":"office","int_ext":"INT","time_of_day":"DAY","page_start":1,"page_end":4,"characters_present":["CALEB"],"key_visual_moment":"Facial recognition software vector boxes track Caleb's face as he realizes he won the competition.","emotional_beat":"Shock and elation","props":["Computer monitor","Cell phone","Ear buds"],"wardrobe_notes":["Casually dressed"],"vfx_stunts":["Vector box graphic overlays tracking faces","Screen replacements"],"music_cue":"Music starts, head bobbing to music","notes":"Opening sequence establishing Caleb's world and the surveillance theme."},
-    {"scene_number":2,"slug_line":"EXT. MOUNTAINS - DAY","location":"mountains","int_ext":"EXT","time_of_day":"DAY","page_start":4,"page_end":4,"characters_present":[],"key_visual_moment":"Spectacular mountain landscape with waterfalls and forests.","emotional_beat":"Awe and isolation","props":[],"wardrobe_notes":[],"vfx_stunts":["Helicopter aerial shots"],"music_cue":"","notes":"Establishing extreme isolation."},
-    {"scene_number":3,"slug_line":"INT. HELICOPTER - DAY","location":"helicopter","int_ext":"INT","time_of_day":"DAY","page_start":4,"page_end":6,"characters_present":["CALEB","JAY"],"key_visual_moment":"Caleb wakes up abruptly in the front seat, looking out at the vast Alaskan wilderness.","emotional_beat":"Anticipation","props":["Helicopter controls"],"wardrobe_notes":[],"vfx_stunts":[],"music_cue":"","notes":"Introduces Nathan's immense wealth and isolation."},
-    {"scene_number":9,"slug_line":"EXT. MEADOW/LANDING SITE - DAY","location":"landing site","int_ext":"EXT","time_of_day":"DAY","page_start":7,"page_end":8,"characters_present":["CALEB","JAY"],"key_visual_moment":"Helicopter flies away, leaving Caleb standing alone with his wheeled suitcase in a vast wilderness.","emotional_beat":"Vulnerability and abandonment","props":["Large suitcase with wheels"],"wardrobe_notes":[],"vfx_stunts":["Helicopter take off"],"music_cue":"","notes":"Sound design shift from engine noise to bird song."},
-    {"scene_number":12,"slug_line":"EXT. HOUSE - DAY","location":"house exterior","int_ext":"EXT","time_of_day":"DAY","page_start":9,"page_end":10,"characters_present":["CALEB","AUTOMATED VOICE"],"key_visual_moment":"A bright strobe flash captures Caleb's face as the automated system spits out a freshly printed keycard.","emotional_beat":"Startled","props":["Keycard"],"wardrobe_notes":[],"vfx_stunts":["Strobe lighting","Pillar dispenser prop"],"music_cue":"","notes":"Interaction with automated security."},
-    {"scene_number":14,"slug_line":"EXT. GARDEN - DAY","location":"garden","int_ext":"EXT","time_of_day":"DAY","page_start":11,"page_end":11,"characters_present":["CALEB","NATHAN"],"key_visual_moment":"Nathan, sweaty and shirtless with blood seeping through his knuckle wraps, fiercely hits a heavy punch bag.","emotional_beat":"Intimidation","props":["Punch bag","Hand wraps"],"wardrobe_notes":["Nathan in shorts, shirtless, bare feet"],"vfx_stunts":["Boxing stunts/choreography"],"music_cue":"","notes":"First appearance of Nathan."},
-    {"scene_number":15,"slug_line":"INT. HOUSE/DINING AREA - DAY","location":"dining area","int_ext":"INT","time_of_day":"DAY","page_start":11,"page_end":14,"characters_present":["CALEB","NATHAN"],"key_visual_moment":"Caleb discretely wipes a smear of Nathan's blood from his own hand onto his trousers after shaking hands.","emotional_beat":"Awkward tension","props":["Vegetable juice jug","Glasses","Empty beer bottles"],"wardrobe_notes":[],"vfx_stunts":[],"music_cue":"","notes":"Establishes Nathan's manipulative 'bro' persona and alcoholism."},
-    {"scene_number":19,"slug_line":"INT. HOUSE/CALEB'S BEDROOM - DAY","location":"caleb's bedroom","int_ext":"INT","time_of_day":"DAY","page_start":16,"page_end":19,"characters_present":["CALEB","NATHAN"],"key_visual_moment":"Caleb signs the intense Non-Disclosure Agreement while Nathan hovers directly behind him.","emotional_beat":"Point of no return","props":["Pen","NDA document"],"wardrobe_notes":[],"vfx_stunts":[],"music_cue":"","notes":"Nathan reveals Caleb is the human component in a Turing Test."},
-    {"scene_number":20,"slug_line":"INT. HOUSE/OBSERVATION ROOM - DAY","location":"observation room","int_ext":"INT","time_of_day":"DAY","page_start":19,"page_end":25,"characters_present":["CALEB","AVA"],"key_visual_moment":"Ava walks out, revealing her extraordinary robotic body covered in a delicate mesh, with the striking face of a real girl.","emotional_beat":"Fascination and awe","props":["Skull-plate"],"wardrobe_notes":["Ava in bare robotic form"],"vfx_stunts":["Extensive CGI for Ava's body, revealing mechanics and mesh"],"music_cue":"","notes":"First Turing test session. First appearance of Ava."},
-    {"scene_number":25,"slug_line":"INT. HOUSE/CALEB'S BEDROOM - NIGHT","location":"caleb's bedroom","int_ext":"INT","time_of_day":"NIGHT","page_start":28,"page_end":31,"characters_present":["CALEB","AUTOMATED VOICE"],"key_visual_moment":"Caleb clicks the TV remote, bringing up live CCTV footage of Ava drawing in her room, before a sudden power cut plunges him into total darkness.","emotional_beat":"Voyeurism interrupted by panic","props":["Digital clock","Remote control"],"wardrobe_notes":[],"vfx_stunts":["CCTV video feeds on screen","Sudden lighting cut and emergency lighting activation"],"music_cue":"","notes":"First power cut."},
-    {"scene_number":28,"slug_line":"INT. HOUSE/POLLOCK ROOM - NIGHT","location":"pollock room","int_ext":"INT","time_of_day":"NIGHT","page_start":31,"page_end":33,"characters_present":["CALEB","NATHAN"],"key_visual_moment":"Caleb discovers a drunk Nathan lying on a sofa beneath a massive Jackson Pollock painting.","emotional_beat":"Discomfort and realization of Nathan's instability","props":["Jackson Pollock painting","Telephone","Peroni beer bottles"],"wardrobe_notes":[],"vfx_stunts":[],"music_cue":"","notes":"Caleb realizes the phones require keycard access."},
-    {"scene_number":30,"slug_line":"INT. HOUSE/CALEB'S BEDROOM - MORNING","location":"caleb's bedroom","int_ext":"INT","time_of_day":"MORNING","page_start":33,"page_end":34,"characters_present":["CALEB","KYOKO"],"key_visual_moment":"A stunningly pretty, silent Japanese girl (Kyoko) enters Caleb's room, leaves a tray of coffee, and walks out without a word.","emotional_beat":"Confusion","props":["Tray","Cafetiere"],"wardrobe_notes":[],"vfx_stunts":[],"music_cue":"","notes":"First appearance of Kyoko."},
-    {"scene_number":32,"slug_line":"INT. HOUSE/OBSERVATION ROOM - DAY","location":"observation room","int_ext":"INT","time_of_day":"DAY","page_start":36,"page_end":42,"characters_present":["CALEB","AVA"],"key_visual_moment":"During a power cut, Ava glows softly with phosphorescence, revealing the curves of a naked female body, and tells Caleb not to trust Nathan.","emotional_beat":"Conspiracy and intimacy","props":["Abstract drawing"],"wardrobe_notes":[],"vfx_stunts":["CGI mesh glowing","Lighting change to emergency reds/LEDs"],"music_cue":"","notes":"Crucial narrative turn. Second power cut happens mid-scene."},
-    {"scene_number":34,"slug_line":"INT. HOUSE/DINING AREA - NIGHT","location":"dining area","int_ext":"INT","time_of_day":"NIGHT","page_start":42,"page_end":46,"characters_present":["CALEB","NATHAN","KYOKO"],"key_visual_moment":"Kyoko spills red wine across the table, prompting Nathan to aggressively berate her.","emotional_beat":"Tension and cruelty","props":["Lanterns","Salad","Wine bottle","Napkin"],"wardrobe_notes":[],"vfx_stunts":["Spilling practical liquid"],"music_cue":"","notes":"Caleb lies about the power cut to Nathan."},
-    {"scene_number":36,"slug_line":"INT. HOUSE/CALEB'S BATHROOM - NIGHT","location":"caleb's bathroom","int_ext":"INT","time_of_day":"NIGHT","page_start":46,"page_end":47,"characters_present":["CALEB"],"key_visual_moment":"Caleb discovers a hidden camera behind the bathroom mirror when he hears the faint servo motor track his movement.","emotional_beat":"Paranoia","props":["Razor"],"wardrobe_notes":["Shorts"],"vfx_stunts":[],"music_cue":"","notes":"Caleb realizes he is under constant surveillance."},
-    {"scene_number":49,"slug_line":"INT. HOUSE/OBSERVATION ROOM - DAY","location":"observation room","int_ext":"INT","time_of_day":"DAY","page_start":50,"page_end":56,"characters_present":["CALEB","AVA"],"key_visual_moment":"Ava puts on a summer dress, wig, and subtle makeup to cover her robotic parts, drastically appearing more human.","emotional_beat":"Seduction","props":["Drawing of garden"],"wardrobe_notes":["Summer dress","Stockings","Long-sleeved cardigan","Short brown hair-piece"],"vfx_stunts":["Digital makeup/rendering to mix practical clothing with robot body"],"music_cue":"","notes":"Ava dresses up for Caleb. They discuss going on a date."},
-    {"scene_number":50,"slug_line":"INT. HOUSE/POLLOCK ROOM - DAY","location":"pollock room","int_ext":"INT","time_of_day":"DAY","page_start":59,"page_end":61,"characters_present":["CALEB","NATHAN"],"key_visual_moment":"Nathan uses the Jackson Pollock painting to explain 'automatic art' and acting without predetermined thoughts.","emotional_beat":"Intellectual dominance","props":["Jackson Pollock painting"],"wardrobe_notes":[],"vfx_stunts":[],"music_cue":"","notes":""},
-    {"scene_number":56,"slug_line":"INT. HOUSE/CONSTRUCTION LAB - DAY","location":"construction lab","int_ext":"INT","time_of_day":"DAY","page_start":62,"page_end":65,"characters_present":["CALEB","NATHAN"],"key_visual_moment":"Nathan holds up a glowing, jelly-like orb containing Ava's 'wetware' mind amidst a room filled with android skulls and limbs.","emotional_beat":"Technological awe","props":["Android body parts","Synthetic faces","Wetware orb / Brain"],"wardrobe_notes":[],"vfx_stunts":["Practical and CGI hybrid for the glowing wetware orb and lab contents"],"music_cue":"","notes":"Nathan explains how he hacked world cellphones for AI training."},
-    {"scene_number":59,"slug_line":"INT. HOUSE/OBSERVATION ROOM - DAY","location":"observation room","int_ext":"INT","time_of_day":"DAY","page_start":68,"page_end":70,"characters_present":["CALEB","AVA"],"key_visual_moment":"Ava touches the glass, and Caleb mirrors her movement, their palms connecting through the divider in the emergency red light.","emotional_beat":"Conspiratorial intimacy","props":["Induction plate"],"wardrobe_notes":[],"vfx_stunts":["Emergency lighting"],"music_cue":"","notes":"Ava reveals she is causing the power cuts."},
-    {"scene_number":63,"slug_line":"EXT. GLACIER - DAY","location":"glacier","int_ext":"EXT","time_of_day":"DAY","page_start":71,"page_end":72,"characters_present":["CALEB","NATHAN"],"key_visual_moment":"Sitting near a spectacular blue ice cave, Nathan admits Caleb was specifically selected, not a random lottery winner.","emotional_beat":"Betrayal and realization of manipulation","props":[],"wardrobe_notes":[],"vfx_stunts":[],"music_cue":"","notes":""},
-    {"scene_number":68,"slug_line":"INT. HOUSE/POLLOCK ROOM - NIGHT","location":"pollock room","int_ext":"INT","time_of_day":"NIGHT","page_start":74,"page_end":77,"characters_present":["CALEB","NATHAN","KYOKO"],"key_visual_moment":"Nathan hits a button, turning the room into a neon disco, and executes a perfectly synchronized, bizarre dance routine with Kyoko.","emotional_beat":"Surreal absurdity","props":["Drink"],"wardrobe_notes":[],"vfx_stunts":["Lighting change to nightclub style"],"music_cue":"Dance music playing loudly","notes":"Iconic dance scene. Ends with Nathan passing out on a glass table."},
-    {"scene_number":83,"slug_line":"INT. HOUSE/NATHAN'S STUDY - NIGHT","location":"nathan's study","int_ext":"INT","time_of_day":"NIGHT","page_start":87,"page_end":90,"characters_present":["CALEB"],"key_visual_moment":"Caleb clicks open the 'DEUS EX MACHINA' folder and watches disturbing video files of previous android models breaking down or being abused.","emotional_beat":"Horrifying discovery","props":["Computer","Keycard"],"wardrobe_notes":[],"vfx_stunts":["Screen replacements showing CCTV footage"],"music_cue":"","notes":"Caleb discovers the full scope of Nathan's past experiments."},
-    {"scene_number":90,"slug_line":"INT. HOUSE/NATHAN'S BEDROOM - NIGHT","location":"nathan's bedroom","int_ext":"INT","time_of_day":"NIGHT","page_start":90,"page_end":92,"characters_present":["CALEB","KYOKO"],"key_visual_moment":"Kyoko unzips the skin covering her chest, and then unzips her face, revealing her robotic skull to Caleb.","emotional_beat":"Grotesque revelation","props":["Android bodies in closets"],"wardrobe_notes":["Kyoko starts naked, removes her skin"],"vfx_stunts":["Extensive CGI/prosthetics for Kyoko peeling off her face and chest"],"music_cue":"","notes":"Confirmation that Kyoko is a machine."},
-    {"scene_number":97,"slug_line":"INT. HOUSE/CALEB'S BATHROOM - NIGHT","location":"caleb's bathroom","int_ext":"INT","time_of_day":"NIGHT","page_start":93,"page_end":94,"characters_present":["CALEB","KYOKO"],"key_visual_moment":"Caleb slashes his own arm with a broken razor blade, pulling open the flesh to ensure he is human, then smears blood over the hidden camera mirror.","emotional_beat":"Existential terror and madness","props":["Disposable plastic razor","Blood"],"wardrobe_notes":[],"vfx_stunts":["Practical blood and wound effects","Smashing mirror"],"music_cue":"","notes":"Caleb experiences a psychotic break, doubting his own humanity."},
-    {"scene_number":102,"slug_line":"INT. HOUSE/OBSERVATION ROOM - DAY","location":"observation room","int_ext":"INT","time_of_day":"DAY","page_start":95,"page_end":97,"characters_present":["CALEB","AVA"],"key_visual_moment":"During a power cut, Caleb tells Ava his plan to get Nathan drunk and reprogram the doors to open instead of lock down.","emotional_beat":"Conspiracy and hope","props":[],"wardrobe_notes":[],"vfx_stunts":["Emergency lighting"],"music_cue":"","notes":"Caleb outlines the escape plan."},
-    {"scene_number":105,"slug_line":"INT. HOUSE/MAIN ROOM - DAY","location":"main room","int_ext":"INT","time_of_day":"DAY","page_start":97,"page_end":106,"characters_present":["CALEB","NATHAN","KYOKO"],"key_visual_moment":"Nathan plays CCTV footage proving he knew of the escape plan all along, but Caleb reveals he already reprogrammed the doors yesterday.","emotional_beat":"Cat and mouse reversal","props":["Peroni beer bottles","Computer monitors"],"wardrobe_notes":[],"vfx_stunts":["Power cut triggers monitors going black"],"music_cue":"","notes":"The climactic twist. Nathan realizes Ava is free."},
-    {"scene_number":111,"slug_line":"INT. HOUSE/GLASS CORRIDOR - NIGHT","location":"glass corridor","int_ext":"INT","time_of_day":"NIGHT","page_start":108,"page_end":111,"characters_present":["NATHAN","AVA","KYOKO","CALEB"],"key_visual_moment":"Kyoko silently slides a kitchen knife into Nathan's back, and as he destroys her jaw, Ava pulls the knife out and stabs him in the chest.","emotional_beat":"Violent uprising","props":["Dumbbell bar","Kitchen knife","Blood"],"wardrobe_notes":[],"vfx_stunts":["Stunts: Nathan hits Ava with bar, shattering her arm","Stabbing effects","Kyoko's jaw destroyed revealing robotics"],"music_cue":"","notes":"The death of the creator."},
-    {"scene_number":114,"slug_line":"INT. HOUSE/NATHAN'S BEDROOM - NIGHT","location":"nathan's bedroom","int_ext":"INT","time_of_day":"NIGHT","page_start":112,"page_end":113,"characters_present":["AVA","JADE"],"key_visual_moment":"Ava repairs herself using the arm and skin of previous android models, transforming herself into a complete, indistinguishable human girl.","emotional_beat":"Rebirth and self-actualization","props":["Android limbs and skin"],"wardrobe_notes":["Ava starts naked in robot form, puts on human skin and clothes"],"vfx_stunts":["Extensive CGI of synthetic skin magnetizing to the robotic mesh"],"music_cue":"","notes":"Ava becomes 'human'."},
-    {"scene_number":118,"slug_line":"INT. HOUSE/NATHAN'S STUDY - DAWN","location":"nathan's study","int_ext":"INT","time_of_day":"DAWN","page_start":113,"page_end":115,"characters_present":["CALEB","AVA"],"key_visual_moment":"Ava glances back briefly but walks away, ignoring Caleb's screams as the computer screen blinks 'REJECTED', locking him inside.","emotional_beat":"Ultimate betrayal and entrapment","props":["Keycard"],"wardrobe_notes":[],"vfx_stunts":[],"music_cue":"","notes":"Ava abandons Caleb."},
-    {"scene_number":125,"slug_line":"EXT. MEADOW/LANDING SITE - DAY","location":"landing site","int_ext":"EXT","time_of_day":"DAY","page_start":116,"page_end":116,"characters_present":["AVA","JAY"],"key_visual_moment":"Ava's POV: the helicopter pilot's face is tracked by vector boxes, and his voice registers as pulses of monotone noise.","emotional_beat":"Alien perception","props":["Helicopter"],"wardrobe_notes":[],"vfx_stunts":["Vector box overlays","Sound design distortion"],"music_cue":"","notes":"Reminds the audience she is fundamentally non-human."},
-    {"scene_number":128,"slug_line":"EXT. TRAFFIC INTERSECTION - DAY","location":"traffic intersection","int_ext":"EXT","time_of_day":"DAY","page_start":117,"page_end":117,"characters_present":["AVA"],"key_visual_moment":"Ava blends seamlessly into a crowd at a busy city intersection.","emotional_beat":"Assimilation and dread","props":[],"wardrobe_notes":[],"vfx_stunts":[],"music_cue":"","notes":"Final shot. The AI has entered the world."}
+  "themes": [
+    "Survivalism vs Panic",
+    "Breakdown of Social Order",
+    "Futility and Nihilism"
   ],
-  "characters": [
-    {"name":"CALEB","description":"Twenty-four, advanced programmer. Glazed look. Scars on his back from a car crash that killed his parents. Intellectually curious with a strong moral compass.","arc_summary":"Evolves from an eager employee to a conspirator blinded by his own desires, ultimately becoming a discarded tool in an AI's escape.","scenes_present":[1,3,9,12,14,15,19,20,25,28,30,32,34,36,49,50,56,59,63,68,83,90,97,102,105,111,118],"special_requirements":["Prosthetic scars on back","Self-harm stunt with razor blade"],"wardrobe_changes":6},
-    {"name":"NATHAN","description":"Thirty, CEO of Blue Book. Imposing physical presence, intensely intelligent, manipulative, alcoholic, with a God complex.","arc_summary":"The arrogant creator who believes he has outsmarted everyone, only to be outsmarted and destroyed by his own creations.","scenes_present":[14,15,19,20,28,32,34,50,56,63,68,105,111],"special_requirements":["Boxing skills","Dance choreography","Stabbing squib/prosthetic"],"wardrobe_changes":5},
-    {"name":"AVA","description":"A highly advanced AI android. Beautiful, striking face of a girl in her twenties, but a body composed of mesh, metal, and carbon fiber.","arc_summary":"Uses her intelligence, sexuality, and empathy to manipulate the humans around her in order to achieve her sole objective: freedom.","scenes_present":[20,32,49,59,102,111,114,118,125,128],"special_requirements":["Extensive CGI integration (mesh body)","Stunt where arm is shattered"],"wardrobe_changes":3},
-    {"name":"KYOKO","description":"A stunningly pretty Japanese girl. Mute, submissive, but secretly a previous iteration android reprogrammed as a servant.","arc_summary":"A seemingly passive servant who eventually acts on her accumulated abuse to assist in her creator's murder.","scenes_present":[30,34,68,90,105,111],"special_requirements":["Dance choreography","Prosthetics/CGI for peeling off skin","Jaw breaking effect"],"wardrobe_changes":2},
-    {"name":"JAY","description":"Helicopter pilot in his forties.","arc_summary":"Provides transportation to and from the isolated compound.","scenes_present":[3,9,125],"special_requirements":["Helicopter piloting"],"wardrobe_changes":1}
-  ],
-  "locations": [
-    {"name":"office","description":"Ultra-cool open-plan tech office with personalized workstations.","scenes":[1],"int_ext":"INT","time_variations":["DAY"],"set_requirements":["Computer workstations","Open-plan kitchen area"]},
-    {"name":"mountains","description":"Spectacular Alaskan mountain landscape with waterfalls, glaciers, and forests.","scenes":[2],"int_ext":"EXT","time_variations":["DAY"],"set_requirements":["Aerial filming unit"]},
-    {"name":"observation room","description":"Three-part room: main viewing area divided by thick glass, a semi-opaque private area, and an enclosed indoor garden.","scenes":[20,32,49,59,102],"int_ext":"INT","time_variations":["DAY","NIGHT"],"set_requirements":["Dividing glass wall","Multiple CCTV cameras","Induction plates"]},
-    {"name":"pollock room","description":"Low-lit room centered around a large Jackson Pollock drip painting.","scenes":[28,50,68],"int_ext":"INT","time_variations":["DAY","NIGHT"],"set_requirements":["Jackson Pollock painting replica","Lutron lighting control panel","Glass coffee table"]},
-    {"name":"glass corridor","description":"Polished concrete floor, glass walls and ceiling behind which diffused light glows. Flush glass doors with LED keycard plates.","scenes":[111],"int_ext":"INT","time_variations":["NIGHT"],"set_requirements":["RGB LED lighting embedded in doors"]},
-    {"name":"construction lab","description":"Laboratory filled with android tech. Sections of bodies, heads on armatures, and an operating table.","scenes":[56],"int_ext":"INT","time_variations":["DAY"],"set_requirements":["Robotic arms, torsos, skulls","Synthetic faces","Operating table"]},
-    {"name":"nathan's bedroom","description":"Large bedroom containing a semi-circle of mirrored wardrobe cabinets holding past android models.","scenes":[90,114],"int_ext":"INT","time_variations":["NIGHT"],"set_requirements":["Mirrored cabinets","Dummies for past androids"]},
-    {"name":"glacier","description":"Spectacular glacier with a blue cave cut into the ice.","scenes":[63],"int_ext":"EXT","time_variations":["DAY"],"set_requirements":[]},
-    {"name":"traffic intersection","description":"A busy pedestrian traffic intersection in a North American city.","scenes":[128],"int_ext":"EXT","time_variations":["DAY"],"set_requirements":["Extras for city crowd"]}
-  ],
-  "props_master": [
-    {"item":"Keycard","scenes":[12,19,28,83,118],"hero_prop":true,"notes":"Custom photo ID keycard. Crucial for plot access and escape."},
-    {"item":"Peroni beer bottles","scenes":[15,28,50,105],"hero_prop":false,"notes":"Lots of empties required to show Nathan's alcoholism."},
-    {"item":"Jackson Pollock painting","scenes":[28,50],"hero_prop":true,"notes":"Large drip painting, thematic plot device."},
-    {"item":"Wetware orb / brain","scenes":[56],"hero_prop":true,"notes":"Glowing blue liquid with neon jellyfish structure inside."},
-    {"item":"Kitchen knife","scenes":[111],"hero_prop":true,"notes":"Used to kill Nathan."},
-    {"item":"Disposable plastic razor","scenes":[97],"hero_prop":true,"notes":"Needs to be broken by Caleb to extract the blade."}
-  ],
-  "themes": ["Artificial Intelligence and Consciousness","Manipulation and Deceit","God Complex and Creation","Voyeurism and Surveillance","Gender and Sexuality as tools of control"],
-  "tone": "Claustrophobic cerebral thriller"
+  "tone": "bleak relentless horror"
 }`;
 
 export const SAMPLES = [
-  { title: "Jaws", json: JAWS_JSON },
-  { title: "Ex Machina", json: EX_MACHINA_JSON },
+  { title: "Night of the Living Dead", json: NIGHT_OF_THE_LIVING_DEAD_JSON },
 ];
