@@ -9,7 +9,7 @@ import { SceneBreakdownViewer } from "@/components/viewers/scene-breakdown-viewe
 import { LocationsViewer } from "@/components/viewers/locations-viewer";
 import { CastAndCrewViewer } from "@/components/viewers/cast-and-crew-viewer";
 import { ProductionViewer } from "@/components/viewers/production-viewer";
-import { VisualsViewer } from "@/components/viewers/visuals-viewer";
+import { KeyArtViewer } from "@/components/viewers/key-art-viewer";
 import type { DocumentResult } from "./wizard-shell";
 import type { SavedImage } from "@/lib/reports";
 import { downloadBlob } from "@/lib/utils";
@@ -23,8 +23,8 @@ const TABS = [
   { key: "scenes", label: "Scenes" },
   { key: "locations", label: "Locations" },
   { key: "cast-and-crew", label: "Cast & Crew" },
-  { key: "production", label: "Production" },
-  { key: "visuals", label: "Visuals" },
+  { key: "production", label: "Production Design" },
+  { key: "visuals", label: "Key Art" },
 ] as const;
 
 type TabKey = (typeof TABS)[number]["key"];
@@ -220,9 +220,16 @@ export function StepResults({
             )}
 
             {activeTab === "visuals" && (
-              <VisualsViewer
-                storyboardContent={storyboardContent}
+              <KeyArtViewer
+                jsonData={jsonData}
+                moodContent={moodContent}
+                onMoodContentUpdate={
+                  onDocumentUpdate
+                    ? (c) => onDocumentUpdate("mood-and-tone", c)
+                    : undefined
+                }
                 posterContent={posterContent}
+                storyboardContent={storyboardContent}
                 storyboardImages={storyboardImages}
                 onStoryboardImagesChange={onStoryboardImagesChange}
                 promptOverrides={promptOverrides}
