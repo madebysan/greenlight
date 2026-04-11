@@ -114,8 +114,14 @@ export function StepInstructions({ onNext }: StepInstructionsProps) {
         </div>
       </div>
 
-      {/* Next button */}
-      <div className="flex justify-end">
+      {/* Next buttons */}
+      <div className="flex justify-end items-center gap-3">
+        <a
+          href="/demo"
+          className="inline-flex items-center justify-center text-sm font-medium text-muted-foreground hover:text-foreground px-4 py-2 rounded-md border border-border hover:border-foreground/20 transition-colors"
+        >
+          See a demo
+        </a>
         <Button onClick={onNext} size="lg" className="px-8">
           I have my JSON &rarr;
         </Button>
