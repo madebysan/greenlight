@@ -277,17 +277,17 @@ export function PosterConceptsViewer({ content, savedImages, onImagesChange }: P
                 const isCopied = copiedId === concept.number;
 
                 return (
-                  <div key={concept.number} className="rounded-xl border overflow-hidden">
+                  <div key={concept.number} className="rounded-[12px] shadow-paper bg-card/40 overflow-hidden">
                     {/* Header */}
                     <button
                       onClick={() => toggleConcept(concept.number)}
-                      className="w-full flex items-center gap-3 px-4 py-3 text-left bg-muted/10 hover:bg-muted/20 transition-colors"
+                      className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-white/[0.02] transition-colors"
                     >
-                      <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-foreground/5 text-xs font-bold shrink-0">
-                        {concept.number}
+                      <span className="flex h-7 w-7 items-center justify-center rounded-[6px] bg-white/[0.04] shadow-pill text-[11px] font-mono font-medium tabular-nums shrink-0 text-foreground/90">
+                        {concept.number.toString().padStart(2, "0")}
                       </span>
                       <div className="flex-1 min-w-0">
-                        <span className="text-sm font-semibold">{concept.name}</span>
+                        <span className="text-[13px] font-medium tracking-tight">{concept.name}</span>
                         {concept.mood && (
                           <span className="text-[11px] text-muted-foreground ml-2">
                             {concept.mood}

@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { RefreshCw, Loader2 } from "lucide-react";
+import { RefreshCw, Loader2, Wind, Tag, BookOpen, Music, Film, Sparkles } from "lucide-react";
 import { replaceMarkdownSection } from "@/lib/markdown-utils";
 import { SectionHead } from "@/components/ui/section-head";
+import { SectionLabelPill } from "@/components/ui/inline-chip";
 
 type ColorEntry = { name: string; hex: string; description: string };
 type ReferenceEntry = { title: string; description: string };
@@ -166,18 +167,25 @@ export function MoodAndToneViewer({ content, jsonData, onContentUpdate }: MoodAn
   };
 
   return (
-    <div className="max-w-4xl space-y-14">
+    <div className="max-w-4xl space-y-16">
       <header>
-        <h1 className="text-2xl font-semibold tracking-tight mb-1">Mood & Tone</h1>
-        <p className="text-[13px] text-muted-foreground">
+        <SectionLabelPill icon={<Sparkles size={10} />} className="mb-3">
+          Atmosphere
+        </SectionLabelPill>
+        <h1 className="text-[44px] font-light tracking-[-0.03em] leading-[1.02] mb-3 text-foreground">
+          Mood & Tone
+        </h1>
+        <p className="text-[14px] text-foreground/70 max-w-[58ch] tracking-tight leading-[1.55]">
           The film&apos;s atmospheric identity — for the director, DP, production designer, and composer.
         </p>
       </header>
 
       {parsed.atmosphere && (
         <section>
-          <SectionHead index={1}>Atmosphere</SectionHead>
-          <div className="text-[15px] leading-[1.75] text-foreground/85 whitespace-pre-line">
+          <SectionHead index={1} label="Atmosphere" labelIcon={<Wind size={10} />}>
+            Feel of the film
+          </SectionHead>
+          <div className="text-[15px] leading-[1.75] text-foreground/80 whitespace-pre-line tracking-tight max-w-[65ch]">
             {parsed.atmosphere}
           </div>
         </section>
@@ -185,12 +193,14 @@ export function MoodAndToneViewer({ content, jsonData, onContentUpdate }: MoodAn
 
       {parsed.descriptors.length > 0 && (
         <section>
-          <SectionHead index={2}>Tonal Descriptors</SectionHead>
+          <SectionHead index={2} label="Tonal" labelIcon={<Tag size={10} />}>
+            Tonal Descriptors
+          </SectionHead>
           <div className="flex flex-wrap gap-1.5">
             {parsed.descriptors.map((d, i) => (
               <span
                 key={`${i}-${d}`}
-                className="inline-flex items-center px-3 py-1.5 rounded-full border border-border/80 bg-card/40 text-[12px] font-mono tracking-tight text-foreground/80"
+                className="inline-flex items-center px-3 py-1.5 rounded-full bg-white/[0.04] text-[11px] font-mono tracking-tight text-foreground/80 shadow-pill"
               >
                 {d}
               </span>
@@ -201,17 +211,19 @@ export function MoodAndToneViewer({ content, jsonData, onContentUpdate }: MoodAn
 
       {parsed.references.length > 0 && (
         <section>
-          <SectionHead index={3}>Reference Points</SectionHead>
+          <SectionHead index={3} label="References" labelIcon={<BookOpen size={10} />}>
+            Reference Points
+          </SectionHead>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {parsed.references.map((r) => (
               <div
                 key={r.title}
-                className="rounded-[10px] border border-border/60 hover:border-border bg-card/30 p-4 transition-colors"
+                className="rounded-[12px] bg-card/40 shadow-paper hover:shadow-paper-hover p-4 transition-all"
               >
-                <div className="text-[13px] font-semibold text-foreground leading-snug">
+                <div className="text-[13px] font-medium text-foreground leading-snug tracking-tight">
                   {r.title}
                 </div>
-                <p className="text-[12px] text-foreground/70 leading-[1.6] mt-1.5">
+                <p className="text-[12px] text-foreground/70 leading-[1.6] mt-1.5 tracking-tight">
                   {r.description}
                 </p>
               </div>
@@ -224,12 +236,14 @@ export function MoodAndToneViewer({ content, jsonData, onContentUpdate }: MoodAn
         <section>
           <SectionHead
             index={4}
+            label="Sound"
+            labelIcon={<Music size={10} />}
             meta={
               onContentUpdate && jsonData ? (
                 <button
                   onClick={handleReshuffleMusic}
                   disabled={reshufflingMusic}
-                  className="inline-flex items-center gap-1 text-[10px] font-medium text-muted-foreground hover:text-foreground disabled:opacity-50 transition-colors"
+                  className="inline-flex items-center gap-1 text-[10px] font-mono uppercase tracking-[0.1em] text-muted-foreground hover:text-foreground disabled:opacity-50 transition-colors"
                   title="Regenerate music direction"
                 >
                   {reshufflingMusic ? (
@@ -246,14 +260,14 @@ export function MoodAndToneViewer({ content, jsonData, onContentUpdate }: MoodAn
           </SectionHead>
 
           {parsed.musicProse && (
-            <div className="text-[14px] leading-[1.75] text-foreground/85 whitespace-pre-line">
+            <div className="text-[14px] leading-[1.75] text-foreground/80 whitespace-pre-line tracking-tight max-w-[65ch]">
               {parsed.musicProse}
             </div>
           )}
 
           {parsed.soundtracks.length > 0 && (
             <div className="mt-6">
-              <h3 className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground mb-3">
+              <h3 className="font-mono text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground mb-3">
                 Soundtrack References
               </h3>
               <SoundtrackGrid tracks={parsed.soundtracks} />
@@ -264,7 +278,9 @@ export function MoodAndToneViewer({ content, jsonData, onContentUpdate }: MoodAn
 
       {parsed.similarMoods.length > 0 && (
         <section>
-          <SectionHead index={5}>Similar Moods</SectionHead>
+          <SectionHead index={5} label="Echoes" labelIcon={<Film size={10} />}>
+            Similar Moods
+          </SectionHead>
           <SimilarMoodsGrid films={parsed.similarMoods.slice(0, 4)} />
         </section>
       )}
@@ -315,7 +331,7 @@ function SimilarMoodsGrid({ films }: { films: SimilarMoodEntry[] }) {
         return (
           <div
             key={`${f.title}-${f.year || ""}`}
-            className="flex gap-3 rounded-[10px] border border-border/60 hover:border-border bg-card/30 p-3 transition-colors"
+            className="flex gap-3 rounded-[12px] bg-card/40 shadow-paper hover:shadow-paper-hover p-3 transition-all"
           >
             <div className="w-14 aspect-[2/3] rounded-md overflow-hidden bg-muted/40 border border-border/60 shrink-0 relative">
               {loading ? (
@@ -390,7 +406,7 @@ function SoundtrackGrid({ tracks }: { tracks: SoundtrackEntry[] }) {
         return (
           <div
             key={`${t.title}-${t.year || ""}`}
-            className="flex gap-3 rounded-[10px] border border-border/60 hover:border-border bg-card/30 p-3 transition-colors"
+            className="flex gap-3 rounded-[12px] bg-card/40 shadow-paper hover:shadow-paper-hover p-3 transition-all"
           >
             <div className="w-14 aspect-[2/3] rounded-md overflow-hidden bg-muted/40 border border-border/60 shrink-0 relative">
               {loading ? (

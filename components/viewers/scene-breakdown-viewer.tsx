@@ -17,6 +17,8 @@ import {
 } from "lucide-react";
 import { parseStoryboardPrompts, type StoryboardScene } from "./storyboard-viewer";
 import { SectionHead } from "@/components/ui/section-head";
+import { ListOrdered, BarChart3, Film } from "lucide-react";
+import { SectionLabelPill } from "@/components/ui/inline-chip";
 import type { SavedImage } from "@/lib/reports";
 
 type ImageState = { status: "idle" | "generating" | "done" | "error"; url?: string; error?: string };
@@ -434,33 +436,44 @@ export function SceneBreakdownViewer({
   };
 
   return (
-    <div className="max-w-4xl space-y-10">
+    <div className="max-w-4xl space-y-12">
       <header>
-        <h1 className="text-2xl font-semibold tracking-tight mb-1">
+        <SectionLabelPill icon={<Film size={10} />} className="mb-3">
+          Scene Breakdown
+        </SectionLabelPill>
+        <h1 className="text-[32px] font-light tracking-[-0.025em] leading-[1.05] mb-2 text-foreground">
           {title || "Scenes"}
         </h1>
-        <p className="text-[13px] text-muted-foreground">
+        <p className="text-[13px] text-foreground/60 tracking-tight max-w-[60ch]">
           Scene-by-scene map of the film. Expand any scene to see its key visual moment, characters, and production notes.
         </p>
       </header>
 
       {overview.length > 0 && (
         <section>
-          <SectionHead index={1}>At a Glance</SectionHead>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-px bg-border/60 border border-border/60 rounded-[4px] overflow-hidden">
-            {overview.map((item) => (
-              <div
-                key={item.label}
-                className="bg-background px-5 py-5 flex flex-col gap-2"
-              >
-                <div className="text-[32px] font-semibold text-foreground tabular-nums leading-none tracking-tight">
-                  {item.value}
+          <SectionHead index={1} label="Breakdown" labelIcon={<BarChart3 size={10} />}>
+            At a Glance
+          </SectionHead>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-px bg-border/50 rounded-[12px] overflow-hidden shadow-paper">
+            {overview.map((item) => {
+              // Stats may come in as "5 unique locations" — strip to leading number
+              // so the big display numeral doesn't overflow.
+              const leadingNum = item.value.match(/^(\d[\d.,]*)/);
+              const shortValue = leadingNum ? leadingNum[1] : item.value;
+              return (
+                <div
+                  key={item.label}
+                  className="bg-card/40 px-5 py-6 flex flex-col gap-2"
+                >
+                  <div className="text-[34px] font-light text-foreground tabular-nums leading-none tracking-[-0.03em]">
+                    {shortValue}
+                  </div>
+                  <div className="font-mono text-[9px] font-medium uppercase tracking-[0.18em] text-muted-foreground leading-snug">
+                    {item.label.replace(/^Total\s+/, "")}
+                  </div>
                 </div>
-                <div className="font-mono text-[9px] uppercase tracking-[0.15em] text-muted-foreground leading-snug">
-                  {item.label.replace(/^Total\s+/, "")}
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </section>
       )}
@@ -468,6 +481,8 @@ export function SceneBreakdownViewer({
       <section>
         <SectionHead
           index={2}
+          label="Scenes"
+          labelIcon={<ListOrdered size={10} />}
           meta={
             <div className="flex items-center gap-1">
               <div className="inline-flex items-center rounded-md border border-border p-0.5 mr-2">
@@ -550,10 +565,10 @@ export function SceneBreakdownViewer({
             return (
               <div
                 key={scene.number}
-                className={`rounded-[10px] border transition-colors ${
+                className={`rounded-[12px] transition-all ${
                   isExpanded
-                    ? "bg-card/60 border-border"
-                    : "bg-card/30 border-border/60 hover:border-border"
+                    ? "bg-card/60 shadow-paper-hover"
+                    : "bg-card/30 shadow-paper hover:shadow-paper-hover"
                 }`}
               >
                 <div className="flex items-center gap-3 px-4 py-3">
@@ -561,24 +576,24 @@ export function SceneBreakdownViewer({
                     onClick={() => toggleScene(scene.number)}
                     className="flex items-center gap-3 flex-1 min-w-0 text-left"
                   >
-                    <span className="flex h-[26px] w-[26px] items-center justify-center rounded-md bg-muted font-mono text-[11px] font-semibold shrink-0 tabular-nums">
+                    <span className="flex h-[26px] w-[26px] items-center justify-center rounded-[6px] bg-white/[0.04] font-mono text-[11px] font-medium shrink-0 tabular-nums shadow-pill text-foreground/90">
                       {scene.number.toString().padStart(2, "0")}
                     </span>
                     {scene.intExt && (
-                      <span className={`font-mono text-[10px] font-semibold tracking-[0.08em] px-2 py-[3px] rounded-[4px] ${INT_EXT_STYLES[scene.intExt]}`}>
+                      <span className={`font-mono text-[10px] font-medium tracking-[0.1em] px-2 py-[3px] rounded-full ${INT_EXT_STYLES[scene.intExt]}`}>
                         {scene.intExt}
                       </span>
                     )}
-                    <span className="text-[14px] font-semibold tracking-wide uppercase flex-1 truncate">
+                    <span className="text-[13px] font-medium tracking-[-0.01em] uppercase flex-1 truncate text-foreground/90">
                       {scene.slugLine.replace(/^(INT|EXT)\.\s*/, "").replace(/\s*-\s*(NIGHT|DAY|MORNING|AFTERNOON|EVENING|DAWN|DUSK|CONTINUOUS)\s*$/i, "")}
                     </span>
                     {scene.timeOfDay && (
-                      <span className={`font-mono text-[10px] font-semibold tracking-[0.08em] uppercase px-2 py-[3px] rounded-[4px] ${TIME_STYLES[scene.timeOfDay.toUpperCase()] || "bg-muted text-muted-foreground"}`}>
+                      <span className={`font-mono text-[10px] font-medium tracking-[0.1em] uppercase px-2 py-[3px] rounded-full ${TIME_STYLES[scene.timeOfDay.toUpperCase()] || "bg-white/[0.04] text-muted-foreground"}`}>
                         {scene.timeOfDay}
                       </span>
                     )}
                     {pages && (
-                      <span className="font-mono text-[11px] text-muted-foreground tabular-nums whitespace-nowrap">pp. {pages}</span>
+                      <span className="font-mono text-[11px] text-muted-foreground tabular-nums whitespace-nowrap tracking-tight">pp. {pages}</span>
                     )}
                   </button>
 
@@ -622,13 +637,13 @@ export function SceneBreakdownViewer({
                     {(location || characters) && (
                       <div className="flex flex-wrap gap-1.5">
                         {location && (
-                          <span className="inline-flex items-center gap-1.5 font-mono text-[11px] bg-muted border border-border/60 rounded-md px-2.5 py-1 text-foreground/85">
+                          <span className="inline-flex items-center gap-1.5 font-mono text-[11px] bg-white/[0.04] rounded-full px-2.5 py-1 text-foreground/85 shadow-pill tracking-tight">
                             <span className="text-muted-foreground">◉</span>
                             {location}
                           </span>
                         )}
                         {characters && characters.split(",").map((char) => (
-                          <span key={char.trim()} className="inline-flex items-center gap-1.5 font-mono text-[11px] bg-muted border border-border/60 rounded-md px-2.5 py-1 text-foreground/85">
+                          <span key={char.trim()} className="inline-flex items-center gap-1.5 font-mono text-[11px] bg-white/[0.04] rounded-full px-2.5 py-1 text-foreground/85 shadow-pill tracking-tight">
                             <span className="text-muted-foreground">◉</span>
                             {char.trim()}
                           </span>
@@ -654,23 +669,23 @@ export function SceneBreakdownViewer({
                         <>
                           {emphasisFields.map((field) => (
                             <div key={field.label}>
-                              <div className="font-mono text-[10px] uppercase tracking-[0.15em] text-muted-foreground mb-2">
+                              <div className="font-mono text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground mb-2">
                                 {field.label}
                               </div>
-                              <p className="text-[14px] leading-[1.6] text-foreground/90">
+                              <p className="text-[15px] leading-[1.6] text-foreground/85 tracking-tight">
                                 {field.value}
                               </p>
                             </div>
                           ))}
 
                           {detailFields.length > 0 && (
-                            <dl className="grid grid-cols-[110px_1fr] gap-x-5 gap-y-3 pt-4 border-t border-border/60">
+                            <dl className="grid grid-cols-[110px_1fr] gap-x-5 gap-y-3 pt-4 border-t border-border/50">
                               {detailFields.map((field) => (
                                 <div key={field.label} className="contents">
-                                  <dt className="font-mono text-[9px] uppercase tracking-[0.18em] text-muted-foreground pt-0.5">
+                                  <dt className="font-mono text-[9px] font-medium uppercase tracking-[0.18em] text-muted-foreground pt-0.5">
                                     {field.label}
                                   </dt>
-                                  <dd className="m-0 text-[13px] leading-[1.55] text-foreground/85">
+                                  <dd className="m-0 text-[13px] leading-[1.6] text-foreground/80 tracking-tight">
                                     {field.value}
                                   </dd>
                                 </div>
@@ -783,8 +798,8 @@ function StoryboardSection({
   const promptVisible = isEditingPrompt || isShowingPrompt;
 
   return (
-    <div className="pt-5 mt-1 border-t border-border/60">
-      <div className="font-mono text-[10px] uppercase tracking-[0.15em] text-muted-foreground mb-4">
+    <div className="pt-6 mt-2 border-t border-border/50">
+      <div className="font-mono text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground mb-4">
         Storyboard Frame
       </div>
 
@@ -792,7 +807,7 @@ function StoryboardSection({
         {/* Left: image or placeholder + action link row */}
         <div>
           {imageState.status === "done" && imageState.url ? (
-            <div className="relative group aspect-video rounded-md overflow-hidden border border-border/60 bg-muted/30">
+            <div className="relative group aspect-video rounded-[10px] overflow-hidden shadow-paper bg-muted/30">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={imageState.url}
@@ -804,19 +819,19 @@ function StoryboardSection({
                 download={`scene-${sceneNumber}.png`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="absolute top-1.5 right-1.5 opacity-0 group-hover:opacity-100 transition-opacity inline-flex items-center gap-1 font-mono text-[10px] px-2 py-1 rounded bg-black/70 text-white hover:bg-black/90"
+                className="absolute top-1.5 right-1.5 opacity-0 group-hover:opacity-100 transition-opacity inline-flex items-center gap-1 font-mono text-[10px] px-2 py-1 rounded-full bg-[#0C0A09] text-white hover:bg-black shadow-pill"
               >
                 <Download size={10} />
                 Save
               </a>
             </div>
           ) : imageState.status === "generating" ? (
-            <div className="aspect-video rounded-md border border-border/60 bg-muted/20 flex items-center justify-center gap-2 text-[11px] text-muted-foreground">
+            <div className="aspect-video rounded-[10px] shadow-paper bg-muted/20 flex items-center justify-center gap-2 text-[11px] text-muted-foreground">
               <Loader2 size={14} className="animate-spin" />
               Generating frame…
             </div>
           ) : imageState.status === "error" ? (
-            <div className="aspect-video rounded-md border border-destructive/30 bg-destructive/5 flex flex-col items-center justify-center gap-1 text-[11px] text-destructive/80">
+            <div className="aspect-video rounded-[10px] shadow-paper bg-destructive/5 flex flex-col items-center justify-center gap-1 text-[11px] text-destructive/80">
               <span>{imageState.error || "Generation failed"}</span>
               <button
                 onClick={onGenerate}
@@ -829,7 +844,7 @@ function StoryboardSection({
             <button
               onClick={onGenerate}
               disabled={generatingAll}
-              className="aspect-video w-full rounded-md border border-dashed border-border/80 bg-muted/10 hover:bg-muted/20 hover:border-foreground/30 flex flex-col items-center justify-center gap-1.5 text-[11px] text-muted-foreground hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="aspect-video w-full rounded-[10px] shadow-paper hover:shadow-paper-hover bg-muted/10 hover:bg-muted/20 flex flex-col items-center justify-center gap-1.5 text-[11px] text-muted-foreground hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed transition-all tracking-tight"
             >
               <ImageIcon size={18} />
               Generate frame

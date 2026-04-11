@@ -1,9 +1,10 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { RefreshCw, Loader2 } from "lucide-react";
+import { RefreshCw, Loader2, FileText, Sparkles, BarChart3, Compass } from "lucide-react";
 import { replaceMarkdownSection } from "@/lib/markdown-utils";
 import { SectionHead } from "@/components/ui/section-head";
+import { SectionLabelPill } from "@/components/ui/inline-chip";
 import { PosterCarousel } from "./poster-carousel";
 import type { SavedImage } from "@/lib/reports";
 
@@ -131,22 +132,27 @@ export function OverviewViewer({
   const hasCarousel = !!posterContent && !!posterImages && Object.keys(posterImages).length > 0;
 
   return (
-    <div className="max-w-5xl space-y-14">
-      <header className={hasCarousel ? "grid grid-cols-1 md:grid-cols-[1fr_240px] gap-8 items-start" : ""}>
+    <div className="max-w-5xl space-y-16">
+      <header className={hasCarousel ? "grid grid-cols-1 md:grid-cols-[1fr_240px] gap-10 items-start" : ""}>
         <div>
+          <SectionLabelPill icon={<Compass size={10} />} className="mb-4">
+            Overview
+          </SectionLabelPill>
           {parsed.title && (
-            <h1 className="text-3xl font-semibold tracking-tight mb-4">{parsed.title}</h1>
+            <h1 className="text-[44px] font-light tracking-[-0.03em] leading-[1.02] mb-5 text-foreground">
+              {parsed.title}
+            </h1>
           )}
           {parsed.logline && (
-            <p className="text-[17px] leading-[1.55] text-foreground/90 max-w-[60ch] font-medium">
+            <p className="text-[17px] leading-[1.55] text-foreground/80 max-w-[58ch] font-normal tracking-tight">
               {parsed.logline}
             </p>
           )}
 
           {parsed.taglines.length > 0 && (
-            <div className="mt-6 rounded-xl border border-border/60 bg-card/30 p-5 max-w-[60ch]">
+            <div className="mt-8 rounded-[12px] bg-card/40 shadow-paper p-5 max-w-[60ch]">
               <div className="flex items-center gap-3 mb-3">
-                <h3 className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                <h3 className="font-mono text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
                   Taglines
                 </h3>
                 <div className="flex-1 h-px bg-border/60" />
@@ -154,7 +160,7 @@ export function OverviewViewer({
                   <button
                     onClick={handleRefreshTaglines}
                     disabled={refreshingTaglines}
-                    className="inline-flex items-center gap-1 text-[10px] font-medium text-muted-foreground hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    className="inline-flex items-center gap-1 text-[10px] font-mono uppercase tracking-[0.1em] text-muted-foreground hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     title="Generate new taglines"
                   >
                     {refreshingTaglines ? (
@@ -170,7 +176,7 @@ export function OverviewViewer({
                 {parsed.taglines.map((t, i) => (
                   <li
                     key={`${i}-${t}`}
-                    className="text-[14px] leading-[1.5] text-foreground/85 italic"
+                    className="text-[14px] leading-[1.55] text-foreground/80 italic tracking-tight"
                   >
                     “{t.replace(/^["“]|["”]$/g, "")}”
                   </li>
@@ -180,17 +186,17 @@ export function OverviewViewer({
           )}
 
           {parsed.identity.length > 0 && (
-            <div className="mt-8 pt-6 border-t border-border/60 max-w-[60ch]">
-              <h3 className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground mb-3">
+            <div className="mt-8 pt-8 border-t border-border/60 max-w-[60ch]">
+              <h3 className="font-mono text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground mb-4">
                 Film Identity
               </h3>
-              <dl className="grid grid-cols-2 gap-x-6 gap-y-2.5">
+              <dl className="grid grid-cols-2 gap-x-6 gap-y-3">
                 {parsed.identity.map((item) => (
-                  <div key={item.label} className="space-y-0.5 min-w-0">
-                    <dt className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+                  <div key={item.label} className="space-y-1 min-w-0">
+                    <dt className="font-mono text-[9px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
                       {item.label}
                     </dt>
-                    <dd className="text-[13px] text-foreground/85 truncate">{item.value}</dd>
+                    <dd className="text-[13px] text-foreground/85 truncate tracking-tight">{item.value}</dd>
                   </div>
                 ))}
               </dl>
@@ -205,8 +211,10 @@ export function OverviewViewer({
 
       {parsed.synopsis && (
         <section>
-          <SectionHead index={1}>Synopsis</SectionHead>
-          <p className="text-[14px] leading-[1.75] text-foreground/80 whitespace-pre-line">
+          <SectionHead index={1} label="Synopsis" labelIcon={<FileText size={10} />}>
+            Story in brief
+          </SectionHead>
+          <p className="text-[15px] leading-[1.75] text-foreground/80 whitespace-pre-line max-w-[65ch] tracking-tight">
             {parsed.synopsis}
           </p>
         </section>
@@ -214,14 +222,16 @@ export function OverviewViewer({
 
       {parsed.themes.length > 0 && (
         <section>
-          <SectionHead index={2}>Themes</SectionHead>
-          <div className="space-y-5">
+          <SectionHead index={2} label="Themes" labelIcon={<Sparkles size={10} />}>
+            What the film is about
+          </SectionHead>
+          <div className="space-y-6 max-w-[65ch]">
             {parsed.themes.map((t) => (
               <div key={t.title}>
-                <h3 className="text-[13px] font-semibold text-foreground mb-1.5">
+                <h3 className="text-[14px] font-medium text-foreground mb-2 tracking-tight">
                   {t.title}
                 </h3>
-                <p className="text-[13px] leading-[1.7] text-foreground/70">
+                <p className="text-[13px] leading-[1.7] text-foreground/70 tracking-tight">
                   {t.body}
                 </p>
               </div>
@@ -232,30 +242,36 @@ export function OverviewViewer({
 
       {(parsed.stats.length > 0 || parsed.complexity) && (
         <section>
-          <SectionHead index={3}>Scope at a Glance</SectionHead>
+          <SectionHead index={3} label="Scope" labelIcon={<BarChart3 size={10} />}>
+            Production footprint
+          </SectionHead>
           {parsed.stats.length > 0 && (
-            <div className="grid grid-cols-2 md:grid-cols-6 gap-px bg-border/60 border border-border/60 rounded-[4px] overflow-hidden mb-5">
-              {parsed.stats.map((s) => (
-                <div
-                  key={s.label}
-                  className="bg-background px-5 py-5 flex flex-col gap-2"
-                >
-                  <div className="text-[32px] font-semibold text-foreground tabular-nums leading-none tracking-tight">
-                    {s.value}
+            <div className="grid grid-cols-2 md:grid-cols-6 gap-px bg-border/50 rounded-[12px] overflow-hidden mb-6 shadow-paper">
+              {parsed.stats.map((s) => {
+                const leadingNum = s.value.match(/^(\d[\d.,]*)/);
+                const shortValue = leadingNum ? leadingNum[1] : s.value;
+                return (
+                  <div
+                    key={s.label}
+                    className="bg-card/40 px-5 py-6 flex flex-col gap-2"
+                  >
+                    <div className="text-[34px] font-light text-foreground tabular-nums leading-none tracking-[-0.03em]">
+                      {shortValue}
+                    </div>
+                    <div className="font-mono text-[9px] font-medium uppercase tracking-[0.18em] text-muted-foreground leading-snug">
+                      {s.label}
+                    </div>
                   </div>
-                  <div className="font-mono text-[9px] uppercase tracking-[0.15em] text-muted-foreground leading-snug">
-                    {s.label}
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
           {parsed.complexity && (
-            <div className="rounded-[4px] border border-border/60 bg-card/20 p-5">
-              <div className="font-mono text-[10px] uppercase tracking-[0.15em] text-muted-foreground mb-2">
+            <div className="rounded-[12px] bg-card/40 shadow-paper p-5 max-w-[65ch]">
+              <div className="font-mono text-[9px] font-medium uppercase tracking-[0.18em] text-muted-foreground mb-2">
                 Complexity Read
               </div>
-              <p className="text-[13px] leading-[1.7] text-foreground/80">
+              <p className="text-[13px] leading-[1.7] text-foreground/80 tracking-tight">
                 {parsed.complexity}
               </p>
             </div>

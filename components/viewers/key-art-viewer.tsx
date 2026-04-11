@@ -1,10 +1,11 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { RefreshCw, Loader2 } from "lucide-react";
+import { RefreshCw, Loader2, Palette, Type, Image as ImageIcon } from "lucide-react";
 import { PosterConceptsViewer } from "@/components/viewers/poster-concepts-viewer";
 import { TitleTreatment } from "@/components/viewers/title-treatment";
 import { SectionHead } from "@/components/ui/section-head";
+import { SectionLabelPill } from "@/components/ui/inline-chip";
 import { replaceMarkdownSection } from "@/lib/markdown-utils";
 import type { SavedImage } from "@/lib/reports";
 
@@ -90,14 +91,19 @@ export function KeyArtViewer({
 
   return (
     <div>
-      <div className="mb-6">
-        <h1 className="text-xl font-semibold tracking-tight mb-1">Key Art</h1>
-        <p className="text-[13px] text-muted-foreground">
+      <div className="mb-8">
+        <SectionLabelPill icon={<ImageIcon size={10} />} className="mb-3">
+          Visual Identity
+        </SectionLabelPill>
+        <h1 className="text-[32px] font-light tracking-[-0.025em] leading-[1.05] mb-2 text-foreground">
+          Key Art
+        </h1>
+        <p className="text-[13px] text-foreground/60 tracking-tight max-w-[58ch]">
           The film&apos;s visual identity — palette, title treatment, and poster concepts.
         </p>
       </div>
 
-      <div className="flex items-center gap-1 border-b border-border mb-6">
+      <div className="flex items-center gap-0 border-b border-border/60 mb-8">
         <SubTabButton active={tab === "identity"} onClick={() => setTab("identity")}>
           Identity
         </SubTabButton>
@@ -107,16 +113,18 @@ export function KeyArtViewer({
       </div>
 
       {tab === "identity" && (
-        <div className="space-y-12">
+        <div className="space-y-14">
           <section>
             <SectionHead
               index={1}
+              label="Palette"
+              labelIcon={<Palette size={10} />}
               meta={
                 onMoodContentUpdate ? (
                   <button
                     onClick={handleReshufflePalette}
                     disabled={reshufflingPalette}
-                    className="inline-flex items-center gap-1 text-[10px] font-medium text-muted-foreground hover:text-foreground disabled:opacity-50 transition-colors"
+                    className="inline-flex items-center gap-1 text-[10px] font-mono uppercase tracking-[0.1em] text-muted-foreground hover:text-foreground disabled:opacity-50 transition-colors"
                     title="Reshuffle color palette"
                   >
                     {reshufflingPalette ? (
@@ -133,7 +141,7 @@ export function KeyArtViewer({
             </SectionHead>
 
             {palette.length === 0 ? (
-              <p className="text-[13px] text-muted-foreground py-4">
+              <p className="text-[13px] text-muted-foreground py-4 tracking-tight">
                 No palette generated yet. Check the Mood & Tone document.
               </p>
             ) : (
@@ -141,22 +149,22 @@ export function KeyArtViewer({
                 {palette.map((c) => (
                   <div
                     key={c.hex}
-                    className="flex items-start gap-3 rounded-[10px] border border-border/60 hover:border-border bg-card/30 px-3 py-3 transition-colors"
+                    className="flex items-start gap-3 rounded-[12px] bg-card/40 shadow-paper hover:shadow-paper-hover px-3 py-3 transition-all"
                   >
                     <div
-                      className="w-10 h-10 rounded-md border border-border/60 shrink-0"
+                      className="w-10 h-10 rounded-[6px] shrink-0 shadow-pill"
                       style={{ backgroundColor: c.hex }}
                     />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-baseline gap-2 flex-wrap">
-                        <span className="text-[13px] font-semibold text-foreground leading-tight">
+                        <span className="text-[13px] font-medium text-foreground leading-tight tracking-tight">
                           {c.name}
                         </span>
-                        <span className="font-mono text-[9px] uppercase tracking-[0.12em] text-muted-foreground">
+                        <span className="font-mono text-[9px] uppercase tracking-[0.12em] text-muted-foreground tabular-nums">
                           {c.hex}
                         </span>
                       </div>
-                      <p className="text-[12px] text-foreground/70 leading-[1.55] mt-1 line-clamp-2">
+                      <p className="text-[12px] text-foreground/70 leading-[1.55] mt-1 line-clamp-2 tracking-tight">
                         {c.description}
                       </p>
                     </div>
@@ -167,7 +175,9 @@ export function KeyArtViewer({
           </section>
 
           <section>
-            <SectionHead index={2}>Title Treatment</SectionHead>
+            <SectionHead index={2} label="Treatment" labelIcon={<Type size={10} />}>
+              Title Treatment
+            </SectionHead>
             <TitleTreatment title={title} />
           </section>
         </div>
@@ -201,13 +211,16 @@ function SubTabButton({
   return (
     <button
       onClick={onClick}
-      className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+      className={`relative px-3 py-3 text-[12px] font-medium tracking-tight transition-colors ${
         active
-          ? "border-primary text-foreground"
-          : "border-transparent text-muted-foreground hover:text-foreground"
+          ? "text-foreground"
+          : "text-muted-foreground hover:text-foreground"
       }`}
     >
       {children}
+      {active && (
+        <span className="absolute -bottom-px left-2 right-2 h-px bg-foreground" />
+      )}
     </button>
   );
 }
