@@ -83,6 +83,7 @@ export function WizardShell() {
   const [promptOverrides, setPromptOverrides] = useState<Record<number, string>>({});
   const [posterImages, setPosterImages] = useState<Record<number, SavedImage>>({});
   const [portraits, setPortraits] = useState<Record<string, SavedImage>>({});
+  const [disabledItems, setDisabledItems] = useState<Record<string, boolean>>({});
 
   // Hydrate from localStorage on mount.
   // setState in an effect is intentional here: we need SSR to render a neutral
@@ -103,6 +104,7 @@ export function WizardShell() {
       setPromptOverrides(project.promptOverrides || {});
       setPosterImages(project.posterImages || {});
       setPortraits(project.portraits || {});
+      setDisabledItems(project.disabledItems || {});
       setCurrentStep(4);
     }
     setApiKey(localStorage.getItem(API_KEY_STORAGE) || "");
@@ -164,6 +166,7 @@ export function WizardShell() {
     setPromptOverrides({});
     setPosterImages({});
     setPortraits({});
+    setDisabledItems({});
   };
 
   const handleImagesChange = useCallback((images: Record<number, SavedImage>) => {
@@ -184,6 +187,11 @@ export function WizardShell() {
   const handlePortraitsChange = useCallback((portraits: Record<string, SavedImage>) => {
     setPortraits(portraits);
     updateProject({ portraits });
+  }, []);
+
+  const handleDisabledItemsChange = useCallback((disabled: Record<string, boolean>) => {
+    setDisabledItems(disabled);
+    updateProject({ disabledItems: disabled });
   }, []);
 
   const handleDocumentUpdate = (slug: string, newContent: string) => {
@@ -375,6 +383,8 @@ export function WizardShell() {
             onPosterImagesChange={handlePosterImagesChange}
             portraits={portraits}
             onPortraitsChange={handlePortraitsChange}
+            disabledItems={disabledItems}
+            onDisabledItemsChange={handleDisabledItemsChange}
           />
         )}
       </main>
