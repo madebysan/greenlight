@@ -9,6 +9,10 @@ type StepGeneratingProps = {
   documents: DocumentResult[];
   setDocuments: React.Dispatch<React.SetStateAction<DocumentResult[]>>;
   onComplete: (results: DocumentResult[]) => void;
+  // When provided, skip real API calls and fake the progression using these
+  // pre-populated documents. Used for the cached-project "bonus round" demo
+  // path where a matching film title already has all its markdown on disk.
+  prefilledDocs?: DocumentResult[];
 };
 
 const STATUS_ICON: Record<DocumentResult["status"], string> = {
@@ -90,12 +94,45 @@ export function StepGenerating({
   documents,
   setDocuments,
   onComplete,
+  prefilledDocs,
 }: StepGeneratingProps) {
   const hasStarted = useRef(false);
 
   useEffect(() => {
     if (hasStarted.current) return;
     hasStarted.current = true;
+
+    async function fakeProgression() {
+      // Walk through each pending doc and replace it with the prefilled one
+      // with a deliberate delay so the animation reads as real generation.
+      const FAKE_STEP_MS = 2200;
+      const finalDocs: DocumentResult[] = documents.map((d) => ({ ...d }));
+
+      for (let i = 0; i < documents.length; i++) {
+        const doc = documents[i];
+        // Mark as generating
+        setDocuments((prev) =>
+          prev.map((d) =>
+            d.slug === doc.slug ? { ...d, status: "generating" as const } : d,
+          ),
+        );
+
+        await new Promise((r) => setTimeout(r, FAKE_STEP_MS));
+
+        // Find the prefilled content for this slug
+        const prefilled = prefilledDocs!.find((p) => p.slug === doc.slug);
+        const nextDoc: DocumentResult = prefilled
+          ? { ...doc, status: "done", content: prefilled.content, error: null }
+          : { ...doc, status: "done", content: null, error: null };
+
+        finalDocs[i] = nextDoc;
+        setDocuments((prev) =>
+          prev.map((d) => (d.slug === doc.slug ? nextDoc : d)),
+        );
+      }
+
+      onComplete(finalDocs);
+    }
 
     async function generateSequential() {
       const results: { slug: string; content: string | null; error: string | null }[] = [];
@@ -128,7 +165,11 @@ export function StepGenerating({
       onComplete(finalDocs);
     }
 
-    generateSequential();
+    if (prefilledDocs && prefilledDocs.length > 0) {
+      fakeProgression();
+    } else {
+      generateSequential();
+    }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const doneCount = documents.filter((d) => d.status === "done").length;
