@@ -25,29 +25,6 @@ export function trimForSceneBreakdown(jsonString: string): string {
   });
 }
 
-// Marketing Brief: needs title/genre/tone/themes + character summaries + scene highlights
-export function trimForMarketingBrief(jsonString: string): string {
-  const data = parseData(jsonString);
-  return JSON.stringify({
-    title: data.title,
-    genre: data.genre,
-    setting_period: data.setting_period,
-    tone: data.tone,
-    themes: data.themes,
-    characters: (data.characters as AnyCharacter[])?.map((c) => ({
-      name: c.name,
-      description: c.description,
-      arc_summary: c.arc_summary,
-    })),
-    scenes: (data.scenes as AnyScene[])?.map((s) => ({
-      scene_number: s.scene_number,
-      slug_line: s.slug_line,
-      key_visual_moment: s.key_visual_moment,
-      emotional_beat: s.emotional_beat,
-    })),
-  });
-}
-
 // Storyboard Prompts: needs scene visuals, no character bios or location details
 export function trimForStoryboardPrompts(jsonString: string): string {
   const data = parseData(jsonString);
