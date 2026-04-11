@@ -206,12 +206,12 @@ export function MoodAndToneViewer({ content, jsonData, onContentUpdate }: MoodAn
             {parsed.references.map((r) => (
               <div
                 key={r.title}
-                className="rounded-lg border border-border/60 bg-card/40 p-4"
+                className="rounded-[10px] border border-border/60 hover:border-border bg-card/30 p-4 transition-colors"
               >
-                <div className="text-[12px] font-semibold text-foreground leading-snug">
+                <div className="text-[13px] font-semibold text-foreground leading-snug">
                   {r.title}
                 </div>
-                <p className="text-[11px] text-foreground/65 leading-[1.6] mt-1.5">
+                <p className="text-[12px] text-foreground/70 leading-[1.6] mt-1.5">
                   {r.description}
                 </p>
               </div>
@@ -315,7 +315,7 @@ function SimilarMoodsGrid({ films }: { films: SimilarMoodEntry[] }) {
         return (
           <div
             key={`${f.title}-${f.year || ""}`}
-            className="flex gap-3 rounded-lg border border-border/60 bg-card/30 p-3"
+            className="flex gap-3 rounded-[10px] border border-border/60 hover:border-border bg-card/30 p-3 transition-colors"
           >
             <div className="w-14 aspect-[2/3] rounded-md overflow-hidden bg-muted/40 border border-border/60 shrink-0 relative">
               {loading ? (
@@ -330,13 +330,13 @@ function SimilarMoodsGrid({ films }: { films: SimilarMoodEntry[] }) {
               ) : null}
             </div>
             <div className="flex-1 min-w-0">
-              <div className="text-[12px] font-semibold text-foreground leading-snug">
+              <div className="text-[13px] font-semibold text-foreground leading-snug">
                 {f.title}
                 {f.year && (
-                  <span className="text-muted-foreground font-normal"> · {f.year}</span>
+                  <span className="text-muted-foreground font-normal font-mono text-[11px] ml-1">· {f.year}</span>
                 )}
               </div>
-              <p className="text-[11px] text-foreground/65 leading-[1.55] mt-1.5">
+              <p className="text-[12px] text-foreground/70 leading-[1.55] mt-1.5">
                 {f.description}
               </p>
             </div>
@@ -390,7 +390,7 @@ function SoundtrackGrid({ tracks }: { tracks: SoundtrackEntry[] }) {
         return (
           <div
             key={`${t.title}-${t.year || ""}`}
-            className="flex gap-3 rounded-lg border border-border/60 bg-card/30 p-3"
+            className="flex gap-3 rounded-[10px] border border-border/60 hover:border-border bg-card/30 p-3 transition-colors"
           >
             <div className="w-14 aspect-[2/3] rounded-md overflow-hidden bg-muted/40 border border-border/60 shrink-0 relative">
               {loading ? (
@@ -405,16 +405,16 @@ function SoundtrackGrid({ tracks }: { tracks: SoundtrackEntry[] }) {
               ) : null}
             </div>
             <div className="flex-1 min-w-0">
-              <div className="text-[12px] font-semibold text-foreground leading-snug">
+              <div className="text-[13px] font-semibold text-foreground leading-snug">
                 {t.title}
                 {t.year && (
-                  <span className="text-muted-foreground font-normal"> · {t.year}</span>
+                  <span className="text-muted-foreground font-normal font-mono text-[11px] ml-1">· {t.year}</span>
                 )}
               </div>
-              <div className="text-[10px] text-muted-foreground mt-0.5 uppercase tracking-wider">
+              <div className="font-mono text-[9px] text-muted-foreground mt-1 uppercase tracking-[0.15em]">
                 {t.composer}
               </div>
-              <p className="text-[11px] text-foreground/65 leading-[1.55] mt-1.5">
+              <p className="text-[12px] text-foreground/70 leading-[1.55] mt-1.5">
                 {t.description}
               </p>
             </div>

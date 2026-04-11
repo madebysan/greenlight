@@ -96,8 +96,10 @@ export function LocationsViewer({ jsonData }: LocationsViewerProps) {
           return (
             <div
               key={loc.name}
-              className={`rounded-xl border transition-colors ${
-                isExpanded ? "bg-card/40" : "bg-card/20 hover:bg-card/30"
+              className={`rounded-[10px] border transition-colors ${
+                isExpanded
+                  ? "bg-card/60 border-border"
+                  : "bg-card/30 border-border/60 hover:border-border"
               }`}
             >
               <button
@@ -105,7 +107,7 @@ export function LocationsViewer({ jsonData }: LocationsViewerProps) {
                 className="w-full text-left p-5 flex items-start justify-between gap-4"
               >
                 <div className="flex-1 min-w-0">
-                  <h2 className="text-base font-semibold capitalize text-foreground flex items-center gap-2">
+                  <h2 className="text-[15px] font-semibold capitalize text-foreground flex items-center gap-2 tracking-tight">
                     <ChevronDown
                       size={14}
                       className={`text-muted-foreground transition-transform ${
@@ -115,16 +117,16 @@ export function LocationsViewer({ jsonData }: LocationsViewerProps) {
                     {loc.name}
                   </h2>
                   {!isExpanded && (
-                    <p className="text-[12px] text-foreground/60 mt-1 line-clamp-1 pl-5">
+                    <p className="text-[12px] text-foreground/65 mt-1 line-clamp-1 pl-5">
                       {loc.description}
                     </p>
                   )}
                 </div>
-                <div className="flex flex-col items-end gap-1 shrink-0">
-                  <span className="inline-flex items-center gap-1 text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-md bg-muted text-muted-foreground">
+                <div className="flex flex-col items-end gap-1.5 shrink-0">
+                  <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.08em] px-2 py-[3px] rounded-[4px] bg-muted text-muted-foreground">
                     {loc.int_ext}
                   </span>
-                  <span className="text-[11px] text-muted-foreground">
+                  <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground tabular-nums">
                     {sceneCount} {sceneCount === 1 ? "scene" : "scenes"}
                   </span>
                 </div>
@@ -141,7 +143,7 @@ export function LocationsViewer({ jsonData }: LocationsViewerProps) {
                       {loc.time_variations.map((time) => (
                         <span
                           key={time}
-                          className="text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-md bg-primary/10 text-primary"
+                          className="font-mono text-[10px] font-semibold uppercase tracking-[0.08em] px-2 py-[3px] rounded-[4px] bg-violet-500/15 text-violet-300"
                         >
                           {time}
                         </span>
@@ -150,14 +152,14 @@ export function LocationsViewer({ jsonData }: LocationsViewerProps) {
                   )}
 
                   {loc.set_requirements && loc.set_requirements.length > 0 && (
-                    <div className="pt-3 border-t border-border/60">
-                      <h3 className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground mb-2">
+                    <div className="pt-4 border-t border-border/60">
+                      <h3 className="font-mono text-[10px] uppercase tracking-[0.15em] text-muted-foreground mb-2.5">
                         Set Requirements
                       </h3>
-                      <ul className="text-[12px] space-y-1 text-foreground/70">
+                      <ul className="text-[13px] space-y-1.5 text-foreground/80">
                         {loc.set_requirements.map((req, i) => (
-                          <li key={i} className="flex items-start gap-2">
-                            <span className="text-muted-foreground mt-0.5">•</span>
+                          <li key={i} className="flex items-start gap-2.5">
+                            <span className="text-muted-foreground mt-[3px]">·</span>
                             <span>{req}</span>
                           </li>
                         ))}
@@ -166,17 +168,17 @@ export function LocationsViewer({ jsonData }: LocationsViewerProps) {
                   )}
 
                   {locScenes.length > 0 && (
-                    <div className="pt-3 border-t border-border/60">
-                      <h3 className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground mb-2">
+                    <div className="pt-4 border-t border-border/60">
+                      <h3 className="font-mono text-[10px] uppercase tracking-[0.15em] text-muted-foreground mb-2.5">
                         Key Visual Moments
                       </h3>
-                      <ul className="text-[12px] space-y-2 text-foreground/70">
+                      <ul className="text-[13px] space-y-2 text-foreground/80">
                         {locScenes.map((s) => (
-                          <li key={s.scene_number} className="flex items-start gap-2">
-                            <span className="text-muted-foreground font-mono shrink-0">
+                          <li key={s.scene_number} className="flex items-start gap-3">
+                            <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.08em] px-2 py-[3px] rounded-[4px] bg-muted text-muted-foreground shrink-0 mt-[1px]">
                               S{s.scene_number}
                             </span>
-                            <span className="leading-relaxed">{s.key_visual_moment}</span>
+                            <span className="leading-[1.55]">{s.key_visual_moment}</span>
                           </li>
                         ))}
                       </ul>
