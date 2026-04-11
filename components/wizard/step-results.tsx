@@ -8,6 +8,7 @@ import { MoodAndToneViewer } from "@/components/viewers/mood-and-tone-viewer";
 import { SceneBreakdownViewer } from "@/components/viewers/scene-breakdown-viewer";
 import { LocationsViewer } from "@/components/viewers/locations-viewer";
 import { CastAndCrewViewer } from "@/components/viewers/cast-and-crew-viewer";
+import { ProductionViewer } from "@/components/viewers/production-viewer";
 import { VisualsViewer } from "@/components/viewers/visuals-viewer";
 import type { DocumentResult } from "./wizard-shell";
 import type { SavedImage } from "@/lib/reports";
@@ -22,6 +23,7 @@ const TABS = [
   { key: "scenes", label: "Scenes" },
   { key: "locations", label: "Locations" },
   { key: "cast-and-crew", label: "Cast & Crew" },
+  { key: "production", label: "Production" },
   { key: "visuals", label: "Visuals" },
 ] as const;
 
@@ -188,6 +190,10 @@ export function StepResults({
                 portraits={portraits}
                 onPortraitsChange={onPortraitsChange}
               />
+            )}
+
+            {activeTab === "production" && (
+              <ProductionViewer jsonData={jsonData} />
             )}
 
             {activeTab === "visuals" && (
