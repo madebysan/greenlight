@@ -463,7 +463,7 @@ export function SceneBreakdownViewer({
           <SectionHead index={1} label="Breakdown" labelIcon={<BarChart3 size={10} />}>
             At a Glance
           </SectionHead>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-px bg-border/50 rounded-[12px] overflow-hidden shadow-paper">
+          <div className="inline-grid grid-cols-2 md:grid-cols-[repeat(3,140px)] gap-px bg-border/50 rounded-[12px] overflow-hidden shadow-paper">
             {overview.map((item) => {
               // Stats may come in as "5 unique locations" — strip to leading number
               // so the big display numeral doesn't overflow.

@@ -246,7 +246,7 @@ export function OverviewViewer({
             Production footprint
           </SectionHead>
           {parsed.stats.length > 0 && (
-            <div className="grid grid-cols-2 md:grid-cols-6 gap-px bg-border/50 rounded-[12px] overflow-hidden mb-6 shadow-paper">
+            <div className="inline-grid grid-cols-2 md:grid-cols-[repeat(6,120px)] gap-px bg-border/50 rounded-[12px] overflow-hidden mb-6 shadow-paper">
               {parsed.stats.map((s) => {
                 const leadingNum = s.value.match(/^(\d[\d.,]*)/);
                 const shortValue = leadingNum ? leadingNum[1] : s.value;
@@ -258,7 +258,7 @@ export function OverviewViewer({
                     <div className="text-[32px] font-light text-foreground tabular-nums leading-none tracking-[-0.03em]">
                       {shortValue}
                     </div>
-                    <div className="font-mono text-[9px] font-medium uppercase tracking-[0.15em] text-muted-foreground leading-[1.35] max-w-[11ch] min-h-[1.8em]">
+                    <div className="font-mono text-[9px] font-medium uppercase tracking-[0.15em] text-muted-foreground leading-[1.35] min-h-[1.8em]">
                       {s.label}
                     </div>
                   </div>

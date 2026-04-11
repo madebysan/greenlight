@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useMemo } from "react";
-import { Loader2, Camera, RefreshCw, Images, X, EyeOff, Eye, Users } from "lucide-react";
+import { Loader2, Camera, RefreshCw, Images, X, EyeOff, Eye, Users, Lightbulb } from "lucide-react";
 import { SectionLabelPill } from "@/components/ui/inline-chip";
 import { getStylePrefix } from "@/lib/image-prompts";
 import type { SavedImage } from "@/lib/reports";
@@ -27,9 +27,15 @@ type CastAndCrewViewerProps = {
 
 type ScreenplayData = {
   characters?: CharacterData[];
-  scenes?: Array<{ vfx_stunts?: string[]; int_ext?: string; time_of_day?: string }>;
+  scenes?: Array<{
+    slug_line?: string;
+    vfx_stunts?: string[];
+    props?: string[];
+    int_ext?: string;
+    time_of_day?: string;
+  }>;
   locations?: unknown[];
-  writer?: string;
+  setting_period?: string;
 };
 
 function parseData(jsonData: string): ScreenplayData {
@@ -40,82 +46,223 @@ function parseData(jsonData: string): ScreenplayData {
   }
 }
 
-// Rough heuristic to suggest which crew roles the film's scope implies.
-// Editable / not comprehensive — designed to start a conversation, not finish one.
-function suggestCrewRoles(data: ScreenplayData): { role: string; note: string }[] {
+type Insight = {
+  key: string;
+  title: string;
+  signal: string;
+  recommendation: string;
+};
+
+// Situational production insights derived from the screenplay.
+// Deliberately skips baseline roles (director, DP, producer, etc.) — those are
+// assumed. This surfaces the non-obvious specialty hires a line producer would
+// flag on a first read.
+function computeInsights(data: ScreenplayData): Insight[] {
   const scenes = data.scenes || [];
   const characters = data.characters || [];
   const locations = data.locations || [];
+  const insights: Insight[] = [];
 
-  const vfxScenes = scenes.filter((s) => Array.isArray(s.vfx_stunts) && s.vfx_stunts.length > 0).length;
+  const allVfxStunts = scenes.flatMap((s) => s.vfx_stunts || []);
+  const allProps = scenes.flatMap((s) => s.props || []);
+  const allSpecialReqs = characters.flatMap((c) => c.special_requirements || []);
+  const allCharText = characters.map((c) => `${c.name} ${c.description || ""}`).join(" ");
+  const allSlugs = scenes.map((s) => s.slug_line || "").join(" ");
+
+  const matches = (pattern: RegExp, pools: string[][]) =>
+    pools.flat().filter((s) => pattern.test(s));
+
+  // --- Safety / specialty ---
+
+  const stuntHits = matches(/stunt|fight|fall|combat|squib|chase|punch|brawl/i, [allVfxStunts, allSpecialReqs]);
+  if (stuntHits.length > 0) {
+    insights.push({
+      key: "stunts",
+      title: "Stunt work",
+      signal: `${stuntHits.length} stunt cue${stuntHits.length > 1 ? "s" : ""} flagged`,
+      recommendation:
+        "Bring on a Stunt Coordinator. Safety and choreography are non-negotiable — budget for rehearsal days and stunt performers who match your cast.",
+    });
+  }
+
+  const vfxHits = matches(/vfx|cgi|visual effect|digital|composit|green[- ]?screen/i, [allVfxStunts]);
+  if (vfxHits.length > 0) {
+    insights.push({
+      key: "vfx",
+      title: "Visual effects",
+      signal: `${vfxHits.length} scene${vfxHits.length > 1 ? "s" : ""} need digital or compositing work`,
+      recommendation:
+        "Bring in a VFX Supervisor during prep — shots need to be planned on set, not fixed in post. Even a small vendor beats winging it.",
+    });
+  }
+
+  const sfxHits = matches(/prosthetic|make[- ]?up|blood|wound|burn|gore|scar/i, [allVfxStunts, allSpecialReqs]);
+  if (sfxHits.length > 0) {
+    insights.push({
+      key: "sfx-makeup",
+      title: "Practical makeup",
+      signal: `${sfxHits.length} cue${sfxHits.length > 1 ? "s" : ""} for prosthetics, blood, or wounds`,
+      recommendation:
+        "Hire an SFX Makeup Artist. These are slow setups — budget extra chair time per shoot day and run a test well before principal photography.",
+    });
+  }
+
+  const weaponHits = matches(/\b(gun|pistol|rifle|firearm|revolver|shotgun|weapon|knife|blade)\b/i, [
+    allProps,
+    allVfxStunts,
+    allSpecialReqs,
+  ]);
+  if (weaponHits.length > 0) {
+    insights.push({
+      key: "weapons",
+      title: "Weapons on set",
+      signal: `${weaponHits.length} reference${weaponHits.length > 1 ? "s" : ""} to firearms or blades`,
+      recommendation:
+        "Hire a licensed Armorer. Post-Rust, insurance carriers and union cast expect this on any set with prop weapons — no exceptions.",
+    });
+  }
+
+  const pyroHits = matches(/fire|flame|explosion|pyro|burn/i, [allVfxStunts]);
+  if (pyroHits.length > 0) {
+    insights.push({
+      key: "pyro",
+      title: "Fire or pyrotechnics",
+      signal: `${pyroHits.length} scene${pyroHits.length > 1 ? "s" : ""} with fire or explosive effects`,
+      recommendation:
+        "Licensed Pyrotechnician required. That pulls in permits, a fire marshal on set, and safety rehearsals — it will shape your location list.",
+    });
+  }
+
+  const waterHits = matches(/underwater|swim|drown|ocean|river|pool|rain/i, [allVfxStunts, allSpecialReqs]);
+  const waterSlugHits = /underwater|ocean|river|pool|lake/i.test(allSlugs) ? 1 : 0;
+  if (waterHits.length > 0 || waterSlugHits > 0) {
+    insights.push({
+      key: "water",
+      title: "Water & weather",
+      signal: "Water work or weather-dependent scenes",
+      recommendation:
+        "Budget for a Marine Coordinator or Water Safety. These days eat the schedule — put them early in the shoot so you have room for reshoots.",
+    });
+  }
+
+  const intimacyHits = matches(/intimacy|intimate|sex|nude|nudity|love scene/i, [allSpecialReqs, allVfxStunts]);
+  if (intimacyHits.length > 0) {
+    insights.push({
+      key: "intimacy",
+      title: "Intimate scenes",
+      signal: `${intimacyHits.length} moment${intimacyHits.length > 1 ? "s" : ""} flagged as intimate`,
+      recommendation:
+        "Hire an Intimacy Coordinator. Standard practice on every union set now — it protects the cast and produces cleaner performances.",
+    });
+  }
+
+  // --- Animals & vehicles ---
+
+  const animalInText = /\b(dog|cat|horse|puppy|wolf|bird|snake|animal)\b/i;
+  const hasAnimal = animalInText.test(allCharText) || matches(animalInText, [allProps, allSpecialReqs]).length > 0;
+  if (hasAnimal) {
+    insights.push({
+      key: "animals",
+      title: "Animals on camera",
+      signal: "Script references trained animals",
+      recommendation:
+        "Hire an Animal Wrangler from an AHA-monitored service. Animals need rehearsal days and backup plans — never improvise on the day.",
+    });
+  }
+
+  const vehicleHits = matches(/\b(car chase|motorcycle|crash|driving sequence|picture car)\b/i, [
+    allVfxStunts,
+    allProps,
+  ]);
+  if (vehicleHits.length > 0) {
+    insights.push({
+      key: "vehicles",
+      title: "Picture cars",
+      signal: "Hero driving or vehicle stunts",
+      recommendation:
+        "Bring in a Picture Car Coordinator. Rigs, process trailers, and tow vehicles have long lead times and specialty drivers who aren't your 2nd unit.",
+    });
+  }
+
+  // --- Production logistics ---
+
   const nightScenes = scenes.filter((s) => s.time_of_day === "NIGHT").length;
-  const exteriorScenes = scenes.filter((s) => s.int_ext === "EXT" || s.int_ext === "BOTH").length;
-
-  // Stunt heuristic: check both scene vfx_stunts AND character special_requirements
-  // for combat/fall/stunt keywords.
-  const stuntPattern = /stunt|fight|fall|combat|squib|chase|gun/i;
-  const stuntScenes = scenes.filter(
-    (s) => Array.isArray(s.vfx_stunts) && s.vfx_stunts.some((v) => stuntPattern.test(v)),
-  ).length;
-  const stuntCharacters = characters.filter((c) =>
-    (c.special_requirements || []).some((r) => stuntPattern.test(r)),
-  ).length;
-
-  const roles: { role: string; note: string }[] = [
-    {
-      role: "Writer",
-      note: data.writer
-        ? `${data.writer} — credited on the screenplay.`
-        : "Original screenplay credit. Update with the writer name from the title page.",
-    },
-    { role: "Director", note: "Essential on every project." },
-    { role: "Producer", note: "Essential on every project." },
-    { role: "Director of Photography", note: "Essential on every project." },
-    { role: "1st Assistant Director", note: "Scene count and coordination suggest you need one." },
-    { role: "Production Designer", note: `${locations.length} unique locations and period-specific set dressing.` },
-    { role: "Sound Mixer", note: "Dialogue-heavy scenes require proper on-set sound." },
-    { role: "Script Supervisor", note: `${scenes.length} scenes — continuity is non-trivial.` },
-  ];
-
-  if (characters.length >= 4) {
-    roles.push({
-      role: "Casting Director",
-      note: `${characters.length} principal characters — worth bringing in casting help.`,
-    });
-  }
-
-  if (stuntScenes > 0 || stuntCharacters > 0) {
-    const bits = [];
-    if (stuntScenes > 0) bits.push(`${stuntScenes} scenes with stunt work`);
-    if (stuntCharacters > 0) bits.push(`${stuntCharacters} cast with stunt requirements`);
-    roles.push({
-      role: "Stunt Coordinator",
-      note: `${bits.join(", ")} — safety and choreography non-negotiable.`,
-    });
-  }
-
-  if (vfxScenes > 0) {
-    roles.push({
-      role: "VFX / Practical Effects Supervisor",
-      note: `${vfxScenes} scenes have practical or visual effects needs.`,
-    });
-  }
-
   if (nightScenes >= 3) {
-    roles.push({
-      role: "Gaffer + Lighting Crew",
-      note: `${nightScenes} night scenes — lighting package and crew needed.`,
+    insights.push({
+      key: "night",
+      title: "Night shoots",
+      signal: `${nightScenes} night scene${nightScenes > 1 ? "s" : ""}`,
+      recommendation:
+        "Upsize the Gaffer and lighting package. Night exteriors especially — condors, HMI balance, and longer turnaround days between wraps and calls.",
     });
   }
 
+  const exteriorScenes = scenes.filter((s) => s.int_ext === "EXT" || s.int_ext === "BOTH").length;
   if (exteriorScenes >= 3) {
-    roles.push({
-      role: "Location Scout / Manager",
-      note: `${exteriorScenes} exterior scenes — permits, parking, weather contingency.`,
+    insights.push({
+      key: "exteriors",
+      title: "Heavy exterior footprint",
+      signal: `${exteriorScenes} exterior scene${exteriorScenes > 1 ? "s" : ""}`,
+      recommendation:
+        "Dedicated Location Manager. Permits, parking, weather contingency, and neighborhood relations is a full-time job on any film this size.",
     });
   }
 
-  return roles;
+  if (locations.length >= 6) {
+    insights.push({
+      key: "many-locations",
+      title: "Location density",
+      signal: `${locations.length} unique locations`,
+      recommendation:
+        "Consider a dedicated Line Producer. Every company move costs roughly half a shoot day — a heavy location list needs someone watching that math.",
+    });
+  }
+
+  if (characters.length >= 6) {
+    insights.push({
+      key: "large-cast",
+      title: "Large ensemble",
+      signal: `${characters.length} principal characters`,
+      recommendation:
+        "Hire a Casting Director. Even with name attachments, casting the supporting ensemble goes faster with someone who knows the current talent pools.",
+    });
+  }
+
+  const childPattern = /\b(child|kid|boy|girl|baby|toddler|teen|minor|young)\b/i;
+  if (characters.some((c) => childPattern.test(c.description || ""))) {
+    insights.push({
+      key: "minors",
+      title: "Minors on set",
+      signal: "Child or teen characters",
+      recommendation:
+        "Studio Teacher and Welfare Worker required. Shoot days are capped by law — it will affect your schedule before it affects anything else.",
+    });
+  }
+
+  // --- Performance / period ---
+
+  const danceHits = matches(/danc|sing|choreograph|musical/i, [allSpecialReqs, allVfxStunts]);
+  if (danceHits.length > 0) {
+    insights.push({
+      key: "movement",
+      title: "Movement or music",
+      signal: "Dance or musical performance required",
+      recommendation:
+        "Hire a Choreographer and lock rehearsals well before principal photography. These scenes almost always need more prep than anyone plans for.",
+    });
+  }
+
+  if (data.setting_period && /\b(1[0-9]\d\d|20[0-1]\d|ancient|medieval|victorian|regency|antebellum)\b/i.test(data.setting_period)) {
+    insights.push({
+      key: "period",
+      title: "Period piece",
+      signal: `Set in ${data.setting_period}`,
+      recommendation:
+        "Research-heavy production design and custom wardrobe. Factor in build lead time and vet locations that won't fight you on period accuracy.",
+    });
+  }
+
+  return insights;
 }
 
 export function CastAndCrewViewer({
@@ -133,14 +280,14 @@ export function CastAndCrewViewer({
   };
   const data = parseData(jsonData);
   const characters = data.characters || [];
-  const [tab, setTab] = useState<"cast" | "crew">("cast");
+  const [tab, setTab] = useState<"cast" | "insights">("cast");
 
   const [localPortraits, setLocalPortraits] = useState<Record<string, PortraitState>>({});
   const [generatingAll, setGeneratingAll] = useState(false);
   const [genAllProgress, setGenAllProgress] = useState({ done: 0, total: 0 });
   const cancelRef = useRef(false);
 
-  const crewRoles = suggestCrewRoles(data);
+  const insights = useMemo(() => computeInsights(data), [data]);
 
   const mergedPortraits: Record<string, PortraitState> = useMemo(() => {
     const merged: Record<string, PortraitState> = {};
@@ -230,7 +377,7 @@ export function CastAndCrewViewer({
           Cast & Crew
         </h1>
         <p className="text-[13px] text-foreground/60 tracking-tight max-w-[60ch]">
-          Characters in the film and a scope-based read on the crew roles you&apos;ll need.
+          Characters in the film and situational insights — the specialty hires a line producer would flag on a first read.
         </p>
       </div>
 
@@ -249,15 +396,15 @@ export function CastAndCrewViewer({
           )}
         </button>
         <button
-          onClick={() => setTab("crew")}
+          onClick={() => setTab("insights")}
           className={`relative px-3 py-3 text-[12px] font-medium tracking-tight transition-colors ${
-            tab === "crew"
+            tab === "insights"
               ? "text-foreground"
               : "text-muted-foreground hover:text-foreground"
           }`}
         >
-          Crew ({crewRoles.length})
-          {tab === "crew" && (
+          Insights ({insights.length})
+          {tab === "insights" && (
             <span className="absolute -bottom-px left-2 right-2 h-px bg-foreground" />
           )}
         </button>
@@ -389,39 +536,54 @@ export function CastAndCrewViewer({
         </div>
       )}
 
-      {tab === "crew" && (
+      {tab === "insights" && (
         <div>
           <p className="text-[12px] text-muted-foreground mb-4 max-w-[60ch]">
-            These are the roles the film&apos;s scope implies. It&apos;s a starting point for a conversation with a line producer, not a final crew list.
+            Baseline roles — director, DP, producer, production designer — are assumed. This is the non-obvious stuff: the specialty hires a line producer would flag on a first read of the script.
           </p>
-          <div className="space-y-2">
-            {crewRoles.map((r) => {
-              const disKey = `crew:${r.role}`;
-              const isDisabled = !!disabledItems[disKey];
-              return (
-                <div
-                  key={r.role}
-                  className={`rounded-[12px] bg-card/40 shadow-paper hover:shadow-paper-hover px-4 py-3 flex items-start gap-3 relative group/card transition-all ${
-                    isDisabled ? "opacity-40" : ""
-                  }`}
-                >
-                  <div className="flex-1 min-w-0">
-                    <div className="text-[13px] font-semibold text-foreground uppercase tracking-[0.04em]">{r.role}</div>
-                    <div className="text-[12px] text-muted-foreground mt-1 leading-[1.55]">
-                      {r.note}
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => toggleDisabled(disKey)}
-                    className="shrink-0 p-1.5 rounded-md text-muted-foreground/60 hover:text-foreground hover:bg-muted/60 opacity-0 group-hover/card:opacity-100 transition-opacity"
-                    title={isDisabled ? "Re-enable this role" : "Disable this role"}
+          {insights.length === 0 ? (
+            <div className="rounded-[12px] bg-card/40 shadow-paper px-5 py-8 text-center">
+              <Lightbulb size={18} className="mx-auto text-muted-foreground/60 mb-2" />
+              <p className="text-[13px] text-muted-foreground max-w-[48ch] mx-auto leading-[1.6]">
+                No specialty situations detected. Your standard above-the-line team should carry this film without extra hires.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {insights.map((i) => {
+                const disKey = `insight:${i.key}`;
+                const isDisabled = !!disabledItems[disKey];
+                return (
+                  <div
+                    key={i.key}
+                    className={`rounded-[12px] bg-card/40 shadow-paper hover:shadow-paper-hover px-5 py-4 flex items-start gap-4 relative group/card transition-all ${
+                      isDisabled ? "opacity-40" : ""
+                    }`}
                   >
-                    {isDisabled ? <Eye size={13} /> : <EyeOff size={13} />}
-                  </button>
-                </div>
-              );
-            })}
-          </div>
+                    <div className="shrink-0 mt-0.5 w-7 h-7 rounded-[6px] bg-muted/60 flex items-center justify-center text-muted-foreground">
+                      <Lightbulb size={13} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-baseline gap-3 flex-wrap mb-1">
+                        <h3 className="text-[14px] font-medium text-foreground tracking-tight">{i.title}</h3>
+                        <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
+                          {i.signal}
+                        </span>
+                      </div>
+                      <p className="text-[13px] text-foreground/75 leading-[1.6]">{i.recommendation}</p>
+                    </div>
+                    <button
+                      onClick={() => toggleDisabled(disKey)}
+                      className="shrink-0 p-1.5 rounded-md text-muted-foreground/60 hover:text-foreground hover:bg-muted/60 opacity-0 group-hover/card:opacity-100 transition-opacity"
+                      title={isDisabled ? "Re-enable this insight" : "Disable this insight"}
+                    >
+                      {isDisabled ? <Eye size={13} /> : <EyeOff size={13} />}
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       )}
     </div>
