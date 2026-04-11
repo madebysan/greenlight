@@ -18,6 +18,7 @@ const OUTPUT_DOCS = [
   { name: "Scenes", desc: "Scene-by-scene map of the film" },
   { name: "Locations", desc: "Unique locations with visual moments and set requirements" },
   { name: "Cast & Crew", desc: "Characters with arcs plus scope-based crew roles" },
+  { name: "Production", desc: "Cross-referenced props, wardrobe, and effects catalog" },
   { name: "Visuals", desc: "Storyboard frames and poster concepts for your art team" },
 ];
 
@@ -163,7 +164,7 @@ export function StepJsonInput({ onSubmit, onBack }: StepJsonInputProps) {
         <h3 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">
           Documents You&apos;ll Get
         </h3>
-        <div className="grid grid-cols-6 gap-2">
+        <div className="grid grid-cols-7 gap-2">
           {OUTPUT_DOCS.map((doc, i) => (
             <div
               key={doc.name}
