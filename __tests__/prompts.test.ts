@@ -29,7 +29,7 @@ describe("Prompts", () => {
     expect(MOOD_AND_TONE_PROMPT).toContain("Color Palette");
     expect(MOOD_AND_TONE_PROMPT).toContain("Music & Sound Direction");
     expect(MOOD_AND_TONE_PROMPT).toContain("Reference Points");
-    expect(MOOD_AND_TONE_PROMPT).toContain("Similar Films");
+    expect(MOOD_AND_TONE_PROMPT).toContain("Similar Moods");
   });
 
   it("Scene breakdown prompt asks for scene-by-scene output", () => {

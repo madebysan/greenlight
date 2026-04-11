@@ -229,6 +229,7 @@ export function SceneBreakdownViewer({
   onPromptOverridesChange,
 }: SceneBreakdownViewerProps) {
   const parsed = useMemo(() => parseSceneBreakdown(content), [content]);
+  const [groupBy, setGroupBy] = useState<"sequence" | "location">("sequence");
   const [expandedScenes, setExpandedScenes] = useState<Set<number>>(() => new Set([1]));
   const [editingScene, setEditingScene] = useState<number | null>(null);
   const [editingPromptScene, setEditingPromptScene] = useState<number | null>(null);
@@ -397,6 +398,26 @@ export function SceneBreakdownViewer({
     onContentChange(scenesToMarkdown(title, overview, newScenes));
   };
 
+  // Group scenes by location (lowercase key), ordered by first appearance.
+  // Each group's scenes remain in their original sequence order.
+  const locationGroups = useMemo(() => {
+    const order: string[] = [];
+    const groups = new Map<string, Scene[]>();
+    for (const scene of scenes) {
+      const locationField = scene.fields.find((f) => f.label === "Location")?.value || "";
+      const key = locationField.trim().toLowerCase() || "(unknown)";
+      if (!groups.has(key)) {
+        order.push(key);
+        groups.set(key, []);
+      }
+      groups.get(key)!.push(scene);
+    }
+    return order.map((key) => ({
+      label: key,
+      scenes: groups.get(key)!,
+    }));
+  }, [scenes]);
+
   const handleAddScene = () => {
     if (!onContentChange) return;
     const maxNum = scenes.length > 0 ? Math.max(...scenes.map((s) => s.number)) : 0;
@@ -459,6 +480,28 @@ export function SceneBreakdownViewer({
         <SectionLabel
           action={
             <div className="flex items-center gap-1">
+              <div className="inline-flex items-center rounded-md border border-border p-0.5 mr-2">
+                <button
+                  onClick={() => setGroupBy("sequence")}
+                  className={`text-[10px] font-medium px-2 py-0.5 rounded transition-colors ${
+                    groupBy === "sequence"
+                      ? "bg-muted text-foreground"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  Sequence
+                </button>
+                <button
+                  onClick={() => setGroupBy("location")}
+                  className={`text-[10px] font-medium px-2 py-0.5 rounded transition-colors ${
+                    groupBy === "location"
+                      ? "bg-muted text-foreground"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  Location
+                </button>
+              </div>
               {storyboardContent && onStoryboardImagesChange && (
                 generatingAll ? (
                   <button
@@ -506,8 +549,8 @@ export function SceneBreakdownViewer({
           Scenes
         </SectionLabel>
 
-        <div className="space-y-2">
-          {scenes.map((scene) => {
+        {(() => {
+          const renderScene = (scene: Scene) => {
             const isExpanded = expandedScenes.has(scene.number);
             const isEditing = editingScene === scene.number;
             const characters = scene.fields.find((f) => f.label === "Characters")?.value || "";
@@ -663,8 +706,32 @@ export function SceneBreakdownViewer({
                 )}
               </div>
             );
-          })}
-        </div>
+          };
+
+          if (groupBy === "location") {
+            return (
+              <div className="space-y-8">
+                {locationGroups.map((group) => (
+                  <div key={group.label}>
+                    <div className="flex items-center gap-3 mb-3">
+                      <h3 className="text-[11px] font-semibold uppercase tracking-[0.15em] text-foreground/80 capitalize">
+                        {group.label}
+                      </h3>
+                      <div className="flex-1 h-px bg-border/60" />
+                      <span className="text-[10px] font-mono text-muted-foreground">
+                        {group.scenes.length}{" "}
+                        {group.scenes.length === 1 ? "scene" : "scenes"}
+                      </span>
+                    </div>
+                    <div className="space-y-2">{group.scenes.map(renderScene)}</div>
+                  </div>
+                ))}
+              </div>
+            );
+          }
+
+          return <div className="space-y-2">{scenes.map(renderScene)}</div>;
+        })()}
       </section>
     </div>
   );
