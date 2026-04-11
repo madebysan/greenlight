@@ -1,8 +1,8 @@
 import { describe, it, expect } from "vitest";
 import { STAGE_0_PROMPT } from "../lib/prompts/stage-0";
+import { OVERVIEW_PROMPT } from "../lib/prompts/overview";
+import { MOOD_AND_TONE_PROMPT } from "../lib/prompts/mood-and-tone";
 import { SCENE_BREAKDOWN_PROMPT } from "../lib/prompts/scene-breakdown";
-import { PRODUCTION_MATRICES_PROMPT } from "../lib/prompts/production-matrices";
-import { MARKETING_BRIEF_PROMPT } from "../lib/prompts/marketing-brief";
 import { STORYBOARD_PROMPTS_PROMPT } from "../lib/prompts/storyboard-prompts";
 import { POSTER_CONCEPTS_PROMPT } from "../lib/prompts/poster-concepts";
 
@@ -15,25 +15,26 @@ describe("Prompts", () => {
     expect(STAGE_0_PROMPT).toContain("slug_line");
   });
 
+  it("Overview prompt includes all sections", () => {
+    expect(OVERVIEW_PROMPT).toContain("Logline");
+    expect(OVERVIEW_PROMPT).toContain("Synopsis");
+    expect(OVERVIEW_PROMPT).toContain("Film Identity");
+    expect(OVERVIEW_PROMPT).toContain("Themes");
+    expect(OVERVIEW_PROMPT).toContain("Comparable Films");
+    expect(OVERVIEW_PROMPT).toContain("Scope at a Glance");
+  });
+
+  it("Mood & Tone prompt includes all sections", () => {
+    expect(MOOD_AND_TONE_PROMPT).toContain("Atmosphere");
+    expect(MOOD_AND_TONE_PROMPT).toContain("Tonal Descriptors");
+    expect(MOOD_AND_TONE_PROMPT).toContain("Color Palette");
+    expect(MOOD_AND_TONE_PROMPT).toContain("Music & Sound Direction");
+    expect(MOOD_AND_TONE_PROMPT).toContain("Reference Points");
+  });
+
   it("Scene breakdown prompt asks for scene-by-scene output", () => {
     expect(SCENE_BREAKDOWN_PROMPT).toContain("Scene");
     expect(SCENE_BREAKDOWN_PROMPT).toContain("markdown");
-  });
-
-  it("Production matrices prompt includes all 5 tables", () => {
-    expect(PRODUCTION_MATRICES_PROMPT).toContain("Character Matrix");
-    expect(PRODUCTION_MATRICES_PROMPT).toContain("Location Matrix");
-    expect(PRODUCTION_MATRICES_PROMPT).toContain("Props Catalog");
-    expect(PRODUCTION_MATRICES_PROMPT).toContain("Wardrobe Catalog");
-    expect(PRODUCTION_MATRICES_PROMPT).toContain("VFX/Stunts Register");
-  });
-
-  it("Marketing brief prompt includes all sections", () => {
-    expect(MARKETING_BRIEF_PROMPT).toContain("Logline");
-    expect(MARKETING_BRIEF_PROMPT).toContain("Taglines");
-    expect(MARKETING_BRIEF_PROMPT).toContain("Comparable Films");
-    expect(MARKETING_BRIEF_PROMPT).toContain("Color Palette");
-    expect(MARKETING_BRIEF_PROMPT).toContain("Target Audience");
   });
 
   it("Storyboard prompts prompt asks for per-scene outputs", () => {
@@ -52,9 +53,9 @@ describe("Prompts", () => {
   it("All prompts are non-empty strings", () => {
     const prompts = [
       STAGE_0_PROMPT,
+      OVERVIEW_PROMPT,
+      MOOD_AND_TONE_PROMPT,
       SCENE_BREAKDOWN_PROMPT,
-      PRODUCTION_MATRICES_PROMPT,
-      MARKETING_BRIEF_PROMPT,
       STORYBOARD_PROMPTS_PROMPT,
       POSTER_CONCEPTS_PROMPT,
     ];
