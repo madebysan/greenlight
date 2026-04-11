@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef, type ReactNode } from "react";
-import { Settings, Info, RotateCcw, FileText, Download, Share2, Sun, Moon, Bookmark, Check, MoreVertical } from "lucide-react";
+import { Settings, Info, RotateCcw, FileText, Download, Share2, Sun, Moon, Bookmark, Check, MoreVertical, Images, Loader2 } from "lucide-react";
+import { parseStoryboardPrompts } from "@/components/viewers/storyboard-viewer";
+import { parsePosterConcepts } from "@/components/viewers/poster-concepts-viewer";
 import {
   Dialog,
   DialogContent,
@@ -282,6 +284,158 @@ export function WizardShell() {
     updateProject({ disabledItems: disabled });
   }, []);
 
+  const [genAllImages, setGenAllImages] = useState<{
+    running: boolean;
+    done: number;
+    total: number;
+  }>({ running: false, done: 0, total: 0 });
+  const genAllCancelRef = useRef(false);
+
+  const handleGenerateAllImages = async () => {
+    if (genAllImages.running) {
+      genAllCancelRef.current = true;
+      return;
+    }
+    if (!jsonData) return;
+
+    type Task = { kind: string; run: () => Promise<void> };
+    const tasks: Task[] = [];
+
+    // --- Parse inputs ---
+    let parsed: {
+      characters?: { name: string; description?: string }[];
+      props_master?: { item: string; notes?: string }[];
+    } = {};
+    try {
+      parsed = JSON.parse(jsonData);
+    } catch {
+      return;
+    }
+
+    // --- Accumulate state as we go so each setState call gets the full picture ---
+    let accPortraits = { ...portraits };
+    let accPropImages = { ...propImages };
+    let accStoryboardImages = { ...storyboardImages };
+    let accPosterImages = { ...posterImages };
+
+    // Character portraits
+    for (const char of parsed.characters || []) {
+      if (accPortraits[char.name]) continue;
+      tasks.push({
+        kind: "portrait",
+        run: async () => {
+          const res = await fetch("/api/generate-portrait", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name: char.name, description: char.description }),
+          });
+          if (!res.ok) return;
+          const { url } = await res.json();
+          accPortraits = { ...accPortraits, [char.name]: { status: "done" as const, url } };
+          handlePortraitsChange(accPortraits);
+        },
+      });
+    }
+
+    // Prop reference images
+    for (const prop of parsed.props_master || []) {
+      if (accPropImages[prop.item]) continue;
+      tasks.push({
+        kind: "prop",
+        run: async () => {
+          const res = await fetch("/api/generate-prop", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name: prop.item, notes: prop.notes }),
+          });
+          if (!res.ok) return;
+          const { url } = await res.json();
+          accPropImages = { ...accPropImages, [prop.item]: { status: "done" as const, url } };
+          handlePropImagesChange(accPropImages);
+        },
+      });
+    }
+
+    // Storyboard frames
+    const sbDoc = documents.find((d) => d.slug === "storyboard-prompts");
+    if (sbDoc?.content) {
+      const { acts } = parseStoryboardPrompts(sbDoc.content);
+      for (const act of acts) {
+        for (const scene of act.scenes) {
+          if (accStoryboardImages[scene.number]) continue;
+          const prompt = promptOverrides[scene.number] || scene.prompt;
+          const camera = scene.camera;
+          tasks.push({
+            kind: "storyboard",
+            run: async () => {
+              const res = await fetch("/api/generate-image", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ prompt, camera }),
+              });
+              if (!res.ok) return;
+              const { url } = await res.json();
+              accStoryboardImages = {
+                ...accStoryboardImages,
+                [scene.number]: { status: "done" as const, url },
+              };
+              handleImagesChange(accStoryboardImages);
+            },
+          });
+        }
+      }
+    }
+
+    // Poster concepts
+    const posterDoc = documents.find((d) => d.slug === "poster-concepts");
+    if (posterDoc?.content) {
+      const { concepts } = parsePosterConcepts(posterDoc.content);
+      for (const concept of concepts) {
+        if (accPosterImages[concept.number]) continue;
+        const prompt = [
+          concept.composition,
+          concept.style ? `Style: ${concept.style}.` : "",
+        ]
+          .filter(Boolean)
+          .join(" ");
+        tasks.push({
+          kind: "poster",
+          run: async () => {
+            const res = await fetch("/api/generate-poster-image", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ prompt }),
+            });
+            if (!res.ok) return;
+            const { url } = await res.json();
+            accPosterImages = {
+              ...accPosterImages,
+              [concept.number]: { status: "done" as const, url },
+            };
+            handlePosterImagesChange(accPosterImages);
+          },
+        });
+      }
+    }
+
+    if (tasks.length === 0) return;
+
+    genAllCancelRef.current = false;
+    setGenAllImages({ running: true, done: 0, total: tasks.length });
+
+    for (let i = 0; i < tasks.length; i++) {
+      if (genAllCancelRef.current) break;
+      try {
+        await tasks[i].run();
+      } catch (e) {
+        console.error(`[generate-all] ${tasks[i].kind} failed`, e);
+      }
+      setGenAllImages({ running: true, done: i + 1, total: tasks.length });
+    }
+
+    setGenAllImages({ running: false, done: 0, total: 0 });
+  };
+
   const [savingDemo, setSavingDemo] = useState<"idle" | "saving" | "saved">("idle");
   const handleSaveDemo = async () => {
     const current = loadProject();
@@ -373,6 +527,19 @@ export function WizardShell() {
             </div>
 
             <div className="flex items-center gap-2 ml-auto">
+              {genAllImages.running && (
+                <button
+                  onClick={handleGenerateAllImages}
+                  title="Click to cancel"
+                  className="inline-flex items-center gap-1.5 text-xs font-medium text-primary bg-primary/10 border border-primary/30 hover:bg-primary/15 px-3 py-1.5 rounded-md transition-colors"
+                >
+                  <Loader2 size={13} className="animate-spin" />
+                  <span className="tabular-nums">
+                    {genAllImages.done}/{genAllImages.total}
+                  </span>
+                  <span className="text-primary/70">images</span>
+                </button>
+              )}
               {hasActiveProject && (
                 <HeaderButton
                   icon={<RotateCcw size={14} />}
@@ -383,6 +550,22 @@ export function WizardShell() {
               )}
               <MoreMenu
                 items={[
+                  hasActiveProject && documents.some((d) => d.status === "done")
+                    ? {
+                        icon: genAllImages.running ? (
+                          <Loader2 size={14} className="animate-spin" />
+                        ) : (
+                          <Images size={14} />
+                        ),
+                        label: genAllImages.running
+                          ? `Generating ${genAllImages.done}/${genAllImages.total}… (click to cancel)`
+                          : "Generate all images",
+                        onClick: handleGenerateAllImages,
+                      }
+                    : null,
+                  hasActiveProject && documents.some((d) => d.status === "done")
+                    ? "divider"
+                    : null,
                   hasActiveProject && documents.some((d) => d.status === "done")
                     ? {
                         icon: <Share2 size={14} />,
