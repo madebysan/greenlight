@@ -19,7 +19,7 @@ type PosterConcept = {
   aiPrompt: string;
 };
 
-function parsePosterConcepts(md: string): { title: string; intro: string; concepts: PosterConcept[] } {
+export function parsePosterConcepts(md: string): { title: string; intro: string; concepts: PosterConcept[] } {
   const lines = md.split("\n");
   let title = "";
   let intro = "";

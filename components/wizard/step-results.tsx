@@ -43,6 +43,8 @@ type StepResultsProps = {
   onPosterImagesChange: (images: Record<number, SavedImage>) => void;
   portraits: Record<string, SavedImage>;
   onPortraitsChange: (portraits: Record<string, SavedImage>) => void;
+  propImages: Record<string, SavedImage>;
+  onPropImagesChange: (images: Record<string, SavedImage>) => void;
   disabledItems: Record<string, boolean>;
   onDisabledItemsChange: (items: Record<string, boolean>) => void;
 };
@@ -60,6 +62,8 @@ export function StepResults({
   onPosterImagesChange,
   portraits,
   onPortraitsChange,
+  propImages,
+  onPropImagesChange,
   disabledItems,
   onDisabledItemsChange,
 }: StepResultsProps) {
@@ -171,6 +175,8 @@ export function StepResults({
                       ? (c) => onDocumentUpdate("overview", c)
                       : undefined
                   }
+                  posterContent={posterContent}
+                  posterImages={posterImages}
                 />
               ) : (
                 <GenerationPending label="Overview" />
@@ -228,7 +234,11 @@ export function StepResults({
             )}
 
             {activeTab === "production" && (
-              <ProductionViewer jsonData={jsonData} />
+              <ProductionViewer
+                jsonData={jsonData}
+                propImages={propImages}
+                onPropImagesChange={onPropImagesChange}
+              />
             )}
 
             {activeTab === "visuals" && (

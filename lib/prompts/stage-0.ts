@@ -9,6 +9,8 @@ Output ONLY valid JSON matching this exact schema (no markdown, no commentary, n
 
 {
   "title": "The movie title",
+  "writer": "Screenwriter name(s) as credited on the title page (e.g., 'Charlie Kaufman' or 'Joel Coen & Ethan Coen')",
+  "based_on": "Source material if adapted (e.g., 'Based on the novel by Stephen King'), otherwise empty string",
   "genre": ["Primary genre", "Secondary genre"],
   "setting_period": "Time period (e.g., 'Contemporary', '1960s', 'Near future')",
   "total_pages": 120,

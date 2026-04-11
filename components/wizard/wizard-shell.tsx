@@ -161,6 +161,7 @@ export function WizardShell() {
   const [promptOverrides, setPromptOverrides] = useState<Record<number, string>>({});
   const [posterImages, setPosterImages] = useState<Record<number, SavedImage>>({});
   const [portraits, setPortraits] = useState<Record<string, SavedImage>>({});
+  const [propImages, setPropImages] = useState<Record<string, SavedImage>>({});
   const [disabledItems, setDisabledItems] = useState<Record<string, boolean>>({});
   const [theme, setTheme] = useState<"dark" | "light">("dark");
 
@@ -183,6 +184,7 @@ export function WizardShell() {
       setPromptOverrides(project.promptOverrides || {});
       setPosterImages(project.posterImages || {});
       setPortraits(project.portraits || {});
+      setPropImages(project.propImages || {});
       setDisabledItems(project.disabledItems || {});
       setCurrentStep(4);
     }
@@ -246,6 +248,7 @@ export function WizardShell() {
     setPromptOverrides({});
     setPosterImages({});
     setPortraits({});
+    setPropImages({});
     setDisabledItems({});
   };
 
@@ -267,6 +270,11 @@ export function WizardShell() {
   const handlePortraitsChange = useCallback((portraits: Record<string, SavedImage>) => {
     setPortraits(portraits);
     updateProject({ portraits });
+  }, []);
+
+  const handlePropImagesChange = useCallback((images: Record<string, SavedImage>) => {
+    setPropImages(images);
+    updateProject({ propImages: images });
   }, []);
 
   const handleDisabledItemsChange = useCallback((disabled: Record<string, boolean>) => {
@@ -523,6 +531,8 @@ export function WizardShell() {
             onPosterImagesChange={handlePosterImagesChange}
             portraits={portraits}
             onPortraitsChange={handlePortraitsChange}
+            propImages={propImages}
+            onPropImagesChange={handlePropImagesChange}
             disabledItems={disabledItems}
             onDisabledItemsChange={handleDisabledItemsChange}
           />
