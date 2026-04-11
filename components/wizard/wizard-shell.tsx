@@ -510,13 +510,9 @@ export function WizardShell() {
       <header className="border-b bg-background/95 backdrop-blur-sm">
         <div className={`mx-auto px-6 py-4 ${currentStep === 4 ? "max-w-6xl" : "max-w-4xl"}`}>
           <div className="flex items-center gap-3">
-            <div className="h-9 w-9 rounded-lg overflow-hidden shrink-0">
+            <div className="h-9 w-9 shrink-0">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/logo.png"
-                alt="Greenlight"
-                className="w-full h-full object-cover"
-              />
+              <img src="/logo.png" alt="Greenlight" className="w-full h-full object-contain" />
             </div>
             <div>
               <h1 className="text-lg font-bold tracking-tight">Greenlight</h1>
@@ -773,9 +769,9 @@ export function WizardShell() {
         <DialogContent className="sm:max-w-3xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <div className="flex items-center gap-3 mb-1">
-              <div className="h-10 w-10 rounded-xl overflow-hidden shrink-0">
+              <div className="h-10 w-10 shrink-0">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/logo.png" alt="Greenlight" className="w-full h-full object-cover" />
+                <img src="/logo.png" alt="Greenlight" className="w-full h-full object-contain" />
               </div>
               <div>
                 <DialogTitle className="text-lg">Greenlight</DialogTitle>
