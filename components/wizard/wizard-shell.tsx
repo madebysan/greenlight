@@ -5,6 +5,7 @@ import { Settings, Info, RotateCcw, FileText, Download, Share2, Sun, Moon, Bookm
 import { parseStoryboardPrompts } from "@/components/viewers/storyboard-viewer";
 import { parsePosterConcepts } from "@/components/viewers/poster-concepts-viewer";
 import { HeaderButton, MoreMenu } from "./header-menu";
+import { AboutDialog } from "./about-dialog";
 import {
   Dialog,
   DialogContent,
@@ -665,86 +666,7 @@ export function WizardShell() {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={showAbout} onOpenChange={setShowAbout}>
-        <DialogContent className="sm:max-w-3xl max-h-[85vh] overflow-y-auto">
-          <DialogHeader>
-            <div className="flex items-center gap-3 mb-1">
-              <div className="h-10 w-10 shrink-0">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/logo.png" alt="Greenlight" className="w-full h-full object-contain" />
-              </div>
-              <div>
-                <DialogTitle className="text-lg">Greenlight</DialogTitle>
-                <p className="text-[12px] text-muted-foreground mt-0.5">A 1st AD&apos;s first pass.</p>
-              </div>
-            </div>
-          </DialogHeader>
-
-          <div className="space-y-6 py-3 text-[13px] leading-relaxed">
-            <p className="text-foreground/70">
-              Turn any screenplay into a complete first-pass breakdown. Extract structured data,
-              generate professional documents for every department, and create visual assets — all from a single JSON file.
-            </p>
-
-            <div>
-              <h3 className="text-sm font-semibold text-foreground mb-3">How it works</h3>
-              <div className="grid grid-cols-4 gap-3">
-                {[
-                  { num: "1", label: "Extract", desc: "Upload your screenplay to Claude or ChatGPT with the extraction prompt", color: "text-violet-400" },
-                  { num: "2", label: "Paste", desc: "Paste the structured JSON output into the app", color: "text-sky-400" },
-                  { num: "3", label: "Generate", desc: "AI creates 5 production documents automatically", color: "text-emerald-400" },
-                  { num: "4", label: "Refine", desc: "Edit, generate visuals, add sections, and iterate", color: "text-amber-400" },
-                ].map((step) => (
-                  <div key={step.num} className="rounded-xl border bg-card/50 p-3">
-                    <span className={`text-lg font-bold ${step.color}`}>{step.num}</span>
-                    <div className="text-[12px] font-semibold text-foreground mt-1">{step.label}</div>
-                    <div className="text-[11px] text-muted-foreground mt-0.5 leading-snug">{step.desc}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <h3 className="text-sm font-semibold text-foreground mb-3">Documents generated</h3>
-              <div className="space-y-2.5">
-                {[
-                  { icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="3" y="14" width="7" height="7" /><rect x="14" y="14" width="7" height="7" /></svg>, color: "text-violet-400 bg-violet-500/15", title: "Scene Breakdown", desc: "Scene-by-scene analysis with locations, cast, props, VFX, and emotional beats. Fully editable — add, remove, and modify scenes." },
-                  { icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="5" /><path d="M20 21a8 8 0 0 0-16 0" /></svg>, color: "text-sky-400 bg-sky-500/15", title: "Production", desc: "Department worksheets: Characters (with AI portraits), Locations, Production Design (props & wardrobe), and Technical (VFX, stunts, notes)." },
-                  { icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" /><line x1="4" y1="22" x2="4" y2="15" /></svg>, color: "text-emerald-400 bg-emerald-500/15", title: "Marketing Brief", desc: "Film identity, logline, taglines, color palette, synopsis, comparable films. Expandable with Festival Strategy, Casting Wishlist, Music Direction, and more." },
-                  { icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18" /><line x1="7" y1="2" x2="7" y2="22" /><line x1="17" y1="2" x2="17" y2="22" /><line x1="2" y1="12" x2="22" y2="12" /><line x1="2" y1="7" x2="7" y2="7" /><line x1="2" y1="17" x2="7" y2="17" /><line x1="17" y1="7" x2="22" y2="7" /><line x1="17" y1="17" x2="22" y2="17" /></svg>, color: "text-amber-400 bg-amber-500/15", title: "Storyboard", desc: "Visual prompt for every scene. Generate B&W sketch storyboards in batch, edit and rewrite prompts for variations." },
-                  { icon: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><circle cx="8.5" cy="8.5" r="1.5" /><polyline points="21,15 16,10 5,21" /></svg>, color: "text-pink-400 bg-pink-500/15", title: "Posters", desc: "15 poster concepts across 5 categories with color palettes, composition notes, and AI-generated sketch previews." },
-                ].map((doc) => (
-                  <div key={doc.title} className="flex items-start gap-3 rounded-lg border px-3.5 py-3">
-                    <div className={`flex h-8 w-8 items-center justify-center rounded-lg shrink-0 ${doc.color}`}>
-                      {doc.icon}
-                    </div>
-                    <div>
-                      <div className="text-[13px] font-semibold text-foreground">{doc.title}</div>
-                      <p className="text-[12px] text-muted-foreground mt-0.5 leading-snug">{doc.desc}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="flex items-center gap-4 pt-3 border-t text-[11px] text-muted-foreground">
-              <span>Powered by Claude (Anthropic) + FLUX Schnell (fal.ai)</span>
-              <span className="flex-1" />
-              <span>
-                Made by{" "}
-                <a
-                  href="https://santiagoalonso.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="underline hover:text-foreground transition-colors"
-                >
-                  santiagoalonso.com
-                </a>
-              </span>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <AboutDialog open={showAbout} onOpenChange={setShowAbout} />
     </div>
   );
 }
