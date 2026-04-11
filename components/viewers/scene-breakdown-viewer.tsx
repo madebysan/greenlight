@@ -19,6 +19,7 @@ import { parseStoryboardPrompts, type StoryboardScene } from "./storyboard-viewe
 import { SectionHead } from "@/components/ui/section-head";
 import { ListOrdered, BarChart3, Film } from "lucide-react";
 import { SectionLabelPill } from "@/components/ui/inline-chip";
+import { getStylePrefix } from "@/lib/image-prompts";
 import type { SavedImage } from "@/lib/reports";
 
 type ImageState = { status: "idle" | "generating" | "done" | "error"; url?: string; error?: string };
@@ -270,7 +271,11 @@ export function SceneBreakdownViewer({
       const res = await fetch("/api/generate-image", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: sb.prompt, camera: sb.camera }),
+        body: JSON.stringify({
+          prompt: sb.prompt,
+          camera: sb.camera,
+          stylePrefix: getStylePrefix("storyboard"),
+        }),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const { url } = await res.json();
@@ -311,7 +316,11 @@ export function SceneBreakdownViewer({
         const res = await fetch("/api/generate-image", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ prompt: sb.prompt, camera: sb.camera }),
+          body: JSON.stringify({
+            prompt: sb.prompt,
+            camera: sb.camera,
+            stylePrefix: getStylePrefix("storyboard"),
+          }),
         });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const { url } = await res.json();
@@ -463,12 +472,12 @@ export function SceneBreakdownViewer({
               return (
                 <div
                   key={item.label}
-                  className="bg-card/40 px-5 py-6 flex flex-col gap-2"
+                  className="bg-card/40 px-5 py-6 flex flex-col gap-2 min-w-0"
                 >
                   <div className="text-[34px] font-light text-foreground tabular-nums leading-none tracking-[-0.03em]">
                     {shortValue}
                   </div>
-                  <div className="font-mono text-[9px] font-medium uppercase tracking-[0.18em] text-muted-foreground leading-snug">
+                  <div className="font-mono text-[9px] font-medium uppercase tracking-[0.15em] text-muted-foreground leading-[1.35] max-w-[11ch]">
                     {item.label.replace(/^Total\s+/, "")}
                   </div>
                 </div>

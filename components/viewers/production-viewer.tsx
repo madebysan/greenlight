@@ -3,6 +3,7 @@
 import { useState, useMemo, useRef } from "react";
 import { Star, Camera, Loader2, RefreshCw, Images, X, Package } from "lucide-react";
 import { SectionLabelPill } from "@/components/ui/inline-chip";
+import { getStylePrefix } from "@/lib/image-prompts";
 import type { SavedImage } from "@/lib/reports";
 
 type SubTab = "props" | "wardrobe";
@@ -85,7 +86,11 @@ export function ProductionViewer({
       const res = await fetch("/api/generate-prop", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: prop.item, notes: prop.notes }),
+        body: JSON.stringify({
+          name: prop.item,
+          notes: prop.notes,
+          stylePrefix: getStylePrefix("prop"),
+        }),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const { url } = await res.json();
@@ -270,8 +275,8 @@ export function ProductionViewer({
 
 function StatCard({ label, value, sub }: { label: string; value: number; sub: string }) {
   return (
-    <div className="bg-card/40 px-5 py-6 flex flex-col gap-2">
-      <div className="font-mono text-[9px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+    <div className="bg-card/40 px-5 py-6 flex flex-col gap-2 min-w-0">
+      <div className="font-mono text-[9px] font-medium uppercase tracking-[0.15em] text-muted-foreground leading-[1.35] max-w-[11ch]">
         {label}
       </div>
       <div className="text-[34px] font-light tabular-nums text-foreground leading-none tracking-[-0.03em]">

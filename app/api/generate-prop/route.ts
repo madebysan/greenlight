@@ -3,28 +3,24 @@ import { fal } from "@fal-ai/client";
 import { writeFileSync, mkdirSync } from "fs";
 import { join } from "path";
 import { randomUUID } from "crypto";
+import { DEFAULT_IMAGE_PROMPTS } from "@/lib/image-prompts";
 
 fal.config({ credentials: process.env.FAL_KEY });
 
 const IMAGES_DIR = join(process.cwd(), ".cache", "images");
 
-// Prop reference sketches — matches the character portrait aesthetic so the
-// whole bible reads as a single artist's hand. Black-and-white pen work, the
-// kind a production designer would pin to a reference board.
-const STYLE_PREFIX =
-  "Prop reference sketch, production art style. " +
-  "Black felt-tip marker on white paper. Single isolated object, centered in frame, no background detail. " +
-  "Loose but confident linework, simple crosshatching for shadows. " +
-  "Strictly black and white only. No color whatsoever, pure black ink on white paper. " +
-  "No people, no text, no labels, no signatures, no watermarks. Square composition.";
-
 export async function POST(request: NextRequest) {
   try {
-    const { name, notes } = await request.json();
+    const { name, notes, stylePrefix } = await request.json();
 
     if (!name) {
       return NextResponse.json({ error: "Missing prop name" }, { status: 400 });
     }
+
+    const STYLE_PREFIX =
+      typeof stylePrefix === "string" && stylePrefix.trim()
+        ? stylePrefix.trim()
+        : DEFAULT_IMAGE_PROMPTS.prop;
 
     const description = notes ? `${name}. ${notes}` : name;
     const prompt = `${STYLE_PREFIX} Subject: ${description}`;

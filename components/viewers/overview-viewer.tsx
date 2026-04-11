@@ -253,12 +253,12 @@ export function OverviewViewer({
                 return (
                   <div
                     key={s.label}
-                    className="bg-card/40 px-5 py-6 flex flex-col gap-2"
+                    className="bg-card/40 px-4 py-5 flex flex-col gap-2 min-w-0"
                   >
-                    <div className="text-[34px] font-light text-foreground tabular-nums leading-none tracking-[-0.03em]">
+                    <div className="text-[32px] font-light text-foreground tabular-nums leading-none tracking-[-0.03em]">
                       {shortValue}
                     </div>
-                    <div className="font-mono text-[9px] font-medium uppercase tracking-[0.18em] text-muted-foreground leading-snug">
+                    <div className="font-mono text-[9px] font-medium uppercase tracking-[0.15em] text-muted-foreground leading-[1.35] max-w-[11ch] min-h-[1.8em]">
                       {s.label}
                     </div>
                   </div>

@@ -3,6 +3,7 @@ import { fal } from "@fal-ai/client";
 import { writeFileSync, mkdirSync } from "fs";
 import { join } from "path";
 import { randomUUID } from "crypto";
+import { DEFAULT_IMAGE_PROMPTS } from "@/lib/image-prompts";
 
 fal.config({ credentials: process.env.FAL_KEY });
 
@@ -10,7 +11,7 @@ const IMAGES_DIR = join(process.cwd(), ".cache", "images");
 
 export async function POST(request: NextRequest) {
   try {
-    const { prompt, camera } = await request.json();
+    const { prompt, camera, stylePrefix } = await request.json();
 
     if (!prompt) {
       return NextResponse.json(
@@ -19,12 +20,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // User can override the style prefix from Settings; otherwise fall back
+    // to the default Ridley-Scott storyboard look.
     const STYLE_PREFIX =
-      "Film production storyboard panel in the style of Ridley Scott's hand-drawn storyboards. " +
-      "Black felt-tip marker on white paper, inside a thin rectangular panel border. " +
-      "Loose but confident linework, simple crosshatching for shadows, stick-figure proportions with just enough detail to read the action. " +
-      "Strictly black and white only. No color whatsoever, no yellow, no red, no tints, pure black ink on white paper. " +
-      "No text, no labels, no captions, no signatures, no initials, no watermarks, no dates, no lined paper.";
+      typeof stylePrefix === "string" && stylePrefix.trim()
+        ? stylePrefix.trim()
+        : DEFAULT_IMAGE_PROMPTS.storyboard;
 
     const storyboardPrompt = [
       STYLE_PREFIX,

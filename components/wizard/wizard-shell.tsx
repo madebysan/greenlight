@@ -27,6 +27,13 @@ import {
   clearProject,
   extractTitle,
 } from "@/lib/reports";
+import {
+  type ImagePromptKind,
+  DEFAULT_IMAGE_PROMPTS,
+  loadImagePrompts,
+  saveImagePrompts,
+  getStylePrefix,
+} from "@/lib/image-prompts";
 import { downloadBlob } from "@/lib/utils";
 
 const STEPS = [
@@ -61,6 +68,12 @@ export function WizardShell() {
   const [showAbout, setShowAbout] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [falKey, setFalKey] = useState<string>("");
+  const [imagePrompts, setImagePrompts] = useState<Record<ImagePromptKind, string>>({
+    storyboard: DEFAULT_IMAGE_PROMPTS.storyboard,
+    portrait: DEFAULT_IMAGE_PROMPTS.portrait,
+    prop: DEFAULT_IMAGE_PROMPTS.prop,
+    poster: DEFAULT_IMAGE_PROMPTS.poster,
+  });
   const [storyboardImages, setStoryboardImages] = useState<Record<number, SavedImage>>({});
   const [promptOverrides, setPromptOverrides] = useState<Record<number, string>>({});
   const [posterImages, setPosterImages] = useState<Record<number, SavedImage>>({});
@@ -98,6 +111,14 @@ export function WizardShell() {
     setApiKey(localStorage.getItem(API_KEY_STORAGE) || "");
     setFalKey(localStorage.getItem(FAL_KEY_STORAGE) || "");
     setTheme(localStorage.getItem("greenlight-theme") === "light" ? "light" : "dark");
+    // Merge stored overrides into defaults so blank fields fall back cleanly.
+    const stored = loadImagePrompts();
+    setImagePrompts({
+      storyboard: stored.storyboard ?? DEFAULT_IMAGE_PROMPTS.storyboard,
+      portrait: stored.portrait ?? DEFAULT_IMAGE_PROMPTS.portrait,
+      prop: stored.prop ?? DEFAULT_IMAGE_PROMPTS.prop,
+      poster: stored.poster ?? DEFAULT_IMAGE_PROMPTS.poster,
+    });
     setHydrated(true);
     /* eslint-enable react-hooks/set-state-in-effect */
   }, []);
@@ -105,6 +126,23 @@ export function WizardShell() {
   const handleApiKeyChange = (key: string) => {
     setApiKey(key);
     localStorage.setItem(API_KEY_STORAGE, key);
+  };
+
+  const handleImagePromptChange = (kind: ImagePromptKind, value: string) => {
+    const next = { ...imagePrompts, [kind]: value };
+    setImagePrompts(next);
+    // Persist only entries that differ from defaults so a blank reset restores defaults.
+    const overrides: Partial<Record<ImagePromptKind, string>> = {};
+    for (const k of Object.keys(next) as ImagePromptKind[]) {
+      if (next[k].trim() && next[k].trim() !== DEFAULT_IMAGE_PROMPTS[k]) {
+        overrides[k] = next[k];
+      }
+    }
+    saveImagePrompts(overrides);
+  };
+
+  const handleResetImagePrompt = (kind: ImagePromptKind) => {
+    handleImagePromptChange(kind, DEFAULT_IMAGE_PROMPTS[kind]);
   };
 
   const handleJsonSubmit = (json: string) => {
@@ -257,7 +295,11 @@ export function WizardShell() {
           const res = await fetch("/api/generate-portrait", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ name: char.name, description: char.description }),
+            body: JSON.stringify({
+              name: char.name,
+              description: char.description,
+              stylePrefix: getStylePrefix("portrait"),
+            }),
           });
           if (!res.ok) return;
           const { url } = await res.json();
@@ -276,7 +318,11 @@ export function WizardShell() {
           const res = await fetch("/api/generate-prop", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ name: prop.item, notes: prop.notes }),
+            body: JSON.stringify({
+              name: prop.item,
+              notes: prop.notes,
+              stylePrefix: getStylePrefix("prop"),
+            }),
           });
           if (!res.ok) return;
           const { url } = await res.json();
@@ -301,7 +347,11 @@ export function WizardShell() {
               const res = await fetch("/api/generate-image", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ prompt, camera }),
+                body: JSON.stringify({
+                  prompt,
+                  camera,
+                  stylePrefix: getStylePrefix("storyboard"),
+                }),
               });
               if (!res.ok) return;
               const { url } = await res.json();
@@ -334,7 +384,10 @@ export function WizardShell() {
             const res = await fetch("/api/generate-poster-image", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ prompt }),
+              body: JSON.stringify({
+                prompt,
+                stylePrefix: getStylePrefix("poster"),
+              }),
             });
             if (!res.ok) return;
             const { url } = await res.json();
@@ -694,16 +747,21 @@ export function WizardShell() {
       </main>
 
       <Dialog open={showSettings} onOpenChange={setShowSettings}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Settings</DialogTitle>
+            <DialogTitle className="tracking-tight">Settings</DialogTitle>
           </DialogHeader>
-          <div className="space-y-5 py-2">
+
+          {/* API keys section */}
+          <section className="space-y-5 pt-2">
+            <div className="font-mono text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground pb-3 border-b border-border/60">
+              API Keys
+            </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium">Claude API Key</label>
-              <p className="text-[12px] text-muted-foreground">
+              <label className="text-[13px] font-medium tracking-tight">Claude API Key</label>
+              <p className="text-[12px] text-foreground/60 tracking-tight">
                 Used to generate documents from your screenplay data.{" "}
-                <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground">
+                <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-foreground">
                   Get a key
                 </a>
               </p>
@@ -712,14 +770,14 @@ export function WizardShell() {
                 placeholder="sk-ant-api03-..."
                 value={apiKey}
                 onChange={(e) => handleApiKeyChange(e.target.value)}
-                className="w-full rounded-lg border bg-background px-3 py-2.5 text-sm font-mono placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                className="w-full rounded-[8px] bg-card/60 shadow-pill px-3 py-2.5 text-[13px] font-mono placeholder:text-muted-foreground/50 focus:outline-none focus:shadow-paper-hover"
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium">fal.ai API Key</label>
-              <p className="text-[12px] text-muted-foreground">
+              <label className="text-[13px] font-medium tracking-tight">fal.ai API Key</label>
+              <p className="text-[12px] text-foreground/60 tracking-tight">
                 Used to generate storyboard sketches, poster concepts, and character portraits.{" "}
-                <a href="https://fal.ai/dashboard/keys" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground">
+                <a href="https://fal.ai/dashboard/keys" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-foreground">
                   Get a key
                 </a>
               </p>
@@ -731,13 +789,89 @@ export function WizardShell() {
                   setFalKey(e.target.value);
                   localStorage.setItem(FAL_KEY_STORAGE, e.target.value);
                 }}
-                className="w-full rounded-lg border bg-background px-3 py-2.5 text-sm font-mono placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                className="w-full rounded-[8px] bg-card/60 shadow-pill px-3 py-2.5 text-[13px] font-mono placeholder:text-muted-foreground/50 focus:outline-none focus:shadow-paper-hover"
               />
             </div>
-            <p className="text-[11px] text-muted-foreground">
+            <p className="text-[11px] text-foreground/50 tracking-tight">
               Keys are stored in your browser only. They are never sent to our servers.
             </p>
-          </div>
+          </section>
+
+          {/* Image style prompts */}
+          <section className="space-y-4 pt-6">
+            <div className="font-mono text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground pb-3 border-b border-border/60">
+              Image Styles
+            </div>
+            <p className="text-[12px] text-foreground/60 tracking-tight leading-[1.55] max-w-[60ch]">
+              The style prefix prepended to every image-generation prompt. Defaults
+              are hand-drawn black &amp; white sketches (Ridley Scott-style
+              storyboards) so the whole bible reads as a single artist&apos;s hand.
+              Override any of them to render in a different aesthetic —
+              watercolor, painted concept art, 3D blockout, photographic
+              reference, whatever fits the project.
+            </p>
+
+            {(["storyboard", "portrait", "prop", "poster"] as ImagePromptKind[]).map(
+              (kind) => {
+                const labels: Record<ImagePromptKind, { title: string; sub: string }> = {
+                  storyboard: {
+                    title: "Storyboard frames",
+                    sub: "Scene-by-scene shot illustrations — landscape 16:9.",
+                  },
+                  portrait: {
+                    title: "Character portraits",
+                    sub: "Cast member head-and-shoulders references — square.",
+                  },
+                  prop: {
+                    title: "Prop references",
+                    sub: "Isolated prop sketches for the art department — square.",
+                  },
+                  poster: {
+                    title: "Poster concepts",
+                    sub: "Tall poster compositions from the Key Art tab — 5:7.",
+                  },
+                };
+                const isModified =
+                  imagePrompts[kind].trim() !== DEFAULT_IMAGE_PROMPTS[kind];
+                return (
+                  <div key={kind} className="space-y-2">
+                    <div className="flex items-baseline justify-between gap-3">
+                      <div className="min-w-0">
+                        <label className="text-[13px] font-medium tracking-tight">
+                          {labels[kind].title}
+                        </label>
+                        <p className="text-[11px] text-foreground/55 tracking-tight mt-0.5">
+                          {labels[kind].sub}
+                        </p>
+                      </div>
+                      {isModified && (
+                        <button
+                          onClick={() => handleResetImagePrompt(kind)}
+                          className="shrink-0 font-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground hover:text-foreground transition-colors"
+                          title="Restore the default style prefix"
+                        >
+                          Reset
+                        </button>
+                      )}
+                    </div>
+                    <textarea
+                      value={imagePrompts[kind]}
+                      onChange={(e) => handleImagePromptChange(kind, e.target.value)}
+                      rows={4}
+                      className="w-full rounded-[8px] bg-card/60 shadow-pill px-3 py-2.5 text-[12px] font-mono leading-[1.55] text-foreground/90 placeholder:text-muted-foreground/50 focus:outline-none focus:shadow-paper-hover resize-y"
+                      placeholder={DEFAULT_IMAGE_PROMPTS[kind]}
+                    />
+                  </div>
+                );
+              },
+            )}
+
+            <p className="text-[11px] text-foreground/50 tracking-tight">
+              Applies to all new image generations. Already-generated images are
+              not retroactively re-rendered. Clear a field and hit Reset to
+              restore the default.
+            </p>
+          </section>
         </DialogContent>
       </Dialog>
 

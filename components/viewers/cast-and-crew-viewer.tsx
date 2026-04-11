@@ -3,6 +3,7 @@
 import { useState, useRef, useMemo } from "react";
 import { Loader2, Camera, RefreshCw, Images, X, EyeOff, Eye, Users } from "lucide-react";
 import { SectionLabelPill } from "@/components/ui/inline-chip";
+import { getStylePrefix } from "@/lib/image-prompts";
 import type { SavedImage } from "@/lib/reports";
 
 type CharacterData = {
@@ -166,7 +167,11 @@ export function CastAndCrewViewer({
       const res = await fetch("/api/generate-portrait", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: char.name, description: char.description }),
+        body: JSON.stringify({
+          name: char.name,
+          description: char.description,
+          stylePrefix: getStylePrefix("portrait"),
+        }),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const { url } = await res.json();
