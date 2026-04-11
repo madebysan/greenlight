@@ -4,6 +4,8 @@
 
 export const NIGHT_OF_THE_LIVING_DEAD_JSON = `{
   "title": "Night of the Living Dead",
+  "writer": "John A. Russo & George A. Romero",
+  "based_on": "",
   "genre": [
     "Horror",
     "Thriller"

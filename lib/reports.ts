@@ -21,6 +21,7 @@ export type SavedProject = {
   promptOverrides?: Record<number, string>;
   posterImages?: Record<number, SavedImage>;
   portraits?: Record<string, SavedImage>;
+  propImages?: Record<string, SavedImage>;
   disabledItems?: Record<string, boolean>;
 };
 
