@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, type ReactNode } from "react";
-import { Settings, Info, RotateCcw, FileText, Download, Share2, Sun, Moon } from "lucide-react";
+import { Settings, Info, RotateCcw, FileText, Download, Share2, Sun, Moon, Bookmark, Check } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -196,6 +196,26 @@ export function WizardShell() {
     updateProject({ disabledItems: disabled });
   }, []);
 
+  const [savingDemo, setSavingDemo] = useState<"idle" | "saving" | "saved">("idle");
+  const handleSaveDemo = async () => {
+    const current = loadProject();
+    if (!current) return;
+    setSavingDemo("saving");
+    try {
+      const res = await fetch("/api/save-demo", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(current),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      setSavingDemo("saved");
+      setTimeout(() => setSavingDemo("idle"), 2500);
+    } catch (e) {
+      console.error("Save as demo failed", e);
+      setSavingDemo("idle");
+    }
+  };
+
   const toggleTheme = () => {
     const next = theme === "dark" ? "light" : "dark";
     setTheme(next);
@@ -277,6 +297,26 @@ export function WizardShell() {
               )}
               {hasActiveProject && documents.some((d) => d.status === "done") && (
                 <>
+                  {process.env.NODE_ENV === "development" && (
+                    <HeaderButton
+                      icon={
+                        savingDemo === "saved" ? (
+                          <Check size={14} />
+                        ) : (
+                          <Bookmark size={14} />
+                        )
+                      }
+                      label={
+                        savingDemo === "saving"
+                          ? "Saving..."
+                          : savingDemo === "saved"
+                          ? "Saved"
+                          : "Save as demo"
+                      }
+                      onClick={handleSaveDemo}
+                      title="Snapshot current state as /demo (dev only)"
+                    />
+                  )}
                   <HeaderButton
                     icon={<Share2 size={14} />}
                     label="Share"

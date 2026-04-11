@@ -3,7 +3,7 @@
 import { useState, useMemo, useRef } from "react";
 import { Video, Sun, Heart, Check, Copy, ImageIcon, Loader2, Download, RefreshCw, Images, ChevronDown } from "lucide-react";
 
-type StoryboardScene = {
+export type StoryboardScene = {
   number: number;
   slugLine: string;
   prompt: string;
@@ -17,7 +17,7 @@ type Act = {
   scenes: StoryboardScene[];
 };
 
-function parseStoryboardPrompts(md: string): { title: string; intro: string; acts: Act[] } {
+export function parseStoryboardPrompts(md: string): { title: string; intro: string; acts: Act[] } {
   const lines = md.split("\n");
   let title = "";
   const allScenes: StoryboardScene[] = [];
