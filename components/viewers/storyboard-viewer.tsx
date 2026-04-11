@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useRef } from "react";
-import { Video, Sun, Heart, Check, Copy, ImageIcon, Loader2, Download, RefreshCw, Images } from "lucide-react";
+import { Video, Sun, Heart, Check, Copy, ImageIcon, Loader2, Download, RefreshCw, Images, ChevronDown } from "lucide-react";
 
 type StoryboardScene = {
   number: number;
@@ -190,6 +190,10 @@ function SceneCard({ scene, copiedScene, onCopy, imageState, onGenerate, regenSt
   const intExt = intExtMatch ? intExtMatch[1].toUpperCase() : "";
   const [editing, setEditing] = useState(false);
   const [editText, setEditText] = useState(scene.prompt);
+  // Prompt text is collapsed by default — the storyboard image is the primary
+  // artifact, the prompt is the generator input that most viewers won't need.
+  const [promptExpanded, setPromptExpanded] = useState(false);
+  const isPromptVisible = promptExpanded || editing;
 
   return (
     <div className="rounded-xl border border-border/60 bg-card/30 overflow-hidden">
@@ -295,23 +299,9 @@ function SceneCard({ scene, copiedScene, onCopy, imageState, onGenerate, regenSt
       <div className={`flex gap-4 px-4 py-4 ${imageState.status === "done" && imageState.url ? "" : "flex-col"}`}>
         {/* Text content */}
         <div className="flex-1 min-w-0">
-          {editing ? (
-            <textarea
-              value={editText}
-              onChange={(e) => setEditText(e.target.value)}
-              className="w-full text-[13px] leading-[1.8] text-foreground/80 bg-muted/30 border rounded-lg p-3 resize-none focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-              rows={Math.max(3, editText.split("\n").length + 1)}
-              autoFocus
-            />
-          ) : (
-            <p className="text-[13px] leading-[1.8] text-foreground/80">
-              {scene.prompt}
-            </p>
-          )}
-
-          {/* Metadata chips */}
+          {/* Metadata chips — always visible, they're compact */}
           {(scene.camera || scene.lighting || scene.mood) && (
-            <div className="flex flex-wrap gap-x-4 gap-y-2 mt-3">
+            <div className="flex flex-wrap gap-x-4 gap-y-2">
               {scene.camera && (
                 <div className="flex items-center gap-1.5">
                   <Video size={13} className="text-muted-foreground" />
@@ -329,6 +319,36 @@ function SceneCard({ scene, copiedScene, onCopy, imageState, onGenerate, regenSt
                   <Heart size={13} className="text-muted-foreground" />
                   <span className="text-[11px] text-muted-foreground">{scene.mood}</span>
                 </div>
+              )}
+            </div>
+          )}
+
+          {/* Prompt — collapsed by default */}
+          <button
+            onClick={() => setPromptExpanded((v) => !v)}
+            className="mt-3 inline-flex items-center gap-1 text-[10px] font-medium text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ChevronDown
+              size={11}
+              className={`transition-transform ${isPromptVisible ? "" : "-rotate-90"}`}
+            />
+            {isPromptVisible ? "Hide prompt" : "Show prompt"}
+          </button>
+
+          {isPromptVisible && (
+            <div className="mt-2">
+              {editing ? (
+                <textarea
+                  value={editText}
+                  onChange={(e) => setEditText(e.target.value)}
+                  className="w-full text-[13px] leading-[1.8] text-foreground/80 bg-muted/30 border rounded-lg p-3 resize-none focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                  rows={Math.max(3, editText.split("\n").length + 1)}
+                  autoFocus
+                />
+              ) : (
+                <p className="text-[12px] leading-[1.7] text-foreground/70 bg-muted/20 rounded-lg p-3 border border-border/40">
+                  {scene.prompt}
+                </p>
               )}
             </div>
           )}

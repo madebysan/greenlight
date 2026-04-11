@@ -19,13 +19,31 @@ export const metadata: Metadata = {
   description: "AI-powered pre-production bible generator",
 };
 
+// Inline script reads theme from localStorage before first paint so we
+// never flash the wrong theme on reload. Runs synchronously in <head>.
+const themeInitScript = `
+(function() {
+  try {
+    var t = localStorage.getItem('greenlight-theme');
+    if (t === 'light') {
+      document.documentElement.classList.remove('dark');
+    } else {
+      document.documentElement.classList.add('dark');
+    }
+  } catch (e) {}
+})();
+`;
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en" className="dark" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+      </head>
       <body
         className={`${spaceGrotesk.variable} ${spaceMono.variable} antialiased`}
       >

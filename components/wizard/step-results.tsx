@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 import { OverviewViewer } from "@/components/viewers/overview-viewer";
 import { MoodAndToneViewer } from "@/components/viewers/mood-and-tone-viewer";
-import { SceneBreakdownViewer } from "@/components/viewers/scene-breakdown-viewer";
+import { ScenesViewer } from "@/components/viewers/scenes-viewer";
 import { LocationsViewer } from "@/components/viewers/locations-viewer";
 import { CastAndCrewViewer } from "@/components/viewers/cast-and-crew-viewer";
 import { ProductionViewer } from "@/components/viewers/production-viewer";
@@ -194,11 +194,19 @@ export function StepResults({
             )}
 
             {activeTab === "scenes" && (
-              sceneContent ? (
-                <SceneBreakdownViewer content={sceneContent} />
-              ) : (
-                <GenerationPending label="Scenes" />
-              )
+              <ScenesViewer
+                sceneContent={sceneContent}
+                storyboardContent={storyboardContent}
+                onSceneContentChange={
+                  onDocumentUpdate
+                    ? (c) => onDocumentUpdate("scene-breakdown", c)
+                    : undefined
+                }
+                storyboardImages={storyboardImages}
+                onStoryboardImagesChange={onStoryboardImagesChange}
+                promptOverrides={promptOverrides}
+                onPromptOverridesChange={onPromptOverridesChange}
+              />
             )}
 
             {activeTab === "locations" && (
@@ -229,11 +237,6 @@ export function StepResults({
                     : undefined
                 }
                 posterContent={posterContent}
-                storyboardContent={storyboardContent}
-                storyboardImages={storyboardImages}
-                onStoryboardImagesChange={onStoryboardImagesChange}
-                promptOverrides={promptOverrides}
-                onPromptOverridesChange={onPromptOverridesChange}
                 posterImages={posterImages}
                 onPosterImagesChange={onPosterImagesChange}
               />
