@@ -207,6 +207,12 @@ export function PosterConceptsViewer({ content, savedImages, onImagesChange }: P
     setGeneratingAll(false);
   };
 
+  const expandAll = () =>
+    setExpandedConcepts(new Set(concepts.map((c) => c.number)));
+  const collapseAll = () => setExpandedConcepts(new Set());
+
+  const missingCount = concepts.filter((c) => !savedImages[c.number]).length;
+
   return (
     <div>
       {intro && (
@@ -215,24 +221,41 @@ export function PosterConceptsViewer({ content, savedImages, onImagesChange }: P
         </p>
       )}
 
-      <div className="flex items-center gap-3 mb-6">
-        <div className="flex-1 h-px bg-border" />
+      <div className="flex items-center gap-1 mb-6">
+        <div className="flex-1 h-px bg-border mr-2" />
+        <button
+          onClick={expandAll}
+          className="text-[11px] text-muted-foreground hover:text-foreground px-2 py-1 rounded transition-colors"
+        >
+          Expand all
+        </button>
+        <span className="text-muted-foreground/30">|</span>
+        <button
+          onClick={collapseAll}
+          className="text-[11px] text-muted-foreground hover:text-foreground px-2 py-1 rounded transition-colors"
+        >
+          Collapse all
+        </button>
         {generatingAll ? (
           <button
-            onClick={() => { cancelRef.current = true; }}
-            className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-md border border-destructive/30 text-destructive hover:bg-destructive/5 transition-colors"
+            onClick={() => {
+              cancelRef.current = true;
+            }}
+            className="ml-2 inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-md border border-destructive/30 text-destructive hover:bg-destructive/5 transition-colors"
           >
             <Loader2 size={13} className="animate-spin" />
             {genAllProgress.done}/{genAllProgress.total} — Cancel
           </button>
         ) : (
-          <button
-            onClick={generateAllPosters}
-            className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-md border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors"
-          >
-            <Images size={13} />
-            Generate all posters
-          </button>
+          missingCount > 0 && (
+            <button
+              onClick={generateAllPosters}
+              className="ml-2 inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-md border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors"
+            >
+              <Images size={13} />
+              Generate {missingCount === concepts.length ? "all" : `${missingCount} missing`} posters
+            </button>
+          )
         )}
       </div>
 
