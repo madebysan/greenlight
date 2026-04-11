@@ -192,9 +192,8 @@ function SceneCard({ scene, copiedScene, onCopy, imageState, onGenerate, regenSt
   const [editText, setEditText] = useState(scene.prompt);
 
   return (
-    <div className="rounded-xl border overflow-hidden">
-      {/* Scene header */}
-      <div className="flex items-center gap-3 px-4 py-3 bg-muted/30 border-b">
+    <div className="rounded-xl border border-border/60 bg-card/30 overflow-hidden">
+      <div className="flex items-center gap-3 px-4 py-3 bg-card/50 border-b border-border/60">
         <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-foreground/5 text-xs font-bold shrink-0 tabular-nums">
           {scene.number}
         </span>
@@ -514,7 +513,7 @@ export function StoryboardViewer({ content, savedImages, onImagesChange, savedPr
       )}
 
       <div className="flex items-center gap-3 mb-6">
-        <h2 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">
+        <h2 className="text-[11px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">
           Scene Prompts
         </h2>
         <div className="flex-1 h-px bg-border" />
@@ -541,9 +540,8 @@ export function StoryboardViewer({ content, savedImages, onImagesChange, savedPr
       <div className="space-y-8">
         {acts.map((act) => (
           <section key={act.label}>
-            {/* Act header */}
             <div className="flex items-center gap-3 mb-4">
-              <span className="text-xs font-semibold uppercase tracking-wider text-primary bg-primary/10 rounded-full px-3 py-1">
+              <span className="text-[11px] font-semibold uppercase tracking-[0.15em] text-primary">
                 {act.label}
               </span>
               <div className="flex-1 h-px bg-border" />
