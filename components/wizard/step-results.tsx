@@ -158,7 +158,7 @@ export function StepResults({
           <div className="overflow-y-auto p-6">
             {activeTab === "overview" && (
               overviewContent ? (
-                <OverviewViewer content={overviewContent} />
+                <OverviewViewer content={overviewContent} jsonData={jsonData} />
               ) : (
                 <GenerationPending label="Overview" />
               )

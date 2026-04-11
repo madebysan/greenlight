@@ -20,7 +20,6 @@ describe("Prompts", () => {
     expect(OVERVIEW_PROMPT).toContain("Synopsis");
     expect(OVERVIEW_PROMPT).toContain("Film Identity");
     expect(OVERVIEW_PROMPT).toContain("Themes");
-    expect(OVERVIEW_PROMPT).toContain("Comparable Films");
     expect(OVERVIEW_PROMPT).toContain("Scope at a Glance");
   });
 
@@ -30,6 +29,7 @@ describe("Prompts", () => {
     expect(MOOD_AND_TONE_PROMPT).toContain("Color Palette");
     expect(MOOD_AND_TONE_PROMPT).toContain("Music & Sound Direction");
     expect(MOOD_AND_TONE_PROMPT).toContain("Reference Points");
+    expect(MOOD_AND_TONE_PROMPT).toContain("Similar Films");
   });
 
   it("Scene breakdown prompt asks for scene-by-scene output", () => {

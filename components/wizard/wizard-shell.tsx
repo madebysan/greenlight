@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, type ReactNode } from "react";
-import { Settings, Info, RotateCcw, FileText, Download } from "lucide-react";
+import { Settings, Info, RotateCcw, FileText, Download, Share2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -255,12 +255,20 @@ export function WizardShell() {
                 />
               )}
               {hasActiveProject && documents.some((d) => d.status === "done") && (
-                <HeaderButton
-                  icon={<Download size={14} />}
-                  label="Download All"
-                  onClick={handleDownloadAll}
-                  title="Download all documents"
-                />
+                <>
+                  <HeaderButton
+                    icon={<Share2 size={14} />}
+                    label="Share"
+                    onClick={() => window.open("/share", "_blank")}
+                    title="Open shareable one-pager"
+                  />
+                  <HeaderButton
+                    icon={<Download size={14} />}
+                    label="Download All"
+                    onClick={handleDownloadAll}
+                    title="Download all documents"
+                  />
+                </>
               )}
               {hasActiveProject && (
                 <HeaderButton
