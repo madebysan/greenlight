@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { RefreshCw, Loader2 } from "lucide-react";
 import { replaceMarkdownSection } from "@/lib/markdown-utils";
+import { SectionHead } from "@/components/ui/section-head";
 
 type ColorEntry = { name: string; hex: string; description: string };
 type ReferenceEntry = { title: string; description: string };
@@ -175,7 +176,7 @@ export function MoodAndToneViewer({ content, jsonData, onContentUpdate }: MoodAn
 
       {parsed.atmosphere && (
         <section>
-          <SectionLabel>Atmosphere</SectionLabel>
+          <SectionHead index={1}>Atmosphere</SectionHead>
           <div className="text-[15px] leading-[1.75] text-foreground/85 whitespace-pre-line">
             {parsed.atmosphere}
           </div>
@@ -184,7 +185,7 @@ export function MoodAndToneViewer({ content, jsonData, onContentUpdate }: MoodAn
 
       {parsed.descriptors.length > 0 && (
         <section>
-          <SectionLabel>Tonal Descriptors</SectionLabel>
+          <SectionHead index={2}>Tonal Descriptors</SectionHead>
           <div className="flex flex-wrap gap-1.5">
             {parsed.descriptors.map((d, i) => (
               <span
@@ -200,7 +201,7 @@ export function MoodAndToneViewer({ content, jsonData, onContentUpdate }: MoodAn
 
       {parsed.references.length > 0 && (
         <section>
-          <SectionLabel>Reference Points</SectionLabel>
+          <SectionHead index={3}>Reference Points</SectionHead>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {parsed.references.map((r) => (
               <div
@@ -221,27 +222,28 @@ export function MoodAndToneViewer({ content, jsonData, onContentUpdate }: MoodAn
 
       {(parsed.musicProse || parsed.soundtracks.length > 0) && (
         <section>
-          <div className="flex items-center gap-3 mb-4">
-            <h2 className="text-[11px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">
-              Music & Sound
-            </h2>
-            <div className="flex-1 h-px bg-border" />
-            {onContentUpdate && jsonData && (
-              <button
-                onClick={handleReshuffleMusic}
-                disabled={reshufflingMusic}
-                className="inline-flex items-center gap-1 text-[10px] font-medium text-muted-foreground hover:text-foreground disabled:opacity-50 transition-colors"
-                title="Regenerate music direction"
-              >
-                {reshufflingMusic ? (
-                  <Loader2 size={11} className="animate-spin" />
-                ) : (
-                  <RefreshCw size={11} />
-                )}
-                Shuffle
-              </button>
-            )}
-          </div>
+          <SectionHead
+            index={4}
+            meta={
+              onContentUpdate && jsonData ? (
+                <button
+                  onClick={handleReshuffleMusic}
+                  disabled={reshufflingMusic}
+                  className="inline-flex items-center gap-1 text-[10px] font-medium text-muted-foreground hover:text-foreground disabled:opacity-50 transition-colors"
+                  title="Regenerate music direction"
+                >
+                  {reshufflingMusic ? (
+                    <Loader2 size={11} className="animate-spin" />
+                  ) : (
+                    <RefreshCw size={11} />
+                  )}
+                  Shuffle
+                </button>
+              ) : null
+            }
+          >
+            Music & Sound
+          </SectionHead>
 
           {parsed.musicProse && (
             <div className="text-[14px] leading-[1.75] text-foreground/85 whitespace-pre-line">
@@ -262,7 +264,7 @@ export function MoodAndToneViewer({ content, jsonData, onContentUpdate }: MoodAn
 
       {parsed.similarMoods.length > 0 && (
         <section>
-          <SectionLabel>Similar Moods</SectionLabel>
+          <SectionHead index={5}>Similar Moods</SectionHead>
           <SimilarMoodsGrid films={parsed.similarMoods.slice(0, 4)} />
         </section>
       )}
@@ -423,13 +425,3 @@ function SoundtrackGrid({ tracks }: { tracks: SoundtrackEntry[] }) {
   );
 }
 
-function SectionLabel({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="flex items-center gap-3 mb-4">
-      <h2 className="text-[11px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">
-        {children}
-      </h2>
-      <div className="flex-1 h-px bg-border" />
-    </div>
-  );
-}

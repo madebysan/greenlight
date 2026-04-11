@@ -601,43 +601,47 @@ export function WizardShell() {
       </header>
 
       {currentStep < 4 && (
-        <div className={`mx-auto px-6 py-6 ${currentStep === 4 ? "max-w-6xl" : "max-w-4xl"}`}>
+        <div className={`mx-auto px-6 py-8 ${currentStep === 4 ? "max-w-6xl" : "max-w-4xl"}`}>
           <div className="flex items-center">
-            {STEPS.map((step, i) => (
-              <div key={step.number} className="flex items-center">
-                <div className="flex items-center gap-2">
-                  <div
-                    className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold transition-colors ${
-                      currentStep === step.number
-                        ? "bg-primary text-primary-foreground shadow-sm"
-                        : currentStep > step.number
-                          ? "bg-primary/20 text-primary"
-                          : "bg-muted text-muted-foreground"
-                    }`}
-                  >
-                    {currentStep > step.number ? "\u2713" : step.number}
+            {STEPS.map((step, i) => {
+              const active = currentStep === step.number;
+              const done = currentStep > step.number;
+              return (
+                <div key={step.number} className="flex items-center">
+                  <div className="flex items-center gap-2.5">
+                    <div
+                      className={`flex h-7 w-7 items-center justify-center rounded-full font-mono text-[11px] font-bold tabular-nums transition-colors ${
+                        active
+                          ? "bg-foreground text-background border border-foreground"
+                          : done
+                            ? "bg-transparent text-foreground border border-foreground/40"
+                            : "bg-transparent text-muted-foreground border border-border"
+                      }`}
+                    >
+                      {done ? "\u2713" : step.number.toString().padStart(2, "0")}
+                    </div>
+                    <span
+                      className={`text-[13px] ${
+                        active
+                          ? "font-semibold text-foreground"
+                          : done
+                            ? "font-medium text-foreground/70"
+                            : "text-muted-foreground"
+                      }`}
+                    >
+                      {step.label}
+                    </span>
                   </div>
-                  <span
-                    className={`text-sm ${
-                      currentStep === step.number
-                        ? "font-semibold text-foreground"
-                        : currentStep > step.number
-                          ? "font-medium text-primary/70"
-                          : "text-muted-foreground"
-                    }`}
-                  >
-                    {step.label}
-                  </span>
+                  {i < STEPS.length - 1 && (
+                    <div
+                      className={`h-px w-12 mx-4 transition-colors ${
+                        done ? "bg-foreground/40" : "bg-border"
+                      }`}
+                    />
+                  )}
                 </div>
-                {i < STEPS.length - 1 && (
-                  <div
-                    className={`h-0.5 w-12 mx-3 rounded-full transition-colors ${
-                      currentStep > step.number ? "bg-primary/30" : "bg-border"
-                    }`}
-                  />
-                )}
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}

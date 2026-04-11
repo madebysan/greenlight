@@ -16,6 +16,7 @@ import {
   Images,
 } from "lucide-react";
 import { parseStoryboardPrompts, type StoryboardScene } from "./storyboard-viewer";
+import { SectionHead } from "@/components/ui/section-head";
 import type { SavedImage } from "@/lib/reports";
 
 type ImageState = { status: "idle" | "generating" | "done" | "error"; url?: string; error?: string };
@@ -113,18 +114,6 @@ const TIME_STYLES: Record<string, string> = {
 
 const EMPHASIS_FIELDS = new Set(["Key Visual Moment", "Emotional Beat"]);
 const SKIP_FIELDS = new Set(["Location", "Time"]);
-
-function SectionLabel({ children, action }: { children: React.ReactNode; action?: React.ReactNode }) {
-  return (
-    <div className="flex items-center gap-3 mb-4">
-      <h2 className="text-[11px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">
-        {children}
-      </h2>
-      <div className="flex-1 h-px bg-border" />
-      {action}
-    </div>
-  );
-}
 
 function SceneEditForm({
   scene,
@@ -457,17 +446,17 @@ export function SceneBreakdownViewer({
 
       {overview.length > 0 && (
         <section>
-          <SectionLabel>At a Glance</SectionLabel>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+          <SectionHead index={1}>At a Glance</SectionHead>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-px bg-border/60 border border-border/60 rounded-[4px] overflow-hidden">
             {overview.map((item) => (
               <div
                 key={item.label}
-                className="rounded-lg border border-border/60 bg-card/30 px-3 py-3"
+                className="bg-background px-5 py-5 flex flex-col gap-2"
               >
-                <div className="text-2xl font-semibold text-foreground tabular-nums leading-none">
+                <div className="text-[32px] font-semibold text-foreground tabular-nums leading-none tracking-tight">
                   {item.value}
                 </div>
-                <div className="text-[9px] font-semibold uppercase tracking-widest text-muted-foreground mt-1.5 leading-snug">
+                <div className="font-mono text-[9px] uppercase tracking-[0.15em] text-muted-foreground leading-snug">
                   {item.label.replace(/^Total\s+/, "")}
                 </div>
               </div>
@@ -477,8 +466,9 @@ export function SceneBreakdownViewer({
       )}
 
       <section>
-        <SectionLabel
-          action={
+        <SectionHead
+          index={2}
+          meta={
             <div className="flex items-center gap-1">
               <div className="inline-flex items-center rounded-md border border-border p-0.5 mr-2">
                 <button
@@ -547,7 +537,7 @@ export function SceneBreakdownViewer({
           }
         >
           Scenes
-        </SectionLabel>
+        </SectionHead>
 
         {(() => {
           const renderScene = (scene: Scene) => {

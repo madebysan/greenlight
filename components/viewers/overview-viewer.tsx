@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { RefreshCw, Loader2 } from "lucide-react";
 import { replaceMarkdownSection } from "@/lib/markdown-utils";
+import { SectionHead } from "@/components/ui/section-head";
 import { PosterCarousel } from "./poster-carousel";
 import type { SavedImage } from "@/lib/reports";
 
@@ -204,7 +205,7 @@ export function OverviewViewer({
 
       {parsed.synopsis && (
         <section>
-          <SectionLabel>Synopsis</SectionLabel>
+          <SectionHead index={1}>Synopsis</SectionHead>
           <p className="text-[14px] leading-[1.75] text-foreground/80 whitespace-pre-line">
             {parsed.synopsis}
           </p>
@@ -213,7 +214,7 @@ export function OverviewViewer({
 
       {parsed.themes.length > 0 && (
         <section>
-          <SectionLabel>Themes</SectionLabel>
+          <SectionHead index={2}>Themes</SectionHead>
           <div className="space-y-5">
             {parsed.themes.map((t) => (
               <div key={t.title}>
@@ -231,18 +232,18 @@ export function OverviewViewer({
 
       {(parsed.stats.length > 0 || parsed.complexity) && (
         <section>
-          <SectionLabel>Scope at a Glance</SectionLabel>
+          <SectionHead index={3}>Scope at a Glance</SectionHead>
           {parsed.stats.length > 0 && (
-            <div className="grid grid-cols-2 md:grid-cols-6 gap-2 mb-5">
+            <div className="grid grid-cols-2 md:grid-cols-6 gap-px bg-border/60 border border-border/60 rounded-[4px] overflow-hidden mb-5">
               {parsed.stats.map((s) => (
                 <div
                   key={s.label}
-                  className="rounded-lg border border-border/60 bg-card/30 px-3 py-3"
+                  className="bg-background px-5 py-5 flex flex-col gap-2"
                 >
-                  <div className="text-2xl font-semibold text-foreground tabular-nums leading-none">
+                  <div className="text-[32px] font-semibold text-foreground tabular-nums leading-none tracking-tight">
                     {s.value}
                   </div>
-                  <div className="text-[9px] font-semibold uppercase tracking-widest text-muted-foreground mt-1.5 leading-snug">
+                  <div className="font-mono text-[9px] uppercase tracking-[0.15em] text-muted-foreground leading-snug">
                     {s.label}
                   </div>
                 </div>
@@ -250,8 +251,8 @@ export function OverviewViewer({
             </div>
           )}
           {parsed.complexity && (
-            <div className="rounded-xl border border-border/60 bg-card/20 p-5">
-              <div className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-2">
+            <div className="rounded-[4px] border border-border/60 bg-card/20 p-5">
+              <div className="font-mono text-[10px] uppercase tracking-[0.15em] text-muted-foreground mb-2">
                 Complexity Read
               </div>
               <p className="text-[13px] leading-[1.7] text-foreground/80">
@@ -261,17 +262,6 @@ export function OverviewViewer({
           )}
         </section>
       )}
-    </div>
-  );
-}
-
-function SectionLabel({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="flex items-center gap-3 mb-4">
-      <h2 className="text-[11px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">
-        {children}
-      </h2>
-      <div className="flex-1 h-px bg-border" />
     </div>
   );
 }
