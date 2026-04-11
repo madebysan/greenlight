@@ -13,11 +13,12 @@ type StepJsonInputProps = {
 };
 
 const OUTPUT_DOCS = [
-  { name: "Scene Breakdown", desc: "Scene-by-scene analysis with locations, cast & props" },
-  { name: "Production Matrices", desc: "Cross-referenced schedules, budgets & logistics" },
-  { name: "Marketing Brief", desc: "Logline, audience, tone & visual identity" },
-  { name: "Storyboard Prompts", desc: "AI-ready image prompts for each scene" },
-  { name: "Poster Concepts", desc: "Visual directions for marketing artwork" },
+  { name: "Overview", desc: "Logline, synopsis, comparables, and scope at a glance" },
+  { name: "Mood & Tone", desc: "Atmosphere, palette, music direction, references" },
+  { name: "Scenes", desc: "Scene-by-scene map of the film" },
+  { name: "Locations", desc: "Unique locations with visual moments and set requirements" },
+  { name: "Cast & Crew", desc: "Characters with arcs plus scope-based crew roles" },
+  { name: "Visuals", desc: "Storyboard frames and poster concepts for your art team" },
 ];
 
 export function StepJsonInput({ onSubmit, onBack }: StepJsonInputProps) {
@@ -162,7 +163,7 @@ export function StepJsonInput({ onSubmit, onBack }: StepJsonInputProps) {
         <h3 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">
           Documents You&apos;ll Get
         </h3>
-        <div className="grid grid-cols-5 gap-2">
+        <div className="grid grid-cols-6 gap-2">
           {OUTPUT_DOCS.map((doc, i) => (
             <div
               key={doc.name}
