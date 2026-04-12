@@ -219,7 +219,7 @@ export function StepGenerating({
           Vision Deck
         </SectionLabelPill>
         <h1 className="text-[44px] font-light tracking-[-0.03em] leading-[1.02] mb-3 text-foreground">
-          Assembling documents
+          Building your vision deck
         </h1>
         <p className="text-[14px] text-foreground/70 max-w-[58ch] tracking-tight leading-[1.55]">
           Claude is writing your project bible one document at a time. Each one
