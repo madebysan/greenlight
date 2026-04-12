@@ -494,12 +494,12 @@ export function SceneBreakdownViewer({
           labelIcon={<ListOrdered size={10} />}
           meta={
             <div className="flex items-center gap-1">
-              <div className="inline-flex items-center rounded-md border border-border bg-muted/50 p-0.5 mr-2">
+              <div className="inline-flex items-center rounded-md border border-border bg-muted p-0.5 mr-2">
                 <button
                   onClick={() => setGroupBy("sequence")}
-                  className={`text-[10px] font-medium px-2 py-0.5 rounded transition-colors ${
+                  className={`text-[10px] font-medium px-2.5 py-1 rounded transition-colors ${
                     groupBy === "sequence"
-                      ? "bg-background text-foreground shadow-sm"
+                      ? "bg-foreground text-background shadow-sm"
                       : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
@@ -507,9 +507,9 @@ export function SceneBreakdownViewer({
                 </button>
                 <button
                   onClick={() => setGroupBy("location")}
-                  className={`text-[10px] font-medium px-2 py-0.5 rounded transition-colors ${
+                  className={`text-[10px] font-medium px-2.5 py-1 rounded transition-colors ${
                     groupBy === "location"
-                      ? "bg-background text-foreground shadow-sm"
+                      ? "bg-foreground text-background shadow-sm"
                       : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
