@@ -48,7 +48,7 @@ import {
 import { downloadBlob } from "@/lib/utils";
 
 const STEPS = [
-  { number: 1, label: "Extract" },
+  { number: 1, label: "Start" },
   { number: 2, label: "Generate" },
   { number: 3, label: "Review" },
 ];

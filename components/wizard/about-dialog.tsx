@@ -50,7 +50,7 @@ export function AboutDialog({ open, onOpenChange }: AboutDialogProps) {
 
           <div>
             <div className="font-mono text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground mb-3">
-              Documents generated
+              What you get
             </div>
             <div className="space-y-px rounded-[10px] overflow-hidden border border-border/60">
               {TABS.map((tab, i) => (
