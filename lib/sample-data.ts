@@ -614,6 +614,9 @@ export const NIGHT_OF_THE_LIVING_DEAD_JSON = `{
   "tone": "bleak relentless horror"
 }`;
 
+// Import EEAAO JSON from cached projects
+import { CACHED_PROJECTS } from "./cached-projects";
+
 export const SAMPLES = [
-  { title: "Night of the Living Dead", json: NIGHT_OF_THE_LIVING_DEAD_JSON },
+  { title: "Everything Everywhere All At Once", json: CACHED_PROJECTS["everything-everywhere-all-at-once"]?.jsonData || "" },
 ];
