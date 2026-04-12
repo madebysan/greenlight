@@ -535,15 +535,6 @@ export function SceneBreakdownViewer({
                   </button>
                 )
               )}
-              {onContentChange && (
-                <button
-                  onClick={handleAddScene}
-                  className="inline-flex items-center gap-1 text-[11px] font-medium text-muted-foreground hover:text-foreground px-2 py-1 rounded-md border border-border hover:border-foreground/20 transition-colors mr-1"
-                >
-                  <Plus size={12} />
-                  Add scene
-                </button>
-              )}
               <button
                 onClick={expandedScenes.size === scenes.length ? collapseAll : expandAll}
                 className="text-[10px] font-mono uppercase tracking-[0.1em] text-muted-foreground hover:text-foreground px-2 py-1 rounded transition-colors"
