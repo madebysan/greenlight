@@ -545,17 +545,10 @@ export function SceneBreakdownViewer({
                 </button>
               )}
               <button
-                onClick={expandAll}
+                onClick={expandedScenes.size === scenes.length ? collapseAll : expandAll}
                 className="text-[11px] text-muted-foreground hover:text-foreground px-2 py-1 rounded transition-colors"
               >
-                Expand all
-              </button>
-              <span className="text-muted-foreground/30">|</span>
-              <button
-                onClick={collapseAll}
-                className="text-[11px] text-muted-foreground hover:text-foreground px-2 py-1 rounded transition-colors"
-              >
-                Collapse all
+                {expandedScenes.size === scenes.length ? "Collapse all" : "Expand all"}
               </button>
             </div>
           }
