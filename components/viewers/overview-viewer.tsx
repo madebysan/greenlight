@@ -207,11 +207,9 @@ export function OverviewViewer({
         {hasCarousel ? (
           <PosterCarousel posterContent={posterContent} posterImages={posterImages!} />
         ) : (
-          <div className="hidden md:flex flex-col items-center justify-center rounded-[12px] border-2 border-dashed border-border/60 aspect-[5/7] text-muted-foreground/50">
-            <Frame size={24} className="mb-2" />
-            <span className="text-[11px] tracking-tight text-center px-4">
-              Generate posters in the Posters tab
-            </span>
+          <div className="hidden md:flex flex-col items-center justify-center rounded-[12px] border-2 border-dashed border-border/60 hover:border-foreground/30 aspect-[5/7] text-muted-foreground hover:text-foreground transition-colors cursor-default">
+            <Frame size={20} className="mb-1.5" />
+            <span className="text-[10px] font-medium">Generate sketch</span>
           </div>
         )}
       </header>
