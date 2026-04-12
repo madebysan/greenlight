@@ -17,10 +17,10 @@ const spaceMono = Space_Mono({
 
 export const metadata: Metadata = {
   title: "Greenlight",
-  description: "Turn a script into something tangible, fast. A pre-production bible generator for indie filmmakers.",
+  description: "Turn a script into something tangible, fast. A vision deck generator for indie filmmakers.",
   openGraph: {
     title: "Greenlight",
-    description: "Turn a script into something tangible, fast. A pre-production bible generator for indie filmmakers.",
+    description: "Turn a script into something tangible, fast. A vision deck generator for indie filmmakers.",
     type: "website",
     images: [{ url: "/og-image.png", width: 1200, height: 630 }],
   },
