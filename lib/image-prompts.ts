@@ -14,20 +14,20 @@ export type ImagePromptKind = "storyboard" | "portrait" | "prop" | "poster";
 
 export const DEFAULT_IMAGE_PROMPTS: Record<ImagePromptKind, string> = {
   storyboard:
-    "gstdrw style, black and white, rough lines, expressive strokes, minimal background, storyboard sketch",
+    "gstdrw style, black ink on pure white paper, rough lines, expressive strokes, minimal background, storyboard sketch, no color, no tint, no tone",
 
   portrait:
-    "gstdrw style, black and white, rough lines, expressive strokes, minimal background, character portrait sketch, head and shoulders",
+    "gstdrw style, black ink on pure white paper, rough lines, expressive strokes, minimal background, character portrait sketch, head and shoulders, no color, no tint, no tone",
 
   prop:
-    "gstdrw style, black and white, rough lines, expressive strokes, minimal background, single isolated object, no people",
+    "gstdrw style, black ink on pure white paper, rough lines, expressive strokes, minimal background, single isolated object, no people, no color, no tint, no tone",
 
   poster:
-    "gstdrw style, black and white, rough lines, expressive strokes, minimal background, poster composition sketch",
+    "gstdrw style, black ink on pure white paper, rough lines, expressive strokes, minimal background, poster composition sketch, no color, no tint, no tone",
 };
 
 export const IMAGE_NEGATIVE_PROMPT =
-  "color, colorful, photorealistic, detailed rendering, polished, finished art, shading, 3d render";
+  "color, colorful, photorealistic, detailed rendering, polished, finished art, shading, 3d render, sepia, yellow, warm tint, aged paper, brown, amber, toned paper";
 
 export const GESTURE_DRAW_LORA_URL =
   "https://huggingface.co/glif/Gesture-Draw/resolve/main/Gesture_Draw_v1.safetensors";
