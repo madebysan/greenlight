@@ -267,11 +267,11 @@ export function OverviewViewer({
             </div>
           )}
           {parsed.complexity && (
-            <div className="rounded-[12px] bg-card/40 shadow-paper p-5 max-w-[65ch]">
-              <div className="font-mono text-[9px] font-medium uppercase tracking-[0.18em] text-muted-foreground mb-2">
+            <div className="rounded-[12px] bg-card/40 shadow-paper p-6 max-w-[65ch]">
+              <div className="font-mono text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground mb-3">
                 Complexity Read
               </div>
-              <p className="text-[13px] leading-[1.7] text-foreground/80 tracking-tight">
+              <p className="text-[15px] leading-[1.75] text-foreground/80 tracking-tight">
                 {parsed.complexity}
               </p>
             </div>
