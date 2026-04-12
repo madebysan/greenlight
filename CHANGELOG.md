@@ -5,6 +5,27 @@ Updated every session via `/save-session`.
 
 ---
 
+## 2026-04-12 (session 4)
+
+Image generation overhaul. Switched from FLUX Schnell to FLUX dev + Gesture Draw LoRA for B&W gesture sketch output across all image types.
+
+### Features
+- **Gesture Draw LoRA integration** — all 4 image routes (`generate-image`, `generate-portrait`, `generate-prop`, `generate-poster-image`) switched from `fal-ai/flux/schnell` to `fal-ai/flux-lora` with [glif/Gesture-Draw](https://huggingface.co/glif/Gesture-Draw) LoRA. Black ink on white paper, rough expressive lines, negative prompt blocks color/photorealism.
+- **Per-kind style prefixes** — storyboards/portraits/posters use "rough lines, minimal background"; props use "bold linework, close-up filling the frame" for visibility.
+- **Negative prompt support** — all routes now send `negative_prompt` to block color, sepia, warm tint, photorealism. Eliminates color leakage from AI-generated subject prose without prompt sandwich gymnastics.
+- **Crew → Insights** — replaced generic crew list (Writer, Director, Producer, etc.) with 15 situational production insights that only fire when the script justifies them (stunts, VFX, weapons, pyro, night shoots, etc.).
+
+### Data
+- **42 demo images regenerated** — all storyboards (13), portraits (8), props (6), and posters (15) in `public/demo-images/` now use Gesture Draw B&W sketch style. Cost: ~$1.47.
+- **A24 bonus-round samples removed from backlog** — already completed.
+
+### Fixes
+- Props visibility — Gesture Draw LoRA rendered isolated objects as near-invisible sparse lines. Fixed with "bold linework, close-up filling the frame" in the prop style prefix only.
+
+### Status: committed (via auto-hook), demo images committed
+
+---
+
 ## 2026-04-11 (session 3)
 
 Peec.ai aesthetic port across every viewer. The app went from "well-structured dark dashboard" to "editorial dark mode that feels cinematic and deliberate."

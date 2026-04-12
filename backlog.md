@@ -149,3 +149,16 @@ Sample data lives in `lib/sample-data.ts` as exported const strings. A24 scripts
 ### General / UX
 - Keyboard shortcuts for navigation between tabs
 - Undo/redo for edits
+
+---
+
+## Added 2026-04-12
+
+### Upload Script tab (end-to-end script→bible)
+- [ ] Add "Upload script" tab alongside "Paste JSON" in step-json-input — user drops a PDF, Claude Sonnet extracts the JSON, pipes into existing generation pipeline
+- [ ] Design thinking completed (session 4): PDF-only v1, Claude Sonnet 4.6 via document content block (no pdf-parse needed), ~$0.45/extraction, 60-90s latency, additive tab (remove if quality isn't there)
+- [ ] Full design notes in plan.md session 3 / conversation history
+
+### Image generation
+- [ ] Expose model/LoRA picker in Settings (let users choose cost/quality tradeoff — schnell for cheap, dev+LoRA for quality)
+- [ ] Per-kind model override (e.g., ultra for posters only, dev+LoRA for storyboards)

@@ -56,13 +56,16 @@ All status badges use `bg-{color}-500/15 text-{color}-400` — transparent backg
 - **Grid gaps:** `gap-2` tight, `gap-3` standard, `gap-5` breathing
 
 ## Image generation style
-All AI-generated images share a single visual language:
-- **Style:** Black felt-tip marker on white paper, loose confident linework, crosshatching for shadows
-- **Storyboards:** Landscape 16:9, inside rectangular panel borders
-- **Posters:** Portrait 5:7 (720×1008), no text/lettering
-- **Character portraits:** Square, head and shoulders, centered
-- **Prop references:** Square, isolated object, no background detail, no people
-- **Rules:** Strictly B&W, no color, no text, no signatures, no watermarks
+All AI-generated images use the **Gesture Draw LoRA** on FLUX dev via `fal-ai/flux-lora` ($0.035/image).
+- **LoRA:** [glif/Gesture-Draw](https://huggingface.co/glif/Gesture-Draw) at scale 1.0, 28 inference steps, guidance 3.5
+- **Trigger word:** `gstdrw style` — must appear at the start of every prompt
+- **Negative prompt:** shared across all types — blocks color, photorealism, sepia, warm tint, rendering
+- **Style:** Black ink gesture drawing on pure white paper, rough expressive lines, no color, no tint
+- **Storyboards:** Landscape 16:9 (1280×720), rough lines, expressive strokes, minimal background
+- **Posters:** Portrait ~5:7 (720×1008), poster composition sketch
+- **Character portraits:** Square (720×720), head and shoulders, suggested facial features
+- **Prop references:** Square (720×720), bold linework, close-up filling the frame (props use a heavier prompt to avoid the LoRA's tendency to render sparse single objects)
+- **Rules:** Strictly B&W, no color, no text, no signatures, no watermarks. Per-kind style prefixes in `lib/image-prompts.ts`. All routes use the same LoRA URL, scale, steps, and negative prompt constants from the same module.
 
 ## Patterns
 
