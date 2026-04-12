@@ -194,7 +194,7 @@ function UploadMode({ onSubmitJson }: { onSubmitJson?: (json: string) => void })
               Reading {fileName}
             </p>
             <p className="text-[12px] text-muted-foreground mt-1">
-              Claude is extracting scenes, characters, locations, and props. This takes 1–3 minutes.
+              Extracting scenes, characters, locations, and props. This takes 1–3 minutes.
             </p>
           </div>
         </div>
