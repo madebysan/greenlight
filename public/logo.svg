@@ -1,6 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="Greenlight">
-  <polygon points="0,0 128,0 0,128" fill="currentColor"/>
-  <polygon points="128,0 256,0 256,128" fill="currentColor"/>
-  <polygon points="0,128 0,256 128,256" fill="currentColor"/>
-  <polygon points="256,128 256,256 128,256" fill="currentColor"/>
-</svg>
