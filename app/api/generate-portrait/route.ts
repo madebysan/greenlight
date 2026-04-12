@@ -3,7 +3,12 @@ import { fal } from "@fal-ai/client";
 import { writeFileSync, mkdirSync } from "fs";
 import { join } from "path";
 import { randomUUID } from "crypto";
-import { DEFAULT_IMAGE_PROMPTS, STYLE_OVERRIDE_PREFIX, STYLE_REINFORCEMENT } from "@/lib/image-prompts";
+import {
+  DEFAULT_IMAGE_PROMPTS,
+  IMAGE_NEGATIVE_PROMPT,
+  GESTURE_DRAW_LORA_URL,
+  GESTURE_DRAW_LORA_SCALE,
+} from "@/lib/image-prompts";
 
 fal.config({ credentials: process.env.FAL_KEY });
 
@@ -25,20 +30,18 @@ export async function POST(request: NextRequest) {
         ? stylePrefix.trim()
         : DEFAULT_IMAGE_PROMPTS.portrait;
 
-    const prompt = [
-      STYLE_PREFIX,
-      STYLE_OVERRIDE_PREFIX,
-      "Subject:",
-      `Character: ${name || "Unknown"}. ${description}`,
-      STYLE_REINFORCEMENT,
-    ].join(" ");
+    const prompt = `${STYLE_PREFIX}. Character: ${name || "Unknown"}. ${description}`;
 
-    const result = await fal.subscribe("fal-ai/flux-pro/v1.1-ultra", {
+    const result = await fal.subscribe("fal-ai/flux-lora", {
       input: {
         prompt,
-        aspect_ratio: "1:1",
+        negative_prompt: IMAGE_NEGATIVE_PROMPT,
+        loras: [{ path: GESTURE_DRAW_LORA_URL, scale: GESTURE_DRAW_LORA_SCALE }],
+        image_size: { width: 720, height: 720 },
         num_images: 1,
-      },
+        num_inference_steps: 28,
+        guidance_scale: 3.5,
+      } as never,
     });
 
     const imageUrl = result.data?.images?.[0]?.url;

@@ -3,7 +3,12 @@ import { fal } from "@fal-ai/client";
 import { writeFileSync, mkdirSync } from "fs";
 import { join } from "path";
 import { randomUUID } from "crypto";
-import { DEFAULT_IMAGE_PROMPTS, STYLE_OVERRIDE_PREFIX, STYLE_REINFORCEMENT } from "@/lib/image-prompts";
+import {
+  DEFAULT_IMAGE_PROMPTS,
+  IMAGE_NEGATIVE_PROMPT,
+  GESTURE_DRAW_LORA_URL,
+  GESTURE_DRAW_LORA_SCALE,
+} from "@/lib/image-prompts";
 
 fal.config({ credentials: process.env.FAL_KEY });
 
@@ -20,28 +25,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // User can override the style prefix from Settings; otherwise fall back
-    // to the default Ridley-Scott storyboard look.
     const STYLE_PREFIX =
       typeof stylePrefix === "string" && stylePrefix.trim()
         ? stylePrefix.trim()
         : DEFAULT_IMAGE_PROMPTS.storyboard;
 
-    const storyboardPrompt = [
-      STYLE_PREFIX,
-      STYLE_OVERRIDE_PREFIX,
-      camera ? `Camera: ${camera}.` : "",
-      "Subject:",
-      prompt,
-      STYLE_REINFORCEMENT,
-    ].filter(Boolean).join(" ");
+    const storyboardPrompt = [STYLE_PREFIX, prompt].join(". ");
 
-    const result = await fal.subscribe("fal-ai/flux-pro/v1.1-ultra", {
+    const result = await fal.subscribe("fal-ai/flux-lora", {
       input: {
         prompt: storyboardPrompt,
-        aspect_ratio: "16:9",
+        negative_prompt: IMAGE_NEGATIVE_PROMPT,
+        loras: [{ path: GESTURE_DRAW_LORA_URL, scale: GESTURE_DRAW_LORA_SCALE }],
+        image_size: { width: 1280, height: 720 },
         num_images: 1,
-      },
+        num_inference_steps: 28,
+        guidance_scale: 3.5,
+      } as never,
     });
 
     const imageUrl = result.data?.images?.[0]?.url;
@@ -49,7 +49,6 @@ export async function POST(request: NextRequest) {
       throw new Error("No image returned from fal.ai");
     }
 
-    // Download and save locally so the image persists
     const res = await fetch(imageUrl);
     const buffer = Buffer.from(await res.arrayBuffer());
     const id = randomUUID().slice(0, 12);
