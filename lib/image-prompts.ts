@@ -20,7 +20,7 @@ export const DEFAULT_IMAGE_PROMPTS: Record<ImagePromptKind, string> = {
     "gstdrw style, black ink on pure white paper, rough lines, expressive strokes, minimal background, character portrait sketch, head and shoulders, no color, no tint, no tone",
 
   prop:
-    "gstdrw style, black ink on pure white paper, rough lines, expressive strokes, minimal background, single isolated object, no people, no color, no tint, no tone",
+    "gstdrw style, black ink on pure white paper, bold linework, expressive strokes, close-up view filling the frame, single object study, no people, no color, no tint, no tone",
 
   poster:
     "gstdrw style, black ink on pure white paper, rough lines, expressive strokes, minimal background, poster composition sketch, no color, no tint, no tone",
