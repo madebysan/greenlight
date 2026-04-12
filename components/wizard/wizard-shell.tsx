@@ -801,25 +801,6 @@ export function WizardShell() {
                 className="w-full rounded-[8px] bg-card/60 shadow-pill px-3 py-2.5 text-[13px] font-mono placeholder:text-muted-foreground/50 focus:outline-none focus:shadow-paper-hover"
               />
             </div>
-            <div className="space-y-2">
-              <label className="text-[13px] font-medium tracking-tight">fal.ai API Key</label>
-              <p className="text-[12px] text-foreground/60 tracking-tight">
-                Used to generate storyboard sketches, poster concepts, and character portraits.{" "}
-                <a href="https://fal.ai/dashboard/keys" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-foreground">
-                  Get a key
-                </a>
-              </p>
-              <input
-                type="password"
-                placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx:..."
-                value={falKey}
-                onChange={(e) => {
-                  setFalKey(e.target.value);
-                  localStorage.setItem(FAL_KEY_STORAGE, e.target.value);
-                }}
-                className="w-full rounded-[8px] bg-card/60 shadow-pill px-3 py-2.5 text-[13px] font-mono placeholder:text-muted-foreground/50 focus:outline-none focus:shadow-paper-hover"
-              />
-            </div>
             <p className="text-[11px] text-foreground/50 tracking-tight">
               Keys are stored in your browser only. They are never sent to our servers.
             </p>
