@@ -136,33 +136,36 @@ export function parseMoodAndTone(md: string): ParsedMoodAndTone {
   return result;
 }
 
-function AtmosphereSection({ atmosphere }: { atmosphere: string }) {
+function CollapsibleProse({ text, sentenceCount = 3 }: { text: string; sentenceCount?: number }) {
   const [expanded, setExpanded] = useState(false);
+  const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
+  const lead = sentences.slice(0, sentenceCount).join(" ").trim();
+  const hasMore = sentences.length > sentenceCount;
 
-  // Split into sentences, take the first 3 as the lead.
-  const sentences = atmosphere.match(/[^.!?]+[.!?]+/g) || [atmosphere];
-  const leadCount = Math.min(3, sentences.length);
-  const lead = sentences.slice(0, leadCount).join(" ").trim();
-  const hasMore = sentences.length > leadCount;
+  return (
+    <div className="max-w-[65ch]">
+      <p className="text-[15px] leading-[1.75] text-foreground/80 tracking-tight">
+        {expanded ? text : lead}
+      </p>
+      {hasMore && (
+        <button
+          onClick={() => setExpanded(!expanded)}
+          className="mt-2 font-mono text-[10px] text-muted-foreground hover:text-foreground transition-colors underline underline-offset-[3px] decoration-border"
+        >
+          {expanded ? "Show less" : "Read more"}
+        </button>
+      )}
+    </div>
+  );
+}
 
+function AtmosphereSection({ atmosphere }: { atmosphere: string }) {
   return (
     <section>
       <SectionHead index={1} label="Atmosphere" labelIcon={<Wind size={10} />}>
         Feel of the film
       </SectionHead>
-      <div className="max-w-[65ch]">
-        <p className="text-[15px] leading-[1.75] text-foreground/80 tracking-tight">
-          {expanded ? atmosphere : lead}
-        </p>
-        {hasMore && (
-          <button
-            onClick={() => setExpanded(!expanded)}
-            className="mt-2 font-mono text-[10px] text-muted-foreground hover:text-foreground transition-colors underline underline-offset-[3px] decoration-border"
-          >
-            {expanded ? "Show less" : "Read more"}
-          </button>
-        )}
-      </div>
+      <CollapsibleProse text={atmosphere} />
     </section>
   );
 }
@@ -284,9 +287,7 @@ export function MoodAndToneViewer({ content, jsonData, onContentUpdate }: MoodAn
           </SectionHead>
 
           {parsed.musicProse && (
-            <div className="text-[14px] leading-[1.75] text-foreground/80 whitespace-pre-line tracking-tight max-w-[65ch]">
-              {parsed.musicProse}
-            </div>
+            <CollapsibleProse text={parsed.musicProse} />
           )}
 
           {parsed.soundtracks.length > 0 && (
