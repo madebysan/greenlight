@@ -44,9 +44,8 @@ export function AboutDialog({ open, onOpenChange }: AboutDialogProps) {
         <div className="space-y-6 py-3">
           <p className="text-[13px] leading-[1.65] text-foreground/70 tracking-tight">
             Paste a structured screenplay extraction and Greenlight generates a
-            full vision deck — seven documents covering every department,
-            with AI-generated storyboard frames, character portraits, prop
-            references, and poster concepts.
+            full vision deck — mood, scenes, locations, cast, and visual
+            concepts. Everything you need to start the conversation.
           </p>
 
           <div>
