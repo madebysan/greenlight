@@ -45,11 +45,10 @@ export function StepInstructions({ onNext, onSubmitJson }: StepInstructionsProps
       {/* Hero */}
       <div>
         <h2 className="text-[2rem] font-semibold tracking-tight mb-3 leading-[1.05]">
-          Extract Screenplay Data
+          How it works
         </h2>
         <p className="text-[15px] leading-[1.6] text-muted-foreground max-w-[52ch]">
-          Before the app can generate your documents, you need to extract
-          structured data from your screenplay using an AI chat.
+          Three steps to go from screenplay to vision deck.
         </p>
       </div>
 
