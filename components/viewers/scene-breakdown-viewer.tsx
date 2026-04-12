@@ -451,10 +451,10 @@ export function SceneBreakdownViewer({
           Scene Breakdown
         </SectionLabelPill>
         <h1 className="text-[32px] font-light tracking-[-0.025em] leading-[1.05] mb-2 text-foreground">
-          {title || "Scenes"}
+          Scene-by-scene map of the film
         </h1>
         <p className="text-[13px] text-foreground/60 tracking-tight max-w-[60ch]">
-          Scene-by-scene map of the film. Expand any scene to see its key visual moment, characters, and production notes.
+          Expand any scene to see its key visual moment, characters, and production notes.
         </p>
       </header>
 
