@@ -155,15 +155,6 @@ export function StepResults({
               </button>
             );
           })}
-          {activeDocContent && (
-            <button
-              onClick={handleDownloadActive}
-              className="ml-auto flex items-center gap-1.5 text-[11px] font-mono uppercase tracking-[0.1em] text-muted-foreground hover:text-foreground px-2 py-1 transition-colors"
-            >
-              <Download size={12} />
-              Download
-            </button>
-          )}
         </div>
 
         <div className="overflow-hidden">
