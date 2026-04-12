@@ -97,6 +97,7 @@ type OverviewViewerProps = {
   onContentUpdate?: (newContent: string) => void;
   posterContent?: string | null;
   posterImages?: Record<number, SavedImage>;
+  onNavigateToPosters?: () => void;
 };
 
 export function OverviewViewer({
@@ -105,6 +106,7 @@ export function OverviewViewer({
   onContentUpdate,
   posterContent,
   posterImages,
+  onNavigateToPosters,
 }: OverviewViewerProps) {
   const parsed = useMemo(() => parseOverview(content), [content]);
   const [refreshingTaglines, setRefreshingTaglines] = useState(false);
@@ -207,10 +209,13 @@ export function OverviewViewer({
         {hasCarousel ? (
           <PosterCarousel posterContent={posterContent} posterImages={posterImages!} />
         ) : (
-          <div className="hidden md:flex flex-col items-center justify-center rounded-[12px] border-2 border-dashed border-border/60 hover:border-foreground/30 aspect-[5/7] text-muted-foreground hover:text-foreground transition-colors cursor-default">
+          <button
+            onClick={onNavigateToPosters}
+            className="hidden md:flex flex-col items-center justify-center rounded-[12px] border-2 border-dashed border-border/60 hover:border-foreground/30 aspect-[5/7] text-muted-foreground hover:text-foreground transition-colors w-full"
+          >
             <ImageIcon size={20} className="mb-1.5" />
             <span className="text-[10px] font-medium">Generate sketch</span>
-          </div>
+          </button>
         )}
       </header>
 
