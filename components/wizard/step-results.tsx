@@ -180,6 +180,7 @@ export function StepResults({
                   }
                   posterContent={posterContent}
                   posterImages={posterImages}
+                  onNavigateToPosters={() => setActiveTab("posters")}
                 />
               ) : (
                 <GenerationPending label="Overview" />
