@@ -1,8 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { fal } from "@fal-ai/client";
-import { writeFileSync, mkdirSync } from "fs";
-import { join } from "path";
-import { randomUUID } from "crypto";
 import {
   DEFAULT_IMAGE_PROMPTS,
   IMAGE_NEGATIVE_PROMPT,
@@ -11,8 +8,6 @@ import {
 } from "@/lib/image-prompts";
 
 fal.config({ credentials: process.env.FAL_KEY });
-
-const IMAGES_DIR = join(process.cwd(), ".cache", "images");
 
 export async function POST(request: NextRequest) {
   try {
@@ -41,6 +36,7 @@ export async function POST(request: NextRequest) {
         num_images: 1,
         num_inference_steps: 28,
         guidance_scale: 3.5,
+        acceleration: "regular",
       } as never,
     });
 
@@ -49,14 +45,7 @@ export async function POST(request: NextRequest) {
       throw new Error("No image returned from fal.ai");
     }
 
-    const res = await fetch(imageUrl);
-    const buffer = Buffer.from(await res.arrayBuffer());
-    const id = randomUUID().slice(0, 12);
-    const filename = `poster-${id}.jpg`;
-    mkdirSync(IMAGES_DIR, { recursive: true });
-    writeFileSync(join(IMAGES_DIR, filename), buffer);
-
-    return NextResponse.json({ url: `/api/serve-image/${filename}` });
+    return NextResponse.json({ url: imageUrl });
   } catch (error) {
     console.error("Poster image generation error:", error);
     return NextResponse.json(
