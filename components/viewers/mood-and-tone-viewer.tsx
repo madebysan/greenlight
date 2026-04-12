@@ -210,7 +210,7 @@ export function MoodAndToneViewer({ content, jsonData, onContentUpdate }: MoodAn
           Mood & Tone
         </h1>
         <p className="text-[13px] text-foreground/60 tracking-tight max-w-[60ch]">
-          The film&apos;s atmospheric identity — for the director, DP, production designer, and composer.
+          The film&apos;s atmospheric identity — mood, references, and sonic direction.
         </p>
       </header>
 

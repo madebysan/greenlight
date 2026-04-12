@@ -26,9 +26,8 @@ export function PostersViewer({
           Posters
         </h1>
         <p className="text-[13px] text-foreground/60 tracking-tight">
-          Poster concepts across categories — character-driven, abstract,
-          object-led. Each one a different angle on how the film presents
-          itself to an audience.
+          Visual directions for how the film could present itself.
+          Conversation starters, not final art.
         </p>
       </div>
 

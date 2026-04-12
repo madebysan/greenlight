@@ -371,7 +371,7 @@ export function CastAndCrewViewer({
     <div className="max-w-4xl">
       <div className="mb-8">
         <SectionLabelPill icon={<Users size={10} />} className="mb-3">
-          People
+          Cast
         </SectionLabelPill>
         <h1 className="text-[32px] font-light tracking-[-0.025em] leading-[1.05] mb-2 text-foreground">
           Cast & Crew

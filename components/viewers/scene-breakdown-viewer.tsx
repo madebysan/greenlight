@@ -454,7 +454,7 @@ export function SceneBreakdownViewer({
           Scene-by-scene map of the film
         </h1>
         <p className="text-[13px] text-foreground/60 tracking-tight max-w-[60ch]">
-          Expand any scene to see its key visual moment, characters, and production notes.
+          Expand any scene for its key moment, characters, and notes.
         </p>
       </header>
 

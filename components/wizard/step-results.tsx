@@ -26,8 +26,8 @@ const TABS = [
   { key: "locations", label: "Locations", icon: MapPin },
   { key: "cast-and-crew", label: "Cast & Crew", icon: Users },
   { key: "production", label: "Production Design", icon: Palette },
-  { key: "identity", label: "Identity", icon: Fingerprint },
-  { key: "posters", label: "Posters", icon: Frame },
+  { key: "identity", label: "Title & Palette", icon: Fingerprint },
+  { key: "posters", label: "Poster Concepts", icon: Frame },
 ] as const;
 
 type TabKey = (typeof TABS)[number]["key"];
