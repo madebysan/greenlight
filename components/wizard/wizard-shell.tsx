@@ -30,6 +30,7 @@ import { StepGenerating } from "./step-generating";
 import { StepResults } from "./step-results";
 import {
   type SavedImage,
+  type SavedProject,
   API_KEY_STORAGE,
   FAL_KEY_STORAGE,
   loadProject,
@@ -272,12 +273,98 @@ export function WizardShell() {
   }>({ running: false, done: 0, total: 0 });
   const genAllCancelRef = useRef(false);
 
+  const fakeGenerateAllImages = async (cached: SavedProject) => {
+    type FakeTask = { apply: () => void };
+    const tasks: FakeTask[] = [];
+
+    // Collect all cached images as tasks that set state
+    if (cached.images) {
+      let accSb = { ...storyboardImages };
+      for (const [num, img] of Object.entries(cached.images)) {
+        if (accSb[Number(num)]) continue;
+        const n = Number(num);
+        const savedImg = img as SavedImage;
+        tasks.push({
+          apply: () => {
+            accSb = { ...accSb, [n]: savedImg };
+            handleImagesChange(accSb);
+          },
+        });
+      }
+    }
+    if (cached.portraits) {
+      let accP = { ...portraits };
+      for (const [name, img] of Object.entries(cached.portraits)) {
+        if (accP[name]) continue;
+        const savedImg = img as SavedImage;
+        tasks.push({
+          apply: () => {
+            accP = { ...accP, [name]: savedImg };
+            handlePortraitsChange(accP);
+          },
+        });
+      }
+    }
+    if (cached.propImages) {
+      let accPr = { ...propImages };
+      for (const [name, img] of Object.entries(cached.propImages)) {
+        if (accPr[name]) continue;
+        const savedImg = img as SavedImage;
+        tasks.push({
+          apply: () => {
+            accPr = { ...accPr, [name]: savedImg };
+            handlePropImagesChange(accPr);
+          },
+        });
+      }
+    }
+    if (cached.posterImages) {
+      let accPo = { ...posterImages };
+      for (const [num, img] of Object.entries(cached.posterImages)) {
+        if (accPo[Number(num)]) continue;
+        const n = Number(num);
+        const savedImg = img as SavedImage;
+        tasks.push({
+          apply: () => {
+            accPo = { ...accPo, [n]: savedImg };
+            handlePosterImagesChange(accPo);
+          },
+        });
+      }
+    }
+
+    if (tasks.length === 0) return;
+
+    genAllCancelRef.current = false;
+    setGenAllImages({ running: true, done: 0, total: tasks.length });
+
+    // Stagger: reveal one image every 300-600ms (randomized)
+    for (let i = 0; i < tasks.length; i++) {
+      if (genAllCancelRef.current) break;
+      tasks[i].apply();
+      setGenAllImages({ running: true, done: i + 1, total: tasks.length });
+      const delay = 300 + Math.random() * 300;
+      await new Promise((r) => setTimeout(r, delay));
+    }
+
+    setGenAllImages({ running: false, done: 0, total: 0 });
+  };
+
   const handleGenerateAllImages = async () => {
     if (genAllImages.running) {
       genAllCancelRef.current = true;
       return;
     }
     if (!jsonData) return;
+
+    // --- Fake-gen path for cached projects with pre-committed images ---
+    try {
+      const parsedTitle = JSON.parse(jsonData).title || "";
+      const cached = findCachedProject(parsedTitle);
+      if (cached && (cached.images || cached.posterImages || cached.portraits || cached.propImages)) {
+        return fakeGenerateAllImages(cached);
+      }
+    } catch { /* not cached, proceed normally */ }
 
     type Task = { kind: string; run: () => Promise<void> };
     const tasks: Task[] = [];
