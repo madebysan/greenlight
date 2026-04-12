@@ -14,10 +14,10 @@ Dark, cinematic, editorial. Warm undertones, not pure black. Feels like reading 
 - **Muted foreground:** `oklch(0.55 0.01 270)` / `oklch(0.45 0 0)`
 - **Border:** `oklch(1 0 0 / 8%)` / `oklch(0 0 0 / 8%)` — barely-there
 
-### Badge colors (dark-safe pattern)
-All status badges use `bg-{color}-500/15 text-{color}-400` — transparent background with bright text. Works across themes.
-- **INT scenes:** amber-500/15, amber-400
-- **EXT scenes:** sky-500/15, sky-400
+### Badge colors (dual-mode pattern)
+All status badges use `bg-{color}-500/15` with `text-{color}-600 dark:text-{color}-400` — darker text in light mode, bright text in dark mode.
+- **INT scenes:** amber-500/15, amber-600 / dark:amber-400
+- **EXT scenes:** sky-500/15, sky-600 / dark:sky-400
 - **Success:** emerald-500/15, emerald-400
 - **VFX/primary:** violet-500/15, violet-400
 - **Destructive:** red-500/15, red-400
@@ -72,16 +72,19 @@ All AI-generated images use the **Gesture Draw LoRA** on FLUX dev via `fal-ai/fl
 ### Peec.ai patterns (current)
 - **Section label pill:** `<SectionLabelPill icon={<Icon size={10} />}>Label</SectionLabelPill>` above every viewer title. Rendered floating above an h1 as an "eyebrow". Set at the top of each viewer and as headers for numbered sections via `SectionHead`.
 - **Shadow-paper cards:** every card surface is a `rounded-[12px] bg-card/40 shadow-paper hover:shadow-paper-hover` container. No borders, no heavy backgrounds.
-- **`font-light` viewer titles:** 32-44px display titles with tight tracking and leading. Never `font-semibold` on titles.
-- **80% body opacity:** prose inside cards uses `text-foreground/80`, not full-opacity white. Creates editorial hierarchy.
+- **`font-light` viewer titles:** all viewers use `text-[32px] font-light tracking-[-0.025em] leading-[1.05] mb-2`. Standardized in session 5.
+- **Subtitles:** all viewers use `text-[13px] text-foreground/60 tracking-tight`. Standardized in session 5.
+- **75% body opacity:** prose inside cards uses `text-foreground/75`, not full-opacity white. Creates editorial hierarchy.
 - **Inline-grid stat grids:** stats use `inline-grid grid-cols-[repeat(N,Xpx)]` (not `grid-cols-N` with `1fr`) so cells hug content instead of stretching. Labels wrap uniformly via `max-w-[11ch]`.
-- **Flat underline tabs:** `border-b border-border/60` container, each tab is a button with an `absolute -bottom-px` underline when active. No pills, no background.
+- **Pill tabs with icons:** `rounded-full` buttons with Lucide icons, active state `bg-white text-black shadow-sm`. Replaced flat underline tabs in session 5.
+- **Collapsible prose:** long prose sections (Atmosphere, Music) show first 3 sentences with "Read more" toggle via `CollapsibleProse` component.
+- **Global zoom 1.1:** `html { zoom: 1.1 }` for 10% font size bump across the board.
 
 ### General
-- **Tabbed navigation:** Horizontal tabs with underline indicator. 7 top-level tabs: Overview, Mood & Tone, Scenes, Locations, Cast & Crew, Production Design, Identity, Posters
-- **Sub-tabs:** Same flat underline pattern, used inside Production Design (Props/Wardrobe) and Cast & Crew (Cast/Insights)
-- **Collapsible scene cards:** Chevron + scene number chip + INT/EXT badge + slug + time-of-day badge + page range, click row to expand
-- **Expand/Collapse all:** text-link pair with separator (`|`) in section headers
+- **Tabbed navigation:** Pill-style tabs with Lucide icons. 8 top-level tabs: Overview, Mood & Tone, Scenes, Locations, Cast & Crew, Production Design, Identity, Posters
+- **Sub-tabs:** flat underline pattern, used inside Production Design (Props/Wardrobe) and Cast & Crew (Cast/Insights)
+- **Collapsible scene cards:** Chevron + scene number chip + INT/EXT badge + slug + time-of-day badge + page range + emotional beat + characters on collapsed row
+- **Expand/Collapse all:** single toggle button (not a pair) using `font-mono text-[10px] uppercase tracking-[0.1em]`
 - **Batch actions:** "Generate all X" in section header, flips to progress + cancel during run
 - **Inline editing:** Pencil icon per card, toggles to textarea with Save/Cancel
 - **Hover-reveal actions:** Disable toggle on cast/crew cards, regenerate overlay on portraits/prop images
@@ -116,6 +119,11 @@ All AI-generated images use the **Gesture Draw LoRA** on FLUX dev via `fal-ai/fl
 - **Crew → Insights** — replaced generic crew list (director, DP, producer, etc.) with situational production Insights that only surface specialty hires the script implies (stunts, VFX, weapons, intimacy, etc.). Baseline roles are assumed, not listed. (2026-04-11)
 - **User-editable image prompts** — storyboard/portrait/prop/poster style prompts exposed in Settings, overrides persist to localStorage. API routes accept `stylePrefix` in body. (2026-04-11)
 - **Stat grids hug content** — `inline-grid grid-cols-[repeat(N,Xpx)]` instead of stretching `1fr` columns. Fixes "5 unique locations" width overflow. (2026-04-11)
+- **Pill tabs replaced underline tabs** — rounded-full with icons, `bg-white text-black` active state. More visual presence, works in both themes. (2026-04-12)
+- **Password gate for Vercel** — sessionStorage-based, skips when `ACCESS_PASSWORD` not set. (2026-04-12)
+- **Start Over requires AlertDialog confirmation** — destructive action, styled modal not browser confirm(). (2026-04-12)
+- **Theme toggle + Share in main nav** — no longer buried in More menu. (2026-04-12)
+- **Poster prompt updated** — A24 arthouse risograph style prefix for new generations. Demo images untouched. (2026-04-12)
 
 ## Anti-patterns
 - Light-mode color classes (bg-sky-50, text-amber-700) — always use `/15` opacity + `400` shade pattern for theme safety
