@@ -135,14 +135,14 @@ export function StepResults({
       )}
 
       <div className="min-h-[600px]">
-        <div className="flex items-center gap-0 border-b border-border/60 mb-0 -mx-1">
+        <div className="flex items-center gap-1 border-b border-border/60 mb-0 -mx-1">
           {TABS.map((tab) => {
             const isActive = tab.key === activeTab;
             return (
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
-                className={`relative px-3 py-3 text-[12px] font-medium transition-colors tracking-tight ${
+                className={`relative px-4 py-3 text-[12px] font-medium transition-colors tracking-tight ${
                   isActive
                     ? "text-foreground"
                     : "text-muted-foreground hover:text-foreground"
