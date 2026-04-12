@@ -41,7 +41,7 @@ export function StepInstructions({ onNext }: StepInstructionsProps) {
             </span>
             <div className="flex-1 min-w-0">
               <h3 className="text-[15px] font-medium tracking-tight mb-1.5">
-                Upload your screenplay PDF and paste the extraction prompt
+                Upload your screenplay to Gemini and paste the extraction prompt
               </h3>
               <p className="text-[13px] leading-[1.6] text-muted-foreground mb-3">
                 Open{" "}
@@ -54,7 +54,7 @@ export function StepInstructions({ onNext }: StepInstructionsProps) {
                   Google AI Studio
                 </a>{" "}
                 <span className="text-[11px] text-muted-foreground/70">(Gemini 2.5 Pro recommended)</span>,
-                upload your screenplay PDF, and paste this prompt alongside it.
+                upload your screenplay, copy the prompt below, and paste it alongside.
               </p>
               <div className="flex items-center gap-3">
                 <button
