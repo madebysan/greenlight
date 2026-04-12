@@ -54,7 +54,7 @@ Five concrete problems an indie filmmaker hits the moment they commit to a scrip
 
 ## How It Works
 
-1. **Extract** — Upload your screenplay PDF to Claude or ChatGPT with the built-in extraction prompt. Get structured JSON back.
+1. **Extract** — Upload your screenplay PDF to Google AI Studio (Gemini 2.5 Pro recommended) with the built-in extraction prompt. Get structured JSON back.
 2. **Paste** — Paste the JSON into the app (or use one of the open-source sample scripts).
 3. **Generate** — Claude creates the full bible automatically.
 4. **Refine** — Edit inline, generate mood imagery, poster concepts, and character portraits.
