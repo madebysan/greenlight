@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { RefreshCw, Loader2, FileText, Sparkles, BarChart3, Compass } from "lucide-react";
+import { RefreshCw, Loader2, FileText, Sparkles, BarChart3, Compass, Frame } from "lucide-react";
 import { replaceMarkdownSection } from "@/lib/markdown-utils";
 import { SectionHead } from "@/components/ui/section-head";
 import { SectionLabelPill } from "@/components/ui/inline-chip";
@@ -133,7 +133,7 @@ export function OverviewViewer({
 
   return (
     <div className="max-w-5xl space-y-16">
-      <header className={hasCarousel ? "grid grid-cols-1 md:grid-cols-[1fr_240px] gap-10 items-start" : ""}>
+      <header className="grid grid-cols-1 md:grid-cols-[1fr_240px] gap-10 items-start">
         <div>
           <SectionLabelPill icon={<Compass size={10} />} className="mb-4">
             Overview
@@ -204,8 +204,15 @@ export function OverviewViewer({
           )}
         </div>
 
-        {hasCarousel && (
+        {hasCarousel ? (
           <PosterCarousel posterContent={posterContent} posterImages={posterImages!} />
+        ) : (
+          <div className="hidden md:flex flex-col items-center justify-center rounded-[12px] border-2 border-dashed border-border/60 aspect-[5/7] text-muted-foreground/50">
+            <Frame size={24} className="mb-2" />
+            <span className="text-[11px] tracking-tight text-center px-4">
+              Generate posters in the Posters tab
+            </span>
+          </div>
         )}
       </header>
 
