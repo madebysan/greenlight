@@ -127,24 +127,54 @@ export function StepInstructions({ onNext }: StepInstructionsProps) {
                 The AI will return structured JSON. Paste it here and Greenlight generates
                 your full production bible — scenes, locations, cast, key art, and more.
               </p>
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={onNext}
-                  className="inline-flex items-center justify-center gap-2 rounded-lg bg-foreground text-background px-5 py-2.5 text-[13px] font-medium hover:bg-foreground/90 transition-colors"
-                >
-                  I have my JSON &rarr;
-                </button>
-                <a
-                  href="/demo"
-                  className="text-[13px] text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  or see a demo
-                </a>
-              </div>
+              <button
+                onClick={onNext}
+                className="inline-flex items-center justify-center gap-2 rounded-lg bg-foreground text-background px-5 py-2.5 text-[13px] font-medium hover:bg-foreground/90 transition-colors"
+              >
+                I have my JSON &rarr;
+              </button>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Divider */}
+      <div className="flex items-center gap-4">
+        <div className="flex-1 h-px bg-border/60" />
+        <span className="text-[11px] font-mono uppercase tracking-[0.15em] text-muted-foreground">or</span>
+        <div className="flex-1 h-px bg-border/60" />
+      </div>
+
+      {/* Demo card */}
+      <a
+        href="/demo"
+        className="group block rounded-[12px] bg-card/40 shadow-paper hover:shadow-paper-hover transition-all overflow-hidden"
+      >
+        <div className="flex items-center gap-5 px-6 py-5">
+          <div className="shrink-0 w-[56px] rounded-lg overflow-hidden bg-muted/30" style={{ aspectRatio: "5/7" }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/demo-images/poster-f96b783b-8f3.jpg"
+              alt="Night of the Living Dead poster sketch"
+              className="w-full h-full object-cover"
+            />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="text-[10px] font-mono uppercase tracking-[0.15em] text-muted-foreground mb-1">
+              Sample Bible
+            </div>
+            <h3 className="text-[15px] font-medium tracking-tight group-hover:text-foreground transition-colors">
+              Night of the Living Dead
+            </h3>
+            <p className="text-[12px] text-muted-foreground mt-0.5">
+              1968 · George A. Romero · Horror · 13 scenes · 5 locations · 8 cast
+            </p>
+          </div>
+          <span className="text-[13px] text-muted-foreground group-hover:text-foreground transition-colors shrink-0">
+            View demo →
+          </span>
+        </div>
+      </a>
     </div>
   );
 }
