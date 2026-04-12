@@ -28,7 +28,7 @@ The `README.md` describes what Greenlight *is* publicly (a 0→1 tool for indie 
 
 - Next.js 16, React 19, Tailwind CSS 4, shadcn/ui
 - Claude Haiku 4.5 for document generation (16384 max tokens)
-- FLUX Schnell (fal.ai) for all image generation (~$0.003/image)
+- FLUX dev + Gesture Draw LoRA (fal.ai `fal-ai/flux-lora`) for all image generation (~$0.035/image). LoRA config, style prefixes, and negative prompt in `lib/image-prompts.ts`
 - TMDB REST API for poster lookups on Similar Moods + Soundtrack References
 - Fonts: Space Grotesk + Space Mono (body), full Google Fonts catalog for title treatment
 - Dev server: port 3001
