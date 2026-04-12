@@ -136,7 +136,7 @@ export function StepInstructions({ onNext }: StepInstructionsProps) {
           </div>
           <div className="flex-1 min-w-0">
             <div className="text-[10px] font-mono uppercase tracking-[0.15em] text-muted-foreground mb-1">
-              Demo Project
+              Pre-Production Bible
             </div>
             <h3 className="text-[15px] font-medium tracking-tight group-hover:text-foreground transition-colors">
               Night of the Living Dead
