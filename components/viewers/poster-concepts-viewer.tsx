@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useRef } from "react";
-import { ImageIcon, Loader2, Download, Images } from "lucide-react";
+import { ImageIcon, Loader2, Download, Images, RefreshCw, FileText, Copy, Check } from "lucide-react";
 import { getStylePrefix } from "@/lib/image-prompts";
 
 type PosterImageState = { status: "idle" | "generating" | "done" | "error"; url?: string };
@@ -117,6 +117,10 @@ export function PosterConceptsViewer({ content, savedImages, onImagesChange }: P
   const [copiedId, setCopiedId] = useState<number | null>(null);
   const [expandedConcepts, setExpandedConcepts] = useState<Set<number>>(() => new Set([1]));
   const [showPrompt, setShowPrompt] = useState<number | null>(null);
+  const [editingPrompt, setEditingPrompt] = useState<number | null>(null);
+  const [editText, setEditText] = useState("");
+  const [promptOverrides, setPromptOverrides] = useState<Record<number, string>>({});
+  const [regenPromptStates, setRegenPromptStates] = useState<Record<number, "idle" | "loading">>({});
   const [localImages, setLocalImages] = useState<Record<number, PosterImageState>>({});
   const [generatingAll, setGeneratingAll] = useState(false);
   const [genAllProgress, setGenAllProgress] = useState({ done: 0, total: 0 });
@@ -136,10 +140,44 @@ export function PosterConceptsViewer({ content, savedImages, onImagesChange }: P
 
   const categories = [...new Set(concepts.map((c) => c.category))];
 
+  const getPrompt = (concept: PosterConcept) =>
+    promptOverrides[concept.number] || concept.aiPrompt;
+
   const copyAIPrompt = async (concept: PosterConcept) => {
-    await navigator.clipboard.writeText(concept.aiPrompt);
+    await navigator.clipboard.writeText(getPrompt(concept));
     setCopiedId(concept.number);
     setTimeout(() => setCopiedId(null), 2000);
+  };
+
+  const startEditPrompt = (concept: PosterConcept) => {
+    setEditText(getPrompt(concept));
+    setEditingPrompt(concept.number);
+    setShowPrompt(concept.number);
+  };
+
+  const savePromptEdit = (num: number) => {
+    setPromptOverrides((prev) => ({ ...prev, [num]: editText }));
+    setEditingPrompt(null);
+  };
+
+  const rewritePrompt = async (concept: PosterConcept) => {
+    setRegenPromptStates((prev) => ({ ...prev, [concept.number]: "loading" }));
+    try {
+      const res = await fetch("/api/regenerate-prompt", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          prompt: getPrompt(concept),
+          slugLine: concept.name,
+        }),
+      });
+      if (!res.ok) throw new Error("Failed");
+      const { prompt } = await res.json();
+      setPromptOverrides((prev) => ({ ...prev, [concept.number]: prompt }));
+    } catch {
+      // silently fail
+    }
+    setRegenPromptStates((prev) => ({ ...prev, [concept.number]: "idle" }));
   };
 
   const toggleConcept = (num: number) => {
@@ -157,7 +195,7 @@ export function PosterConceptsViewer({ content, savedImages, onImagesChange }: P
   // other's work in the parent.
   const fetchPosterImage = async (concept: PosterConcept): Promise<{ url: string } | null> => {
     setLocalImages((prev) => ({ ...prev, [concept.number]: { status: "generating" } }));
-    const prompt = [
+    const prompt = getPrompt(concept) || [
       concept.composition,
       concept.style ? `Style: ${concept.style}.` : "",
     ].filter(Boolean).join(" ");
@@ -317,7 +355,7 @@ export function PosterConceptsViewer({ content, savedImages, onImagesChange }: P
 
                     {isExpanded && (
                       <div className="px-4 pb-4 space-y-4">
-                        {/* Generated poster sketch + color strip side by side */}
+                        {/* Generated poster sketch + details side by side */}
                         <div className="flex gap-4 mt-3">
                           {/* Poster image or generate button */}
                           <div className="shrink-0 w-[140px]">
@@ -341,12 +379,6 @@ export function PosterConceptsViewer({ content, savedImages, onImagesChange }: P
                                     <Download size={10} />
                                   </a>
                                 </div>
-                                <button
-                                  onClick={(e) => { e.stopPropagation(); generatePosterImage(concept); }}
-                                  className="w-full mt-1.5 text-[10px] text-muted-foreground hover:text-foreground text-center transition-colors"
-                                >
-                                  Regenerate
-                                </button>
                               </div>
                             ) : (
                               <button
@@ -368,30 +400,105 @@ export function PosterConceptsViewer({ content, savedImages, onImagesChange }: P
                                 )}
                               </button>
                             )}
+
+                            {/* Action links row — same pattern as scene storyboards */}
+                            <div className="flex flex-wrap gap-x-3 gap-y-1.5 mt-2.5 font-mono text-[10px]">
+                              {posterImages[concept.number]?.status === "done" && (
+                                <PosterLink
+                                  icon={<RefreshCw size={11} />}
+                                  label="Regenerate"
+                                  onClick={() => generatePosterImage(concept)}
+                                />
+                              )}
+                              <PosterLink
+                                icon={
+                                  regenPromptStates[concept.number] === "loading"
+                                    ? <Loader2 size={11} className="animate-spin" />
+                                    : <RefreshCw size={11} />
+                                }
+                                label={regenPromptStates[concept.number] === "loading" ? "Rewriting…" : "Rewrite"}
+                                onClick={() => rewritePrompt(concept)}
+                                disabled={regenPromptStates[concept.number] === "loading" || editingPrompt === concept.number}
+                              />
+                              <PosterLink
+                                icon={<FileText size={11} />}
+                                label={editingPrompt === concept.number ? "Editing…" : "Edit"}
+                                onClick={() => editingPrompt === concept.number ? setEditingPrompt(null) : startEditPrompt(concept)}
+                                active={editingPrompt === concept.number}
+                              />
+                              <PosterLink
+                                icon={isCopied ? <Check size={11} /> : <Copy size={11} />}
+                                label={isCopied ? "Copied" : "Copy"}
+                                onClick={() => copyAIPrompt(concept)}
+                              />
+                            </div>
                           </div>
 
-                          {/* Color palette + tagline */}
+                          {/* Details column */}
                           <div className="flex-1 min-w-0 space-y-3">
-                            {/* Tagline */}
                             {concept.tagline && (
                               <blockquote className="text-[15px] font-medium italic border-l-2 border-primary/30 pl-3 text-foreground/85">
                                 &ldquo;{concept.tagline}&rdquo;
                               </blockquote>
                             )}
-
-                            {/* Style */}
                             {concept.style && (
                               <div>
                                 <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-1">Style</div>
                                 <p className="text-[13px] text-foreground/75 leading-relaxed">{concept.style}</p>
                               </div>
                             )}
-
-                            {/* Composition */}
                             {concept.composition && (
                               <div>
                                 <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-1">Composition</div>
                                 <p className="text-[13px] text-foreground/75 leading-relaxed">{concept.composition}</p>
+                              </div>
+                            )}
+
+                            {/* Prompt section — show/edit/hide */}
+                            {concept.aiPrompt && editingPrompt !== concept.number && showPrompt !== concept.number && (
+                              <button
+                                onClick={(e) => { e.stopPropagation(); setShowPrompt(concept.number); }}
+                                className="font-mono text-[10px] text-muted-foreground hover:text-foreground transition-colors underline underline-offset-[3px] decoration-border"
+                              >
+                                Show prompt →
+                              </button>
+                            )}
+                            {editingPrompt === concept.number && (
+                              <div className="space-y-2">
+                                <textarea
+                                  value={editText}
+                                  onChange={(e) => setEditText(e.target.value)}
+                                  className="w-full font-mono text-[12px] leading-[1.7] text-foreground/85 bg-muted/30 border border-border/60 rounded-md p-3 resize-none focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                                  rows={Math.max(3, editText.split("\n").length + 1)}
+                                  autoFocus
+                                />
+                                <div className="flex items-center gap-2">
+                                  <button
+                                    onClick={(e) => { e.stopPropagation(); savePromptEdit(concept.number); }}
+                                    className="text-[11px] font-medium bg-primary text-primary-foreground px-3 py-1.5 rounded-md hover:bg-primary/90 transition-colors"
+                                  >
+                                    Save
+                                  </button>
+                                  <button
+                                    onClick={(e) => { e.stopPropagation(); setEditingPrompt(null); }}
+                                    className="text-[11px] text-muted-foreground hover:text-foreground px-3 py-1.5 rounded-md transition-colors"
+                                  >
+                                    Cancel
+                                  </button>
+                                </div>
+                              </div>
+                            )}
+                            {showPrompt === concept.number && editingPrompt !== concept.number && (
+                              <div>
+                                <p className="font-mono text-[11px] leading-[1.65] text-foreground/75 bg-muted/20 rounded-md p-3 border border-border/40">
+                                  {getPrompt(concept)}
+                                </p>
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); setShowPrompt(null); }}
+                                  className="mt-2 font-mono text-[10px] text-muted-foreground hover:text-foreground transition-colors underline underline-offset-[3px] decoration-border"
+                                >
+                                  Hide prompt
+                                </button>
                               </div>
                             )}
                           </div>
@@ -428,54 +535,6 @@ export function PosterConceptsViewer({ content, savedImages, onImagesChange }: P
                             <span className="text-[12px] text-foreground/60">{concept.targetAppeal}</span>
                           </div>
                         )}
-
-                        {/* AI Prompt — hidden by default */}
-                        {concept.aiPrompt && showPrompt !== concept.number && (
-                          <button
-                            onClick={(e) => { e.stopPropagation(); setShowPrompt(concept.number); }}
-                            className="font-mono text-[10px] text-muted-foreground hover:text-foreground transition-colors underline underline-offset-[3px] decoration-border"
-                          >
-                            Show prompt →
-                          </button>
-                        )}
-                        {concept.aiPrompt && showPrompt === concept.number && (
-                          <div className="rounded-lg border bg-muted/20 p-3">
-                            <div className="flex items-center justify-between mb-2">
-                              <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">
-                                AI Image Prompt
-                              </span>
-                              <button
-                                onClick={(e) => { e.stopPropagation(); copyAIPrompt(concept); }}
-                                className={`inline-flex items-center gap-1 text-[11px] font-medium px-2 py-1 rounded-md transition-colors ${
-                                  isCopied
-                                    ? "bg-emerald-500/15 text-emerald-400"
-                                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                                }`}
-                              >
-                                {isCopied ? (
-                                  <>
-                                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
-                                    Copied
-                                  </>
-                                ) : (
-                                  <>
-                                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" /></svg>
-                                    Copy
-                                  </>
-                                )}
-                              </button>
-                            </div>
-                            <p className="text-[12px] font-mono text-foreground/60 leading-relaxed">
-                              {concept.aiPrompt}
-                            </p>
-                            <button
-                              onClick={(e) => { e.stopPropagation(); setShowPrompt(null); }}
-                              className="mt-2 font-mono text-[10px] text-muted-foreground hover:text-foreground transition-colors underline underline-offset-[3px] decoration-border"
-                            >
-                              Hide prompt
-                            </button>
-                          </div>
-                        )}
                       </div>
                     )}
                   </div>
@@ -486,5 +545,34 @@ export function PosterConceptsViewer({ content, savedImages, onImagesChange }: P
         );
       })}
     </div>
+  );
+}
+
+function PosterLink({
+  icon,
+  label,
+  onClick,
+  disabled,
+  active,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  onClick: () => void;
+  disabled?: boolean;
+  active?: boolean;
+}) {
+  return (
+    <button
+      onClick={(e) => { e.stopPropagation(); onClick(); }}
+      disabled={disabled}
+      className={`inline-flex items-center gap-1.5 transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
+        active
+          ? "text-foreground"
+          : "text-muted-foreground hover:text-foreground"
+      }`}
+    >
+      {icon}
+      <span className="underline underline-offset-[3px] decoration-border">{label}</span>
+    </button>
   );
 }
