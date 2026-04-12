@@ -127,13 +127,13 @@ export function StepGenerating({
     async function fakeProgression() {
       // Vary timing per document to feel more realistic.
       const FAKE_TIMING: Record<string, number> = {
-        overview: 2000,
-        "mood-and-tone": 3200,
-        "scene-breakdown": 3500,
-        "storyboard-prompts": 2800,
-        "poster-concepts": 4000,
+        overview: 2800,
+        "mood-and-tone": 4000,
+        "scene-breakdown": 4500,
+        "storyboard-prompts": 3500,
+        "poster-concepts": 5000,
       };
-      const DEFAULT_MS = 1800;
+      const DEFAULT_MS = 2500;
       const finalDocs: DocumentResult[] = documents.map((d) => ({ ...d }));
 
       for (let i = 0; i < documents.length; i++) {

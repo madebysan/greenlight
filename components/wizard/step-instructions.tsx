@@ -134,7 +134,7 @@ function UploadMode({ onSubmitJson }: { onSubmitJson?: (json: string) => void })
         const cached = findCachedProject(title);
         if (cached?.jsonData) {
           // Fake a realistic delay
-          await new Promise((r) => setTimeout(r, 3000 + Math.random() * 2000));
+          await new Promise((r) => setTimeout(r, 8000 + Math.random() * 2000));
           setStatus("done");
           onSubmitJson?.(cached.jsonData);
           return;
