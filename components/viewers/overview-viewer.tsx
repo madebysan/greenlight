@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { RefreshCw, Loader2, FileText, Sparkles, BarChart3, Compass, Frame } from "lucide-react";
+import { RefreshCw, Loader2, FileText, Sparkles, BarChart3, Compass, ImageIcon } from "lucide-react";
 import { replaceMarkdownSection } from "@/lib/markdown-utils";
 import { SectionHead } from "@/components/ui/section-head";
 import { SectionLabelPill } from "@/components/ui/inline-chip";
@@ -208,7 +208,7 @@ export function OverviewViewer({
           <PosterCarousel posterContent={posterContent} posterImages={posterImages!} />
         ) : (
           <div className="hidden md:flex flex-col items-center justify-center rounded-[12px] border-2 border-dashed border-border/60 hover:border-foreground/30 aspect-[5/7] text-muted-foreground hover:text-foreground transition-colors cursor-default">
-            <Frame size={20} className="mb-1.5" />
+            <ImageIcon size={20} className="mb-1.5" />
             <span className="text-[10px] font-medium">Generate sketch</span>
           </div>
         )}
