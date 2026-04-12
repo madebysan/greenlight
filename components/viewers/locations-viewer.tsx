@@ -78,17 +78,10 @@ export function LocationsViewer({ jsonData }: LocationsViewerProps) {
         </div>
         <div className="flex items-center gap-1 shrink-0 mt-10">
           <button
-            onClick={expandAll}
+            onClick={expanded.size === locations.length ? collapseAll : expandAll}
             className="text-[10px] font-mono uppercase tracking-[0.1em] text-muted-foreground hover:text-foreground px-2 py-1 rounded transition-colors"
           >
-            Expand all
-          </button>
-          <span className="text-muted-foreground/30">|</span>
-          <button
-            onClick={collapseAll}
-            className="text-[10px] font-mono uppercase tracking-[0.1em] text-muted-foreground hover:text-foreground px-2 py-1 rounded transition-colors"
-          >
-            Collapse all
+            {expanded.size === locations.length ? "Collapse all" : "Expand all"}
           </button>
         </div>
       </div>

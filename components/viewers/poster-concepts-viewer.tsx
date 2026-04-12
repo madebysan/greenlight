@@ -267,17 +267,10 @@ export function PosterConceptsViewer({ content, savedImages, onImagesChange }: P
       <div className="flex items-center gap-1 mb-6">
         <div className="flex-1 h-px bg-border mr-2" />
         <button
-          onClick={expandAll}
+          onClick={expandedConcepts.size === concepts.length ? collapseAll : expandAll}
           className="text-[11px] text-muted-foreground hover:text-foreground px-2 py-1 rounded transition-colors"
         >
-          Expand all
-        </button>
-        <span className="text-muted-foreground/30">|</span>
-        <button
-          onClick={collapseAll}
-          className="text-[11px] text-muted-foreground hover:text-foreground px-2 py-1 rounded transition-colors"
-        >
-          Collapse all
+          {expandedConcepts.size === concepts.length ? "Collapse all" : "Expand all"}
         </button>
         {generatingAll ? (
           <button

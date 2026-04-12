@@ -558,6 +558,13 @@ export function WizardShell() {
                   title="Open shareable view"
                 />
               )}
+              <button
+                onClick={toggleTheme}
+                className="inline-flex items-center justify-center h-9 w-9 rounded-md border border-border text-muted-foreground hover:text-foreground hover:border-foreground/20 transition-colors"
+                title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+              >
+                {theme === "dark" ? <Sun size={14} /> : <Moon size={14} />}
+              </button>
               {hasActiveProject && (
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
@@ -620,11 +627,6 @@ export function WizardShell() {
                       }
                     : null,
                   "divider",
-                  {
-                    icon: theme === "dark" ? <Sun size={14} /> : <Moon size={14} />,
-                    label: theme === "dark" ? "Switch to light mode" : "Switch to dark mode",
-                    onClick: toggleTheme,
-                  },
                   {
                     icon: <Settings size={14} />,
                     label: "Settings",
