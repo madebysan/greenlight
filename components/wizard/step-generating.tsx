@@ -216,7 +216,7 @@ export function StepGenerating({
     <div className="max-w-3xl space-y-12">
       <header>
         <SectionLabelPill icon={<Film size={10} />} className="mb-4">
-          Pre-Production Bible
+          Vision Deck
         </SectionLabelPill>
         <h1 className="text-[44px] font-light tracking-[-0.03em] leading-[1.02] mb-3 text-foreground">
           Assembling documents

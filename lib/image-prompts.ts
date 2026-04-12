@@ -2,7 +2,7 @@
 //
 // Each of the four image endpoints (storyboard, portrait, prop, poster) uses a
 // hardcoded style prefix to keep the generated art visually consistent across
-// the whole pre-production bible. This module lets users override those
+// the whole vision deck. This module lets users override those
 // defaults from Settings so they can render in their own style — painted, 3D
 // blockout, cel-shaded, photographic reference, whatever fits the project.
 //

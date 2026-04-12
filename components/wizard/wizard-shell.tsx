@@ -535,7 +535,7 @@ export function WizardShell() {
             <div>
               <h1 className="text-lg font-bold tracking-tight">Greenlight</h1>
               <p className="text-[13px] text-muted-foreground">
-                Script to pre-production bible in minutes.
+                Script to vision deck in minutes.
               </p>
             </div>
 

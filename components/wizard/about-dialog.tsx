@@ -35,7 +35,7 @@ export function AboutDialog({ open, onOpenChange }: AboutDialogProps) {
             <div>
               <DialogTitle className="text-lg">Greenlight</DialogTitle>
               <p className="text-[12px] text-muted-foreground mt-0.5">
-                Script to pre-production bible in minutes.
+                Script to vision deck in minutes.
               </p>
             </div>
           </div>
@@ -44,7 +44,7 @@ export function AboutDialog({ open, onOpenChange }: AboutDialogProps) {
         <div className="space-y-6 py-3">
           <p className="text-[13px] leading-[1.65] text-foreground/70 tracking-tight">
             Paste a structured screenplay extraction and Greenlight generates a
-            full pre-production bible — seven documents covering every department,
+            full vision deck — seven documents covering every department,
             with AI-generated storyboard frames, character portraits, prop
             references, and poster concepts.
           </p>
