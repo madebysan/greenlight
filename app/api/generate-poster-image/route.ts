@@ -27,13 +27,10 @@ export async function POST(request: NextRequest) {
 
     const posterPrompt = `${STYLE_PREFIX} ${prompt}`;
 
-    const result = await fal.subscribe("fal-ai/flux/schnell", {
+    const result = await fal.subscribe("fal-ai/flux-pro/v1.1-ultra", {
       input: {
         prompt: posterPrompt,
-        image_size: {
-          width: 720,
-          height: 1008,
-        },
+        aspect_ratio: "2:3",
         num_images: 1,
       },
     });
