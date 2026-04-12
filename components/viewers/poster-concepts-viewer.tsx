@@ -401,37 +401,6 @@ export function PosterConceptsViewer({ content, savedImages, onImagesChange }: P
                               </button>
                             )}
 
-                            {/* Action links row — same pattern as scene storyboards */}
-                            <div className="flex flex-wrap gap-x-3 gap-y-1.5 mt-2.5 font-mono text-[10px]">
-                              {posterImages[concept.number]?.status === "done" && (
-                                <PosterLink
-                                  icon={<RefreshCw size={11} />}
-                                  label="Regenerate"
-                                  onClick={() => generatePosterImage(concept)}
-                                />
-                              )}
-                              <PosterLink
-                                icon={
-                                  regenPromptStates[concept.number] === "loading"
-                                    ? <Loader2 size={11} className="animate-spin" />
-                                    : <RefreshCw size={11} />
-                                }
-                                label={regenPromptStates[concept.number] === "loading" ? "Rewriting…" : "Rewrite"}
-                                onClick={() => rewritePrompt(concept)}
-                                disabled={regenPromptStates[concept.number] === "loading" || editingPrompt === concept.number}
-                              />
-                              <PosterLink
-                                icon={<FileText size={11} />}
-                                label={editingPrompt === concept.number ? "Editing…" : "Edit"}
-                                onClick={() => editingPrompt === concept.number ? setEditingPrompt(null) : startEditPrompt(concept)}
-                                active={editingPrompt === concept.number}
-                              />
-                              <PosterLink
-                                icon={isCopied ? <Check size={11} /> : <Copy size={11} />}
-                                label={isCopied ? "Copied" : "Copy"}
-                                onClick={() => copyAIPrompt(concept)}
-                              />
-                            </div>
                           </div>
 
                           {/* Details column */}
@@ -454,15 +423,44 @@ export function PosterConceptsViewer({ content, savedImages, onImagesChange }: P
                               </div>
                             )}
 
-                            {/* Prompt section — show/edit/hide */}
-                            {concept.aiPrompt && editingPrompt !== concept.number && showPrompt !== concept.number && (
-                              <button
-                                onClick={(e) => { e.stopPropagation(); setShowPrompt(concept.number); }}
-                                className="font-mono text-[10px] text-muted-foreground hover:text-foreground transition-colors underline underline-offset-[3px] decoration-border"
-                              >
-                                Show prompt →
-                              </button>
-                            )}
+                            {/* Prompt action links — inline row */}
+                            <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 font-mono text-[10px]">
+                              {posterImages[concept.number]?.status === "done" && (
+                                <PosterLink
+                                  icon={<RefreshCw size={11} />}
+                                  label="Regenerate image"
+                                  onClick={() => generatePosterImage(concept)}
+                                />
+                              )}
+                              <PosterLink
+                                icon={
+                                  regenPromptStates[concept.number] === "loading"
+                                    ? <Loader2 size={11} className="animate-spin" />
+                                    : <RefreshCw size={11} />
+                                }
+                                label={regenPromptStates[concept.number] === "loading" ? "Rewriting…" : "Rewrite prompt"}
+                                onClick={() => rewritePrompt(concept)}
+                                disabled={regenPromptStates[concept.number] === "loading" || editingPrompt === concept.number}
+                              />
+                              <PosterLink
+                                icon={<FileText size={11} />}
+                                label={editingPrompt === concept.number ? "Editing…" : "Edit prompt"}
+                                onClick={() => editingPrompt === concept.number ? setEditingPrompt(null) : startEditPrompt(concept)}
+                                active={editingPrompt === concept.number}
+                              />
+                              <PosterLink
+                                icon={isCopied ? <Check size={11} /> : <Copy size={11} />}
+                                label={isCopied ? "Copied" : "Copy prompt"}
+                                onClick={() => copyAIPrompt(concept)}
+                              />
+                              {concept.aiPrompt && editingPrompt !== concept.number && showPrompt !== concept.number && (
+                                <PosterLink
+                                  icon={<FileText size={11} />}
+                                  label="Show prompt"
+                                  onClick={() => setShowPrompt(concept.number)}
+                                />
+                              )}
+                            </div>
                             {editingPrompt === concept.number && (
                               <div className="space-y-2">
                                 <textarea
