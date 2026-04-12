@@ -5,6 +5,45 @@ Updated every session via `/save-session`.
 
 ---
 
+## 2026-04-12 (session 5)
+
+Vercel deployment, UI polish pass, and consistency audit across all viewers.
+
+### Features
+- **Vercel deployment** — live at `greenlight-app-red.vercel.app` with password gate, all API keys as env vars
+- **Password gate** — `components/password-gate.tsx` + `/api/verify-access`, sessionStorage-based, skips when no `ACCESS_PASSWORD` env var
+- **Image routes Vercel-compatible** — removed filesystem caching, return fal.ai CDN URLs directly
+- **`acceleration: "regular"`** on all image routes (~40% faster generation)
+- **Home NUX redesign** — 3-step vertical card flow (Upload to Gemini → Copy JSON → Paste here), inline JSON textarea, demo card with poster thumbnail, eliminated separate Paste JSON wizard step
+- **Pill-style tabs with icons** — replaced underline tabs across all document viewers
+- **Poster prompt controls** — regenerate, rewrite, edit, copy, show/hide prompt on each poster card (matching scene storyboard controls)
+- **Start Over confirmation** — styled AlertDialog instead of browser confirm()
+- **Theme toggle in main nav** — icon-only HeaderButton, removed from More menu
+- **Share in main nav** — moved from More menu to header
+- **Stop button on generation** — cancel document generation mid-flight to save credits
+- **Collapsible prose** — Atmosphere and Music sections show 3 sentences with "Read more" toggle
+- **Poster placeholder in Overview** — dashed card that navigates to Posters tab when no posters exist
+- **About dialog redesign** — clean numbered document list, no rainbow colors, updated tech stack references
+- **Cached project timing** — varied per-document (18s total with ±20% jitter) instead of flat 2.2s each
+- **A24 poster prompt** — new default poster style prefix with risograph/arthouse aesthetic
+- **Expand/Collapse toggle** — merged into single button across scenes, posters, locations
+
+### Fixes
+- **INT/EXT and time-of-day badge contrast** in light mode (darker text colors)
+- **Segmented control** (Sequence/Location) — solid `bg-foreground` active state visible in both modes
+- **UI consistency audit** — all viewer H1 titles → 32px, subtitles → 13px foreground/60, SectionLabelPill margins → mb-3
+- **Scene title** changed from movie name (redundant) to "Scene-by-scene map of the film"
+- **Tagline** updated to "Script to pre-production bible in minutes." across header, demo, about
+- **Response cache** silently skips on read-only filesystems (Vercel)
+- **Removed dead UI** — per-document Download button, fal.ai Settings field, Add Scene button, Download JSON menu item
+- **Global zoom 1.1** — 10% font size bump via CSS zoom
+- **Gemini recommended** for extraction (was Claude/ChatGPT)
+- **Sample data** switched from NotLD to EEAAO for "try with" link
+
+### Status: committed locally, needs Vercel redeploy
+
+---
+
 ## 2026-04-12 (session 4)
 
 Image generation overhaul. Switched from FLUX Schnell to FLUX dev + Gesture Draw LoRA for B&W gesture sketch output across all image types.

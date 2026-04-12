@@ -33,11 +33,16 @@ The `README.md` describes what Greenlight *is* publicly (a 0→1 tool for indie 
 - Fonts: Space Grotesk + Space Mono (body), full Google Fonts catalog for title treatment
 - Dev server: port 3001
 - API keys: `.env.local` (`ANTHROPIC_API_KEY`, `FAL_KEY`, `TMDB_API_KEY`) or Settings dialog in-browser
-- Cache: `.cache/` (API responses) + `.cache/images/` (FLUX output) — dev only, gitignored
+- Cache: `.cache/` (API responses) — dev only, gitignored. Silently skipped on Vercel (read-only filesystem)
+- Image gen returns fal.ai CDN URLs directly (no local filesystem caching)
+- `acceleration: "regular"` on all image routes for ~40% faster generation
 - Committed demo assets: `public/demo-images/` (used by /demo and /share)
 - Active project: localStorage key `greenlight-project` (single-project architecture)
 - Cached projects (title-match fake-gen): `lib/cached-projects.ts` + dev-only `/api/save-cached`
 - Demo snapshot: `lib/demo-project.ts` + dev-only `/api/save-demo`
+- **Deployed:** Vercel at `greenlight-app-red.vercel.app` with password gate (`ACCESS_PASSWORD` env var)
+- All API keys set as Vercel env vars (Claude, fal.ai, TMDB) — users don't need their own keys
+- Password gate: `components/password-gate.tsx` + `/api/verify-access` — skips itself when `ACCESS_PASSWORD` not set (dev mode)
 
 ## Decision rule
 
