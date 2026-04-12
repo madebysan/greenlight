@@ -5,6 +5,31 @@ Updated every session via `/save-session`.
 
 ---
 
+## 2026-04-12 (session 6)
+
+Audit-driven copy overhaul, PDF upload, EEAAO images, parallel image generation.
+
+### Features
+- **PDF screenplay upload** — new `/api/extract-screenplay` route + drag-and-drop UI tab. Claude Sonnet 4.6 extracts structured JSON from PDF.
+- **Two-tab home screen** — "Upload PDF" and "Paste JSON" modes side by side
+- **EEAAO cached images** — 67 images (storyboards, portraits, props, posters) committed to `public/demo-images/eeaao/`
+- **Fake image generation** — cached projects load pre-committed images with staggered delays instead of calling fal.ai
+- **EEAAO PDF auto-detection** — dropping the EEAAO PDF triggers fake extraction + cached flow, zero API cost
+- **Parallel image generation** — staggered 500ms starts instead of sequential, ~5-10x faster
+- **Cancel + payment error detection** — stop button works mid-flight, 402 errors shown clearly
+- **Copy overhaul** — "pre-production bible" → "vision deck" across all surfaces, tabs renamed, subtitles rewritten
+- **Production executive audit** — full 10-point domain audit saved as `audit-review.md`
+
+### Fixes
+- README rewritten with "vision deck" framing, accurate tab names, Gemini recommendation
+- About dialog updated to match new tab names and language
+- Generation screen title → "Building your vision deck"
+- Wizard stepper: "Extract" → "Start", "Results" → "Review"
+
+### Status: committed locally, needs Vercel deploy
+
+---
+
 ## 2026-04-12 (session 5)
 
 Vercel deployment, UI polish pass, and consistency audit across all viewers.
