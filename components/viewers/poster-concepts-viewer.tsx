@@ -116,6 +116,7 @@ export function PosterConceptsViewer({ content, savedImages, onImagesChange }: P
   const { title, intro, concepts } = useMemo(() => parsePosterConcepts(content), [content]);
   const [copiedId, setCopiedId] = useState<number | null>(null);
   const [expandedConcepts, setExpandedConcepts] = useState<Set<number>>(() => new Set([1]));
+  const [showPrompt, setShowPrompt] = useState<number | null>(null);
   const [localImages, setLocalImages] = useState<Record<number, PosterImageState>>({});
   const [generatingAll, setGeneratingAll] = useState(false);
   const [genAllProgress, setGenAllProgress] = useState({ done: 0, total: 0 });
@@ -428,8 +429,16 @@ export function PosterConceptsViewer({ content, savedImages, onImagesChange }: P
                           </div>
                         )}
 
-                        {/* AI Prompt with copy */}
-                        {concept.aiPrompt && (
+                        {/* AI Prompt — hidden by default */}
+                        {concept.aiPrompt && showPrompt !== concept.number && (
+                          <button
+                            onClick={(e) => { e.stopPropagation(); setShowPrompt(concept.number); }}
+                            className="font-mono text-[10px] text-muted-foreground hover:text-foreground transition-colors underline underline-offset-[3px] decoration-border"
+                          >
+                            Show prompt →
+                          </button>
+                        )}
+                        {concept.aiPrompt && showPrompt === concept.number && (
                           <div className="rounded-lg border bg-muted/20 p-3">
                             <div className="flex items-center justify-between mb-2">
                               <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">
@@ -459,6 +468,12 @@ export function PosterConceptsViewer({ content, savedImages, onImagesChange }: P
                             <p className="text-[12px] font-mono text-foreground/60 leading-relaxed">
                               {concept.aiPrompt}
                             </p>
+                            <button
+                              onClick={(e) => { e.stopPropagation(); setShowPrompt(null); }}
+                              className="mt-2 font-mono text-[10px] text-muted-foreground hover:text-foreground transition-colors underline underline-offset-[3px] decoration-border"
+                            >
+                              Hide prompt
+                            </button>
                           </div>
                         )}
                       </div>
