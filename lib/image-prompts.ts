@@ -14,36 +14,25 @@ export type ImagePromptKind = "storyboard" | "portrait" | "prop" | "poster";
 
 export const DEFAULT_IMAGE_PROMPTS: Record<ImagePromptKind, string> = {
   storyboard:
-    "Production storyboard rough, loose graphite pencil on white paper, gestural figures with multiple construction lines and unfinished edges, quick architectural blocking with straight pencil lines, soft graphite tone, working document quality, inside a thin rectangular storyboard panel border. " +
-    "Monochrome graphite only, no ink, no marker, no rendering, no facial detail, no shading detail, no color, no text, no labels, no signatures. " +
-    "Not polished art, not illustration — a 5-minute working sketch.",
+    "gstdrw style, black and white, rough lines, expressive strokes, minimal background, storyboard sketch",
 
   portrait:
-    "Production sketchbook character study rough, loose graphite pencil on white paper, head and shoulders centered in frame, gestural construction lines with unfinished edges, suggested facial features without rendering, soft graphite tone, working sketchbook quality. " +
-    "Monochrome graphite only, no ink, no marker, no color, no text, no labels, no signatures. " +
-    "Not polished art — a quick 5-minute character sketch.",
+    "gstdrw style, black and white, rough lines, expressive strokes, minimal background, character portrait sketch, head and shoulders",
 
   prop:
-    "Production design prop study rough, loose graphite pencil on white paper, single isolated object centered in frame, no background, gestural construction lines with unfinished edges, soft graphite tone, working sketchbook quality. " +
-    "Monochrome graphite only, no ink, no marker, no rendering, no color, no people, no text, no labels, no signatures. " +
-    "Not polished art — a quick 5-minute prop reference sketch.",
+    "gstdrw style, black and white, rough lines, expressive strokes, minimal background, single isolated object, no people",
 
   poster:
-    "Production rough poster concept thumbnail, loose graphite pencil on white paper, gestural figures with multiple construction lines and unfinished edges, simple compositional blocking, soft graphite tone, working concept sketch quality. " +
-    "Monochrome graphite only, no ink, no marker, no rendering, no color, no text, no words, no letters, no titles, no signatures. " +
-    "Not finished art — a quick 5-minute poster thumbnail.",
+    "gstdrw style, black and white, rough lines, expressive strokes, minimal background, poster composition sketch",
 };
 
-// Wraps the user's subject prose on both sides. The AI-generated subject text
-// is full of color, lighting, and mood words ("warm amber", "disco lights",
-// "bittersweet") which overpower the style prefix on its own. Sandwiching the
-// subject with explicit "ignore color" instructions before AND after is the
-// only reliable way to keep FLUX in graphite-sketch mode on colorful prompts.
-export const STYLE_OVERRIDE_PREFIX =
-  "Render strictly as loose graphite pencil sketch — ignore any color, lighting, mood, or rendering descriptions in the subject below.";
+export const IMAGE_NEGATIVE_PROMPT =
+  "color, colorful, photorealistic, detailed rendering, polished, finished art, shading, 3d render";
 
-export const STYLE_REINFORCEMENT =
-  "Render this strictly as a loose graphite pencil sketch on white paper — monochrome graphite only, NO color whatsoever, no rendering, no shading detail, gestural construction lines with unfinished edges. Ignore any color, lighting, mood, or rendering details described in the subject above. Working sketchbook quality — not finished art.";
+export const GESTURE_DRAW_LORA_URL =
+  "https://huggingface.co/glif/Gesture-Draw/resolve/main/Gesture_Draw_v1.safetensors";
+
+export const GESTURE_DRAW_LORA_SCALE = 1.0;
 
 export const IMAGE_PROMPT_STORAGE = "greenlight-image-prompts";
 
