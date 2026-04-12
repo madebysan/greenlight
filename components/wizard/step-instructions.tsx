@@ -5,6 +5,7 @@ import { STAGE_0_PROMPT } from "@/lib/prompts/stage-0";
 import { validateScreenplayJson } from "@/lib/schema";
 import { SAMPLES } from "@/lib/sample-data";
 import { Check, Copy, ChevronDown, Upload, FileText, Loader2 } from "lucide-react";
+import { findCachedProject } from "@/lib/cached-projects";
 
 type StepInstructionsProps = {
   onNext: () => void;
@@ -110,6 +111,11 @@ function UploadMode({ onSubmitJson }: { onSubmitJson?: (json: string) => void })
   const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Map known filenames to cached project titles for fake-gen demo
+  const KNOWN_PDFS: Record<string, string> = {
+    "everything-everywhere-all-at-once": "Everything Everywhere All At Once",
+  };
+
   const handleFile = async (file: File) => {
     if (!file.name.match(/\.(pdf|txt|fdx)$/i)) {
       setError("Please upload a PDF, TXT, or FDX file.");
@@ -120,6 +126,21 @@ function UploadMode({ onSubmitJson }: { onSubmitJson?: (json: string) => void })
     setFileName(file.name);
     setStatus("extracting");
     setError("");
+
+    // Check if this PDF matches a cached project — skip extraction
+    const nameSlug = file.name.replace(/\.[^.]+$/, "").toLowerCase();
+    for (const [pattern, title] of Object.entries(KNOWN_PDFS)) {
+      if (nameSlug.includes(pattern)) {
+        const cached = findCachedProject(title);
+        if (cached?.jsonData) {
+          // Fake a realistic delay
+          await new Promise((r) => setTimeout(r, 3000 + Math.random() * 2000));
+          setStatus("done");
+          onSubmitJson?.(cached.jsonData);
+          return;
+        }
+      }
+    }
 
     try {
       const formData = new FormData();
