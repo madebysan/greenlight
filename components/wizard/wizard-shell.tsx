@@ -38,9 +38,8 @@ import { downloadBlob } from "@/lib/utils";
 
 const STEPS = [
   { number: 1, label: "Extract" },
-  { number: 2, label: "Paste JSON" },
-  { number: 3, label: "Generate" },
-  { number: 4, label: "Results" },
+  { number: 2, label: "Generate" },
+  { number: 3, label: "Results" },
 ];
 
 export type DocumentResult = {
@@ -106,7 +105,7 @@ export function WizardShell() {
       setPortraits(project.portraits || {});
       setPropImages(project.propImages || {});
       setDisabledItems(project.disabledItems || {});
-      setCurrentStep(4);
+      setCurrentStep(3);
     }
     setApiKey(localStorage.getItem(API_KEY_STORAGE) || "");
     setFalKey(localStorage.getItem(FAL_KEY_STORAGE) || "");
@@ -172,13 +171,13 @@ export function WizardShell() {
       setPrefilledDocs(null);
     }
 
-    setCurrentStep(3);
+    setCurrentStep(2);
   };
 
   const handleGenerationComplete = useCallback(
     (results: DocumentResult[]) => {
       setDocuments(results);
-      setCurrentStep(4);
+      setCurrentStep(3);
 
       saveProject({
         title: extractTitle(jsonData),
@@ -508,12 +507,12 @@ export function WizardShell() {
     );
   }
 
-  const hasActiveProject = currentStep === 4;
+  const hasActiveProject = currentStep === 3;
 
   return (
     <div className="min-h-screen bg-background">
       <header className="relative z-50 border-b bg-background/95 backdrop-blur-sm">
-        <div className={`mx-auto px-6 py-4 ${currentStep === 4 ? "max-w-6xl" : "max-w-4xl"}`}>
+        <div className={`mx-auto px-6 py-4 ${currentStep === 3 ? "max-w-6xl" : "max-w-4xl"}`}>
           <div className="flex items-center gap-3">
             <div className="h-9 w-9 shrink-0 rounded-[8px] bg-white flex items-center justify-center shadow-pill text-black">
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -653,8 +652,8 @@ export function WizardShell() {
         </div>
       </header>
 
-      {currentStep < 4 && (
-        <div className={`mx-auto px-6 py-8 ${currentStep === 4 ? "max-w-6xl" : "max-w-4xl"}`}>
+      {currentStep < 3 && (
+        <div className={`mx-auto px-6 py-8 ${currentStep === 3 ? "max-w-6xl" : "max-w-4xl"}`}>
           <div className="flex items-center">
             {STEPS.map((step, i) => {
               const active = currentStep === step.number;
@@ -701,7 +700,7 @@ export function WizardShell() {
 
       <main
         className={`mx-auto px-6 pb-12 ${
-          currentStep === 4 ? "max-w-6xl" : "max-w-4xl"
+          currentStep === 3 ? "max-w-6xl" : "max-w-4xl"
         }`}
       >
         {currentStep === 1 && (
@@ -713,12 +712,6 @@ export function WizardShell() {
           />
         )}
         {currentStep === 2 && (
-          <StepJsonInput
-            onSubmit={handleJsonSubmit}
-            onBack={() => setCurrentStep(1)}
-          />
-        )}
-        {currentStep === 3 && (
           <StepGenerating
             apiKey={apiKey}
             jsonData={jsonData}
@@ -729,7 +722,7 @@ export function WizardShell() {
             onStop={() => handleGenerationComplete(documents)}
           />
         )}
-        {currentStep === 4 && (
+        {currentStep === 3 && (
           <StepResults
             documents={documents}
             jsonData={jsonData}
