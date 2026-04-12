@@ -134,15 +134,41 @@ export function ProductionViewer({
 
   const missingPropImages = propsMaster.filter((p) => !propImages[p.item]).length;
 
-  const wardrobeBySceneAndChars = useMemo(() => {
-    const wardrobe: WardrobeEntry[] = [];
+  const wardrobeByCharacter = useMemo(() => {
+    const allNotes: WardrobeEntry[] = [];
     for (const s of scenes) {
       for (const note of s.wardrobe_notes || []) {
-        wardrobe.push({ scene: s.scene_number, note });
+        allNotes.push({ scene: s.scene_number, note });
       }
     }
-    return wardrobe;
-  }, [scenes]);
+    if (allNotes.length === 0) return { byCharacter: [], general: [] };
+
+    const charNames = characters.map((c) => c.name.toUpperCase());
+    const byChar: Record<string, WardrobeEntry[]> = {};
+    const general: WardrobeEntry[] = [];
+
+    for (const entry of allNotes) {
+      const matched = charNames.find((name) =>
+        entry.note.toUpperCase().includes(name),
+      );
+      if (matched) {
+        if (!byChar[matched]) byChar[matched] = [];
+        byChar[matched].push(entry);
+      } else {
+        general.push(entry);
+      }
+    }
+
+    const byCharacter = characters
+      .filter((c) => byChar[c.name.toUpperCase()] || (c.wardrobe_changes && c.wardrobe_changes > 0))
+      .map((c) => ({
+        name: c.name,
+        changes: c.wardrobe_changes ?? 0,
+        notes: byChar[c.name.toUpperCase()] || [],
+      }));
+
+    return { byCharacter, general };
+  }, [scenes, characters]);
 
   const heroPropsCount = propsMaster.filter((p) => p.hero_prop).length;
   const totalWardrobeChanges = characters.reduce((sum, c) => sum + (c.wardrobe_changes || 0), 0);
@@ -173,7 +199,7 @@ export function ProductionViewer({
           Props ({propsMaster.length})
         </SubTabButton>
         <SubTabButton active={tab === "wardrobe"} onClick={() => setTab("wardrobe")}>
-          Wardrobe ({wardrobeBySceneAndChars.length})
+          Wardrobe ({wardrobeByCharacter.byCharacter.length})
         </SubTabButton>
 
         {tab === "props" && propsMaster.length > 0 && (
@@ -225,47 +251,58 @@ export function ProductionViewer({
       )}
 
       {tab === "wardrobe" && (
-        <div className="space-y-6">
-          {characters.length > 0 && (
-            <div>
-              <SectionLabel>By Character</SectionLabel>
-              <div className="grid grid-cols-2 gap-3">
-                {characters.map((c) => (
-                  <div key={c.name} className="rounded-[12px] bg-card/40 shadow-paper hover:shadow-paper-hover px-4 py-3 transition-all">
-                    <div className="flex items-baseline justify-between gap-2">
-                      <span className="text-[13px] font-medium uppercase tracking-[0.04em] text-foreground">
-                        {c.name}
-                      </span>
-                      <span className="font-mono text-[10px] uppercase tracking-[0.12em] tabular-nums text-muted-foreground">
-                        {c.wardrobe_changes ?? 0} {c.wardrobe_changes === 1 ? "change" : "changes"}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          <div>
-            <SectionLabel>Per-Scene Notes</SectionLabel>
-            {wardrobeBySceneAndChars.length === 0 ? (
-              <Empty message="No wardrobe notes across the screenplay." />
-            ) : (
-              <div className="space-y-2">
-                {wardrobeBySceneAndChars.map((w, i) => (
-                  <div
-                    key={`${w.scene}-${i}`}
-                    className="rounded-[12px] bg-card/40 shadow-paper hover:shadow-paper-hover px-4 py-3 flex items-start gap-3 transition-all"
-                  >
-                    <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.08em] px-2 py-[3px] rounded-[4px] bg-muted text-muted-foreground shrink-0">
-                      S{w.scene}
+        <div className="space-y-4">
+          {wardrobeByCharacter.byCharacter.length === 0 && wardrobeByCharacter.general.length === 0 ? (
+            <Empty message="No wardrobe notes across the screenplay." />
+          ) : (
+            <>
+              {wardrobeByCharacter.byCharacter.map((c) => (
+                <div key={c.name} className="rounded-[12px] bg-card/40 shadow-paper hover:shadow-paper-hover p-5 transition-all">
+                  <div className="flex items-baseline justify-between gap-2 mb-3">
+                    <span className="text-[14px] font-medium uppercase tracking-[0.04em] text-foreground">
+                      {c.name}
                     </span>
-                    <span className="text-[13px] leading-[1.6] text-foreground/80">{w.note}</span>
+                    <span className="font-mono text-[10px] uppercase tracking-[0.12em] tabular-nums text-muted-foreground">
+                      {c.changes} {c.changes === 1 ? "change" : "changes"}
+                    </span>
                   </div>
-                ))}
-              </div>
-            )}
-          </div>
+                  {c.notes.length > 0 ? (
+                    <div className="space-y-2">
+                      {c.notes.map((w, i) => (
+                        <div key={`${w.scene}-${i}`} className="flex items-start gap-3">
+                          <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.08em] px-2 py-[3px] rounded-[4px] bg-muted text-muted-foreground shrink-0">
+                            S{w.scene}
+                          </span>
+                          <span className="text-[13px] leading-[1.6] text-foreground/80">{w.note}</span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-[12px] text-muted-foreground italic">No specific wardrobe descriptions in the script.</p>
+                  )}
+                </div>
+              ))}
+
+              {wardrobeByCharacter.general.length > 0 && (
+                <div>
+                  <SectionLabel>General Notes</SectionLabel>
+                  <div className="space-y-2">
+                    {wardrobeByCharacter.general.map((w, i) => (
+                      <div
+                        key={`gen-${w.scene}-${i}`}
+                        className="rounded-[12px] bg-card/40 shadow-paper hover:shadow-paper-hover px-4 py-3 flex items-start gap-3 transition-all"
+                      >
+                        <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.08em] px-2 py-[3px] rounded-[4px] bg-muted text-muted-foreground shrink-0">
+                          S{w.scene}
+                        </span>
+                        <span className="text-[13px] leading-[1.6] text-foreground/80">{w.note}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </>
+          )}
         </div>
       )}
 
