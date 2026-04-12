@@ -52,3 +52,8 @@ test-screenplay.json
 # Claude
 .claude/
 ralph-prompt.md
+plan.md
+backlog.md
+checkpoint.json
+presentation.md
+DESIGN-PEEC.md

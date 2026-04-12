@@ -16,7 +16,19 @@ const spaceMono = Space_Mono({
 
 export const metadata: Metadata = {
   title: "Greenlight",
-  description: "A 1st AD's first pass.",
+  description: "Turn a script into something tangible, fast. A pre-production bible generator for indie filmmakers.",
+  openGraph: {
+    title: "Greenlight",
+    description: "Turn a script into something tangible, fast. A pre-production bible generator for indie filmmakers.",
+    type: "website",
+    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Greenlight",
+    description: "Turn a script into something tangible, fast.",
+    images: ["/og-image.png"],
+  },
 };
 
 // Inline script reads theme from localStorage before first paint so we
