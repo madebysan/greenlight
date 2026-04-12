@@ -22,6 +22,10 @@ export function getCached(slug: string, jsonData: string): string | null {
 }
 
 export function setCache(slug: string, jsonData: string, content: string): void {
-  mkdirSync(CACHE_DIR, { recursive: true });
-  writeFileSync(join(CACHE_DIR, `${cacheKey(slug, jsonData)}.md`), content, "utf-8");
+  try {
+    mkdirSync(CACHE_DIR, { recursive: true });
+    writeFileSync(join(CACHE_DIR, `${cacheKey(slug, jsonData)}.md`), content, "utf-8");
+  } catch {
+    // Read-only filesystem (Vercel) — skip caching silently
+  }
 }
