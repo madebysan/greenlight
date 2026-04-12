@@ -23,7 +23,7 @@ export const DEFAULT_IMAGE_PROMPTS: Record<ImagePromptKind, string> = {
     "gstdrw style, black ink on pure white paper, bold linework, expressive strokes, close-up view filling the frame, single object study, no people, no color, no tint, no tone",
 
   poster:
-    "gstdrw style, black ink on pure white paper, rough lines, expressive strokes, minimal background, poster composition sketch, no color, no tint, no tone",
+    "gstdrw style, A24 arthouse movie poster, hand-drawn illustrated style, single centered subject, symmetrical composition, large negative space, subject occupying lower third, loose ink linework with visible pencil under-sketch, scratchy crosshatching for shadows, uneven hand-inked contours, slight registration offset like risograph print, limited muted palette of two or three flat colors, dusty ochre and deep teal with one bold accent, paper grain texture",
 };
 
 export const IMAGE_NEGATIVE_PROMPT =
