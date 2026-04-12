@@ -721,6 +721,7 @@ export function WizardShell() {
             setDocuments={setDocuments}
             onComplete={handleGenerationComplete}
             prefilledDocs={prefilledDocs || undefined}
+            onStop={() => handleGenerationComplete(documents)}
           />
         )}
         {currentStep === 4 && (
