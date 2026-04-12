@@ -539,11 +539,23 @@ export function WizardShell() {
                   <span className="text-primary/70">images</span>
                 </button>
               )}
+              {hasActiveProject && documents.some((d) => d.status === "done") && (
+                <HeaderButton
+                  icon={<Share2 size={14} />}
+                  label="Share"
+                  onClick={() => window.open("/share", "_blank")}
+                  title="Open shareable view"
+                />
+              )}
               {hasActiveProject && (
                 <HeaderButton
                   icon={<RotateCcw size={14} />}
                   label="Start Over"
-                  onClick={handleStartOver}
+                  onClick={() => {
+                    if (window.confirm("Start over? You'll lose all generated documents and images.")) {
+                      handleStartOver();
+                    }
+                  }}
                   title="Start a new project"
                 />
               )}
@@ -564,13 +576,6 @@ export function WizardShell() {
                     : null,
                   hasActiveProject && documents.some((d) => d.status === "done")
                     ? "divider"
-                    : null,
-                  hasActiveProject && documents.some((d) => d.status === "done")
-                    ? {
-                        icon: <Share2 size={14} />,
-                        label: "Share",
-                        onClick: () => window.open("/share", "_blank"),
-                      }
                     : null,
                   hasActiveProject && documents.some((d) => d.status === "done")
                     ? {
