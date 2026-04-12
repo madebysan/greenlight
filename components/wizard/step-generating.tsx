@@ -222,8 +222,8 @@ export function StepGenerating({
           Building your vision deck
         </h1>
         <p className="text-[14px] text-foreground/70 max-w-[58ch] tracking-tight leading-[1.55]">
-          Claude is writing your project bible one document at a time. Each one
-          is saved to your local workspace the moment it&apos;s ready.
+          Each section is generated from your screenplay data and ready to
+          review the moment it lands.
         </p>
       </header>
 
