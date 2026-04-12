@@ -100,19 +100,19 @@ function scenesToMarkdown(title: string, overview: Overview, scenes: Scene[]): s
 }
 
 const INT_EXT_STYLES = {
-  INT: "bg-amber-500/15 text-amber-400",
-  EXT: "bg-sky-500/15 text-sky-400",
+  INT: "bg-amber-500/15 text-amber-600 dark:text-amber-400",
+  EXT: "bg-sky-500/15 text-sky-600 dark:text-sky-400",
   "": "bg-muted text-muted-foreground",
 };
 
 const TIME_STYLES: Record<string, string> = {
-  NIGHT: "bg-indigo-500/15 text-indigo-300",
-  DAY: "bg-yellow-500/15 text-yellow-300",
-  MORNING: "bg-orange-500/15 text-orange-300",
-  AFTERNOON: "bg-amber-500/15 text-amber-300",
-  EVENING: "bg-purple-500/15 text-purple-300",
-  DAWN: "bg-pink-500/15 text-pink-300",
-  DUSK: "bg-violet-500/15 text-violet-300",
+  NIGHT: "bg-indigo-500/15 text-indigo-400 dark:text-indigo-300",
+  DAY: "bg-yellow-500/15 text-yellow-600 dark:text-yellow-300",
+  MORNING: "bg-orange-500/15 text-orange-500 dark:text-orange-300",
+  AFTERNOON: "bg-amber-500/15 text-amber-600 dark:text-amber-300",
+  EVENING: "bg-purple-500/15 text-purple-500 dark:text-purple-300",
+  DAWN: "bg-pink-500/15 text-pink-500 dark:text-pink-300",
+  DUSK: "bg-violet-500/15 text-violet-500 dark:text-violet-300",
 };
 
 const EMPHASIS_FIELDS = new Set(["Key Visual Moment", "Emotional Beat"]);
@@ -494,12 +494,12 @@ export function SceneBreakdownViewer({
           labelIcon={<ListOrdered size={10} />}
           meta={
             <div className="flex items-center gap-1">
-              <div className="inline-flex items-center rounded-md border border-border p-0.5 mr-2">
+              <div className="inline-flex items-center rounded-md border border-border bg-muted/50 p-0.5 mr-2">
                 <button
                   onClick={() => setGroupBy("sequence")}
                   className={`text-[10px] font-medium px-2 py-0.5 rounded transition-colors ${
                     groupBy === "sequence"
-                      ? "bg-muted text-foreground"
+                      ? "bg-background text-foreground shadow-sm"
                       : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
@@ -509,7 +509,7 @@ export function SceneBreakdownViewer({
                   onClick={() => setGroupBy("location")}
                   className={`text-[10px] font-medium px-2 py-0.5 rounded transition-colors ${
                     groupBy === "location"
-                      ? "bg-muted text-foreground"
+                      ? "bg-background text-foreground shadow-sm"
                       : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
