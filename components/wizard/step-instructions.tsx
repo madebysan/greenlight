@@ -39,47 +39,22 @@ export function StepInstructions({ onNext }: StepInstructionsProps) {
             <span className="flex h-7 w-7 items-center justify-center rounded-full bg-foreground text-background text-[12px] font-mono font-medium shrink-0 mt-0.5">
               1
             </span>
-            <div>
-              <h3 className="text-[15px] font-medium tracking-tight mb-1.5">
-                Open your screenplay in an AI chat
-              </h3>
-              <p className="text-[13px] leading-[1.6] text-muted-foreground">
-                Upload your screenplay PDF to{" "}
-                <a
-                  href="https://claude.ai"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="underline underline-offset-2 decoration-border hover:decoration-foreground text-foreground"
-                >
-                  Claude.ai
-                </a>{" "}
-                or{" "}
-                <a
-                  href="https://chat.openai.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="underline underline-offset-2 decoration-border hover:decoration-foreground text-foreground"
-                >
-                  ChatGPT
-                </a>
-                .
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Step 2 */}
-        <div className="rounded-[12px] bg-card/40 shadow-paper px-6 py-5">
-          <div className="flex items-start gap-4">
-            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-foreground text-background text-[12px] font-mono font-medium shrink-0 mt-0.5">
-              2
-            </span>
             <div className="flex-1 min-w-0">
               <h3 className="text-[15px] font-medium tracking-tight mb-1.5">
-                Paste the extraction prompt alongside your PDF
+                Upload your screenplay PDF and paste the extraction prompt
               </h3>
               <p className="text-[13px] leading-[1.6] text-muted-foreground mb-3">
-                This prompt tells the AI exactly what to extract. Copy it in one click.
+                Open{" "}
+                <a
+                  href="https://aistudio.google.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline underline-offset-2 decoration-border hover:decoration-foreground text-foreground"
+                >
+                  Google AI Studio
+                </a>{" "}
+                <span className="text-[11px] text-muted-foreground/70">(Gemini 2.5 Pro recommended)</span>,
+                upload your screenplay PDF, and paste this prompt alongside it.
               </p>
               <div className="flex items-center gap-3">
                 <button
@@ -113,11 +88,11 @@ export function StepInstructions({ onNext }: StepInstructionsProps) {
           </div>
         </div>
 
-        {/* Step 3 */}
+        {/* Step 2 */}
         <div className="rounded-[12px] bg-card/40 shadow-paper px-6 py-5">
           <div className="flex items-start gap-4">
             <span className="flex h-7 w-7 items-center justify-center rounded-full bg-foreground text-background text-[12px] font-mono font-medium shrink-0 mt-0.5">
-              3
+              2
             </span>
             <div>
               <h3 className="text-[15px] font-medium tracking-tight mb-1.5">
@@ -161,7 +136,7 @@ export function StepInstructions({ onNext }: StepInstructionsProps) {
           </div>
           <div className="flex-1 min-w-0">
             <div className="text-[10px] font-mono uppercase tracking-[0.15em] text-muted-foreground mb-1">
-              Sample Bible
+              Demo Project
             </div>
             <h3 className="text-[15px] font-medium tracking-tight group-hover:text-foreground transition-colors">
               Night of the Living Dead
