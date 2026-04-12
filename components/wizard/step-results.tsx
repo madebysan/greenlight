@@ -142,7 +142,7 @@ export function StepResults({
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
-                className={`relative px-4 py-3 text-[12px] font-medium transition-colors tracking-tight ${
+                className={`relative px-4 py-3 font-mono text-[10px] uppercase tracking-[0.1em] font-medium transition-colors ${
                   isActive
                     ? "text-foreground"
                     : "text-muted-foreground hover:text-foreground"
