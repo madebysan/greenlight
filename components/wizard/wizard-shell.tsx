@@ -705,7 +705,12 @@ export function WizardShell() {
         }`}
       >
         {currentStep === 1 && (
-          <StepInstructions onNext={() => setCurrentStep(2)} />
+          <StepInstructions
+            onNext={() => setCurrentStep(2)}
+            onSubmitJson={(json) => {
+              handleJsonSubmit(json);
+            }}
+          />
         )}
         {currentStep === 2 && (
           <StepJsonInput
