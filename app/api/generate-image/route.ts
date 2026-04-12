@@ -36,6 +36,7 @@ export async function POST(request: NextRequest) {
         num_images: 1,
         num_inference_steps: 28,
         guidance_scale: 3.5,
+        acceleration: "regular",
       } as never,
     });
 
