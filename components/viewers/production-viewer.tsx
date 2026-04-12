@@ -143,17 +143,26 @@ export function ProductionViewer({
     }
     if (allNotes.length === 0) return { byCharacter: [], general: [] };
 
-    const charNames = characters.map((c) => c.name.toUpperCase());
+    // Build search tokens: full name + each individual word (for partial matches
+    // like "Evelyn" matching "EVELYN WANG", or "Deirdre" matching "DEIRDRE ATKINS").
+    // Skip short words (2 chars or less) to avoid false positives on "of", "in", etc.
+    const charTokens = characters.map((c) => {
+      const full = c.name.toUpperCase();
+      const words = full.split(/\s+/).filter((w) => w.length > 2);
+      return { name: c.name, tokens: [full, ...words] };
+    });
+
     const byChar: Record<string, WardrobeEntry[]> = {};
     const general: WardrobeEntry[] = [];
 
     for (const entry of allNotes) {
-      const matched = charNames.find((name) =>
-        entry.note.toUpperCase().includes(name),
+      const upper = entry.note.toUpperCase();
+      const matched = charTokens.find((ct) =>
+        ct.tokens.some((token) => upper.includes(token)),
       );
       if (matched) {
-        if (!byChar[matched]) byChar[matched] = [];
-        byChar[matched].push(entry);
+        if (!byChar[matched.name]) byChar[matched.name] = [];
+        byChar[matched.name].push(entry);
       } else {
         general.push(entry);
       }
