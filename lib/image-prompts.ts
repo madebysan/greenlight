@@ -14,32 +14,24 @@ export type ImagePromptKind = "storyboard" | "portrait" | "prop" | "poster";
 
 export const DEFAULT_IMAGE_PROMPTS: Record<ImagePromptKind, string> = {
   storyboard:
-    "Film production storyboard panel in the style of Ridley Scott's hand-drawn storyboards. " +
-    "Black felt-tip marker on white paper, inside a thin rectangular panel border. " +
-    "Loose but confident linework, simple crosshatching for shadows, stick-figure proportions with just enough detail to read the action. " +
-    "Strictly black and white only. No color whatsoever, no yellow, no red, no tints, pure black ink on white paper. " +
-    "No text, no labels, no captions, no signatures, no initials, no watermarks, no dates, no lined paper.",
+    "Production storyboard rough, loose graphite pencil on white paper, gestural figures with multiple construction lines and unfinished edges, quick architectural blocking with straight pencil lines, soft graphite tone, working document quality, inside a thin rectangular storyboard panel border. " +
+    "Monochrome graphite only, no ink, no marker, no rendering, no facial detail, no shading detail, no color, no text, no labels, no signatures. " +
+    "Not polished art, not illustration — a 5-minute working sketch.",
 
   portrait:
-    "Character portrait sketch, production art style. " +
-    "Black felt-tip marker on white paper, head and shoulders only, centered in frame. " +
-    "Loose but confident linework, simple crosshatching for shadows. " +
-    "Strictly black and white only. No color whatsoever, pure black ink on white paper. " +
-    "No text, no labels, no signatures, no watermarks. Square composition.",
+    "Production sketchbook character study rough, loose graphite pencil on white paper, head and shoulders centered in frame, gestural construction lines with unfinished edges, suggested facial features without rendering, soft graphite tone, working sketchbook quality. " +
+    "Monochrome graphite only, no ink, no marker, no color, no text, no labels, no signatures. " +
+    "Not polished art — a quick 5-minute character sketch.",
 
   prop:
-    "Prop reference sketch, production art style. " +
-    "Black felt-tip marker on white paper. Single isolated object, centered in frame, no background detail. " +
-    "Loose but confident linework, simple crosshatching for shadows. " +
-    "Strictly black and white only. No color whatsoever, pure black ink on white paper. " +
-    "No people, no text, no labels, no signatures, no watermarks. Square composition.",
+    "Production design prop study rough, loose graphite pencil on white paper, single isolated object centered in frame, no background, gestural construction lines with unfinished edges, soft graphite tone, working sketchbook quality. " +
+    "Monochrome graphite only, no ink, no marker, no rendering, no color, no people, no text, no labels, no signatures. " +
+    "Not polished art — a quick 5-minute prop reference sketch.",
 
   poster:
-    "Film poster concept sketch, production art style. " +
-    "Black felt-tip marker on white paper. " +
-    "Loose but confident linework, simple crosshatching for shadows, gestural figures with just enough detail to convey the composition. " +
-    "Strictly black and white only. No color whatsoever, pure black ink on white paper. " +
-    "No text, no words, no letters, no titles, no signatures, no watermarks, no dates. Image only.",
+    "Production rough poster concept thumbnail, loose graphite pencil on white paper, gestural figures with multiple construction lines and unfinished edges, simple compositional blocking, soft graphite tone, working concept sketch quality. " +
+    "Monochrome graphite only, no ink, no marker, no rendering, no color, no text, no words, no letters, no titles, no signatures. " +
+    "Not finished art — a quick 5-minute poster thumbnail.",
 };
 
 export const IMAGE_PROMPT_STORAGE = "greenlight-image-prompts";

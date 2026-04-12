@@ -33,10 +33,10 @@ export async function POST(request: NextRequest) {
       prompt,
     ].filter(Boolean).join(" ");
 
-    const result = await fal.subscribe("fal-ai/flux/schnell", {
+    const result = await fal.subscribe("fal-ai/flux-pro/v1.1-ultra", {
       input: {
         prompt: storyboardPrompt,
-        image_size: "landscape_16_9",
+        aspect_ratio: "16:9",
         num_images: 1,
       },
     });

@@ -25,10 +25,10 @@ export async function POST(request: NextRequest) {
     const description = notes ? `${name}. ${notes}` : name;
     const prompt = `${STYLE_PREFIX} Subject: ${description}`;
 
-    const result = await fal.subscribe("fal-ai/flux/schnell", {
+    const result = await fal.subscribe("fal-ai/flux-pro/v1.1-ultra", {
       input: {
         prompt,
-        image_size: "square",
+        aspect_ratio: "1:1",
         num_images: 1,
       },
     });
