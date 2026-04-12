@@ -570,6 +570,7 @@ export function SceneBreakdownViewer({
             const characters = scene.fields.find((f) => f.label === "Characters")?.value || "";
             const location = scene.fields.find((f) => f.label === "Location")?.value || "";
             const pages = scene.fields.find((f) => f.label === "Pages")?.value || "";
+            const emotionalBeat = scene.fields.find((f) => f.label.toLowerCase() === "emotional beat")?.value || "";
 
             return (
               <div
@@ -580,31 +581,32 @@ export function SceneBreakdownViewer({
                     : "bg-card/30 shadow-paper hover:shadow-paper-hover"
                 }`}
               >
-                <div className="flex items-center gap-3 px-4 py-3">
-                  <button
-                    onClick={() => toggleScene(scene.number)}
-                    className="flex items-center gap-3 flex-1 min-w-0 text-left"
-                  >
-                    <span className="flex h-[26px] w-[26px] items-center justify-center rounded-[6px] bg-white/[0.04] font-mono text-[11px] font-medium shrink-0 tabular-nums shadow-pill text-foreground/90">
-                      {scene.number.toString().padStart(2, "0")}
-                    </span>
-                    {scene.intExt && (
-                      <span className={`font-mono text-[10px] font-medium tracking-[0.1em] px-2 py-[3px] rounded-full ${INT_EXT_STYLES[scene.intExt]}`}>
-                        {scene.intExt}
+                <div className="px-4 py-3">
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => toggleScene(scene.number)}
+                      className="flex items-center gap-3 flex-1 min-w-0 text-left"
+                    >
+                      <span className="flex h-[26px] w-[26px] items-center justify-center rounded-[6px] bg-white/[0.04] font-mono text-[11px] font-medium shrink-0 tabular-nums shadow-pill text-foreground/90">
+                        {scene.number.toString().padStart(2, "0")}
                       </span>
-                    )}
-                    <span className="text-[13px] font-medium tracking-[-0.01em] uppercase flex-1 truncate text-foreground/90">
-                      {scene.slugLine.replace(/^(INT|EXT)\.\s*/, "").replace(/\s*-\s*(NIGHT|DAY|MORNING|AFTERNOON|EVENING|DAWN|DUSK|CONTINUOUS)\s*$/i, "")}
-                    </span>
-                    {scene.timeOfDay && (
-                      <span className={`font-mono text-[10px] font-medium tracking-[0.1em] uppercase px-2 py-[3px] rounded-full ${TIME_STYLES[scene.timeOfDay.toUpperCase()] || "bg-white/[0.04] text-muted-foreground"}`}>
-                        {scene.timeOfDay}
+                      {scene.intExt && (
+                        <span className={`font-mono text-[10px] font-medium tracking-[0.1em] px-2 py-[3px] rounded-full ${INT_EXT_STYLES[scene.intExt]}`}>
+                          {scene.intExt}
+                        </span>
+                      )}
+                      <span className="text-[13px] font-medium tracking-[-0.01em] uppercase flex-1 truncate text-foreground/90">
+                        {scene.slugLine.replace(/^(INT|EXT)\.\s*/, "").replace(/\s*-\s*(NIGHT|DAY|MORNING|AFTERNOON|EVENING|DAWN|DUSK|CONTINUOUS)\s*$/i, "")}
                       </span>
-                    )}
-                    {pages && (
-                      <span className="font-mono text-[11px] text-muted-foreground tabular-nums whitespace-nowrap tracking-tight">pp. {pages}</span>
-                    )}
-                  </button>
+                      {scene.timeOfDay && (
+                        <span className={`font-mono text-[10px] font-medium tracking-[0.1em] uppercase px-2 py-[3px] rounded-full ${TIME_STYLES[scene.timeOfDay.toUpperCase()] || "bg-white/[0.04] text-muted-foreground"}`}>
+                          {scene.timeOfDay}
+                        </span>
+                      )}
+                      {pages && (
+                        <span className="font-mono text-[11px] text-muted-foreground tabular-nums whitespace-nowrap tracking-tight">pp. {pages}</span>
+                      )}
+                    </button>
 
                   {onContentChange && isExpanded && !isEditing && (
                     <div className="flex items-center gap-0.5 shrink-0">
@@ -631,6 +633,25 @@ export function SceneBreakdownViewer({
                   >
                     <path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
+                  </div>
+
+                  {!isExpanded && (emotionalBeat || characters) && (
+                    <div className="flex items-center gap-2 pl-[42px] pt-0.5 pb-1">
+                      {emotionalBeat && (
+                        <span className="text-[12px] italic text-foreground/50 tracking-tight">
+                          {emotionalBeat}
+                        </span>
+                      )}
+                      {emotionalBeat && characters && (
+                        <span className="text-muted-foreground/30">·</span>
+                      )}
+                      {characters && (
+                        <span className="text-[11px] text-muted-foreground/60 tracking-tight truncate">
+                          {characters}
+                        </span>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 {isExpanded && isEditing && (
