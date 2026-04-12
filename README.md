@@ -1,7 +1,9 @@
 <h1 align="center">Greenlight</h1>
 <p align="center">Turn a script into something tangible, fast.<br>
 A 0→1 tool for indie filmmakers and freelancers.</p>
-<p align="center"><code>Next.js</code> <code>React 19</code> <code>Tailwind CSS 4</code> <code>Claude API</code> <code>FLUX Schnell</code></p>
+<p align="center"><code>Next.js</code> <code>React 19</code> <code>Tailwind CSS 4</code> <code>Claude API</code> <code>FLUX + Gesture Draw LoRA</code></p>
+
+![Greenlight demo — Night of the Living Dead](public/screenshot.png)
 
 ---
 
@@ -59,7 +61,7 @@ Five concrete problems an indie filmmaker hits the moment they commit to a scrip
 
 ## Image Generation
 
-Storyboard frames, poster concepts, character portraits, and prop references are generated using FLUX Schnell (fal.ai) in a consistent black-and-white felt-tip marker production art style so every asset in the bible looks like it came from the same hand. Images are saved locally to `.cache/images/` and persist with your project. Use **Generate all images** in the More menu to batch-generate everything missing across every tab in one click.
+Storyboard frames, poster concepts, character portraits, and prop references are generated using FLUX dev + the Gesture Draw LoRA (fal.ai) in a consistent black-ink-on-white-paper gesture sketch style so every asset in the bible looks like it came from the same storyboard artist's sketchbook. Images are saved locally to `.cache/images/` and persist with your project. Use **Generate all images** in the More menu to batch-generate everything missing across every tab in one click.
 
 ## Setup
 
@@ -92,10 +94,14 @@ TMDB_API_KEY=...
 ## Tech Stack
 
 - **Framework:** Next.js 16, React 19, Tailwind CSS 4, shadcn/ui
-- **AI:** Claude Haiku 4.5 (Anthropic), FLUX Schnell (fal.ai)
+- **AI:** Claude Haiku 4.5 (Anthropic), FLUX dev + Gesture Draw LoRA (fal.ai)
 - **Data:** TMDB REST API for film reference lookups
 - **Fonts:** Space Grotesk + Space Mono (UI), full Google Fonts catalog for title treatment
 - **Theme:** Dark default with light mode toggle
+
+## License
+
+[All rights reserved](LICENSE)
 
 ---
 
