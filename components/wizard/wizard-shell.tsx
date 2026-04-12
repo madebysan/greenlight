@@ -13,6 +13,17 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { StepInstructions } from "./step-instructions";
 import { StepJsonInput } from "./step-json-input";
 import { StepGenerating } from "./step-generating";
@@ -548,16 +559,33 @@ export function WizardShell() {
                 />
               )}
               {hasActiveProject && (
-                <HeaderButton
-                  icon={<RotateCcw size={14} />}
-                  label="Start Over"
-                  onClick={() => {
-                    if (window.confirm("Start over? You'll lose all generated documents and images.")) {
-                      handleStartOver();
-                    }
-                  }}
-                  title="Start a new project"
-                />
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <HeaderButton
+                      icon={<RotateCcw size={14} />}
+                      label="Start Over"
+                      onClick={() => {}}
+                      title="Start a new project"
+                    />
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Start over?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This will discard all generated documents, images, and edits. This action cannot be undone.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={handleStartOver}
+                        className="bg-destructive text-white hover:bg-destructive/90"
+                      >
+                        Start Over
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               )}
               <MoreMenu
                 items={[
