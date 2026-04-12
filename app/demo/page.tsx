@@ -101,7 +101,7 @@ function DemoContent({ project }: { project: SavedProject }) {
                   · Demo
                 </span>
               </h1>
-              <p className="text-[12px] text-foreground/70 tracking-tight">A 1st AD&apos;s first pass.</p>
+              <p className="text-[12px] text-foreground/70 tracking-tight">Script to pre-production bible in minutes.</p>
             </div>
 
             <div className="flex items-center gap-2 ml-auto">

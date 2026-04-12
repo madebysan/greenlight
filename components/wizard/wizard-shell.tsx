@@ -39,7 +39,7 @@ import { downloadBlob } from "@/lib/utils";
 const STEPS = [
   { number: 1, label: "Extract" },
   { number: 2, label: "Generate" },
-  { number: 3, label: "Results" },
+  { number: 3, label: "Review" },
 ];
 
 export type DocumentResult = {
@@ -521,7 +521,7 @@ export function WizardShell() {
             <div>
               <h1 className="text-lg font-bold tracking-tight">Greenlight</h1>
               <p className="text-[13px] text-muted-foreground">
-                A 1st AD&apos;s first pass.
+                Script to pre-production bible in minutes.
               </p>
             </div>
 
