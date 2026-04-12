@@ -37,7 +37,7 @@ A quick read on the size of the project. Use concrete numbers pulled from the JS
 - **Principal cast:** [count of characters]
 - **Exterior scenes:** [count]
 - **Night shoots:** [count with time_of_day = NIGHT]
-- **VFX / practical-effects scenes:** [count of scenes with non-empty vfx_stunts]
+- **VFX/FX scenes:** [count of scenes with non-empty vfx_stunts]
 - **Complexity read:** [one sentence qualitative judgment — "contained single-location thriller with a small cast" / "ambitious period piece with extensive night shoots" etc.]
 
 Output ONLY the markdown document. No commentary outside the document. Do not include any introductory text before the # heading.`;
