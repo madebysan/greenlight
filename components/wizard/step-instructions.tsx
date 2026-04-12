@@ -97,11 +97,11 @@ export function StepInstructions({ onNext }: StepInstructionsProps) {
             </span>
             <div>
               <h3 className="text-[15px] font-medium tracking-tight mb-1.5">
-                Paste the JSON you get back
+                Copy the JSON and paste it here
               </h3>
               <p className="text-[13px] leading-[1.6] text-muted-foreground mb-3">
-                The AI will return structured JSON. Paste it here and Greenlight generates
-                your full production bible — scenes, locations, cast, key art, and more.
+                Gemini will return structured JSON. Copy its answer and paste it below — Greenlight
+                takes it from there.
               </p>
               <button
                 onClick={onNext}
