@@ -19,7 +19,8 @@ const TABS = [
   { title: "Locations", desc: "Unique locations grouped with scenes, time variations, and set requirements." },
   { title: "Cast & Crew", desc: "Characters with AI portraits plus production insights." },
   { title: "Production Design", desc: "Cross-referenced props and wardrobe with reference sketches." },
-  { title: "Key Art", desc: "Poster concepts, color palette, and title treatment." },
+  { title: "Title & Palette", desc: "Color palette and title treatment with the full Google Fonts catalog." },
+  { title: "Poster Concepts", desc: "Visual directions for how the film could present itself." },
 ];
 
 export function AboutDialog({ open, onOpenChange }: AboutDialogProps) {
