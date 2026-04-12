@@ -57,17 +57,19 @@ export function AboutDialog({ open, onOpenChange }: AboutDialogProps) {
               {TABS.map((tab, i) => (
                 <div
                   key={tab.title}
-                  className="flex items-baseline gap-3 px-4 py-2.5 bg-card/40"
+                  className="flex items-start gap-3 px-4 py-2.5 bg-card/40"
                 >
-                  <span className="font-mono text-[10px] text-muted-foreground tabular-nums w-4 shrink-0">
+                  <span className="font-mono text-[10px] text-muted-foreground tabular-nums w-4 shrink-0 pt-0.5">
                     {(i + 1).toString().padStart(2, "0")}
                   </span>
-                  <span className="text-[13px] font-medium text-foreground tracking-tight shrink-0">
-                    {tab.title}
-                  </span>
-                  <span className="text-[12px] text-muted-foreground tracking-tight">
-                    {tab.desc}
-                  </span>
+                  <div>
+                    <div className="text-[13px] font-medium text-foreground tracking-tight">
+                      {tab.title}
+                    </div>
+                    <div className="text-[12px] text-muted-foreground tracking-tight mt-0.5">
+                      {tab.desc}
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
