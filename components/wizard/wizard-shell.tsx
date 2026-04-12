@@ -314,7 +314,7 @@ export function WizardShell() {
               stylePrefix: getStylePrefix("portrait"),
             }),
           });
-          if (!res.ok) return;
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
           const { url } = await res.json();
           accPortraits = { ...accPortraits, [char.name]: { status: "done" as const, url } };
           handlePortraitsChange(accPortraits);
@@ -337,7 +337,7 @@ export function WizardShell() {
               stylePrefix: getStylePrefix("prop"),
             }),
           });
-          if (!res.ok) return;
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
           const { url } = await res.json();
           accPropImages = { ...accPropImages, [prop.item]: { status: "done" as const, url } };
           handlePropImagesChange(accPropImages);
@@ -366,7 +366,7 @@ export function WizardShell() {
                   stylePrefix: getStylePrefix("storyboard"),
                 }),
               });
-              if (!res.ok) return;
+              if (!res.ok) throw new Error(`HTTP ${res.status}`);
               const { url } = await res.json();
               accStoryboardImages = {
                 ...accStoryboardImages,
@@ -402,7 +402,7 @@ export function WizardShell() {
                 stylePrefix: getStylePrefix("poster"),
               }),
             });
-            if (!res.ok) return;
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
             const { url } = await res.json();
             accPosterImages = {
               ...accPosterImages,
@@ -419,16 +419,40 @@ export function WizardShell() {
     genAllCancelRef.current = false;
     setGenAllImages({ running: true, done: 0, total: tasks.length });
 
-    for (let i = 0; i < tasks.length; i++) {
-      if (genAllCancelRef.current) break;
-      try {
-        await tasks[i].run();
-      } catch (e) {
-        console.error(`[generate-all] ${tasks[i].kind} failed`, e);
-      }
-      setGenAllImages({ running: true, done: i + 1, total: tasks.length });
-    }
+    let completed = 0;
+    let abortedByError = false;
 
+    // Staggered parallel: fire all tasks with 500ms delay between each.
+    // Each task runs independently; results land as they finish.
+    const promises = tasks.map((task, i) =>
+      new Promise<void>((resolve) => {
+        // Stagger start by 500ms per task
+        setTimeout(async () => {
+          if (genAllCancelRef.current || abortedByError) {
+            resolve();
+            return;
+          }
+          try {
+            await task.run();
+          } catch (e) {
+            const msg = e instanceof Error ? e.message : String(e);
+            // Detect payment/quota errors and abort everything
+            if (msg.includes("402") || msg.includes("payment") || msg.includes("quota") || msg.includes("insufficient")) {
+              abortedByError = true;
+              console.error(`[generate-all] API credits exhausted — stopping all tasks`);
+              alert("Image generation stopped — your fal.ai API key is out of credits.");
+            } else {
+              console.error(`[generate-all] ${task.kind} failed:`, msg);
+            }
+          }
+          completed++;
+          setGenAllImages({ running: true, done: completed, total: tasks.length });
+          resolve();
+        }, i * 500);
+      })
+    );
+
+    await Promise.all(promises);
     setGenAllImages({ running: false, done: 0, total: 0 });
   };
 
