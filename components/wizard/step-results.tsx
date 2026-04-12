@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Download } from "lucide-react";
+import { Compass, Wind, ListOrdered, MapPin, Users, Palette, Fingerprint, Frame } from "lucide-react";
 import { OverviewViewer } from "@/components/viewers/overview-viewer";
 import { MoodAndToneViewer } from "@/components/viewers/mood-and-tone-viewer";
 import { SceneBreakdownViewer } from "@/components/viewers/scene-breakdown-viewer";
@@ -20,14 +20,14 @@ import { downloadBlob } from "@/lib/utils";
 // directly. Identity + Posters both read from mood-and-tone + poster-concepts docs
 // respectively — they used to live under one "Key Art" tab.
 const TABS = [
-  { key: "overview", label: "Overview" },
-  { key: "mood-and-tone", label: "Mood & Tone" },
-  { key: "scenes", label: "Scenes" },
-  { key: "locations", label: "Locations" },
-  { key: "cast-and-crew", label: "Cast & Crew" },
-  { key: "production", label: "Production Design" },
-  { key: "identity", label: "Identity" },
-  { key: "posters", label: "Posters" },
+  { key: "overview", label: "Overview", icon: Compass },
+  { key: "mood-and-tone", label: "Mood & Tone", icon: Wind },
+  { key: "scenes", label: "Scenes", icon: ListOrdered },
+  { key: "locations", label: "Locations", icon: MapPin },
+  { key: "cast-and-crew", label: "Cast & Crew", icon: Users },
+  { key: "production", label: "Production Design", icon: Palette },
+  { key: "identity", label: "Identity", icon: Fingerprint },
+  { key: "posters", label: "Posters", icon: Frame },
 ] as const;
 
 type TabKey = (typeof TABS)[number]["key"];
@@ -135,23 +135,22 @@ export function StepResults({
       )}
 
       <div className="min-h-[600px]">
-        <div className="flex items-center gap-1 border-b border-border/60 mb-0 -mx-1">
+        <div className="flex items-center gap-1 py-2 -mx-1">
           {TABS.map((tab) => {
             const isActive = tab.key === activeTab;
+            const Icon = tab.icon;
             return (
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
-                className={`relative px-4 py-3 font-mono text-[10px] uppercase tracking-[0.1em] font-medium transition-colors ${
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium tracking-tight transition-colors ${
                   isActive
-                    ? "text-foreground"
-                    : "text-muted-foreground hover:text-foreground"
+                    ? "bg-foreground text-background"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
                 }`}
               >
+                <Icon size={13} />
                 {tab.label}
-                {isActive && (
-                  <span className="absolute -bottom-px left-2 right-2 h-px bg-foreground" />
-                )}
               </button>
             );
           })}
