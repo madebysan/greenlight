@@ -125,7 +125,15 @@ export function StepGenerating({
     sessionStartRef.current = Date.now();
 
     async function fakeProgression() {
-      const FAKE_STEP_MS = 2200;
+      // Vary timing per document to feel more realistic.
+      const FAKE_TIMING: Record<string, number> = {
+        overview: 3000,
+        "mood-and-tone": 4500,
+        "scene-breakdown": 5000,
+        "storyboard-prompts": 4000,
+        "poster-concepts": 6000,
+      };
+      const DEFAULT_MS = 2500;
       const finalDocs: DocumentResult[] = documents.map((d) => ({ ...d }));
 
       for (let i = 0; i < documents.length; i++) {
@@ -136,7 +144,10 @@ export function StepGenerating({
           ),
         );
 
-        await new Promise((r) => setTimeout(r, FAKE_STEP_MS));
+        const ms = FAKE_TIMING[doc.slug] || DEFAULT_MS;
+        // Add ±20% jitter so it doesn't feel mechanical
+        const jitter = ms * (0.8 + Math.random() * 0.4);
+        await new Promise((r) => setTimeout(r, jitter));
 
         const prefilled = prefilledDocs!.find((p) => p.slug === doc.slug);
         const nextDoc: DocumentResult = prefilled
