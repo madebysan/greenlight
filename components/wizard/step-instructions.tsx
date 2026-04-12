@@ -138,7 +138,7 @@ export function StepInstructions({ onNext, onSubmitJson }: StepInstructionsProps
                 Paste it here
               </h3>
               <p className="text-[13px] leading-[1.6] text-muted-foreground mb-3">
-                Greenlight takes it from there — scenes, locations, cast, key art, and more.
+                Greenlight takes it from there — mood, scenes, locations, cast, and visual concepts.
               </p>
 
               <textarea
