@@ -223,7 +223,7 @@ export function OverviewViewer({
       {parsed.themes.length > 0 && (
         <section>
           <SectionHead index={2} label="Themes" labelIcon={<Sparkles size={10} />}>
-            What the film is about
+            Core Themes
           </SectionHead>
           <div className="space-y-6 max-w-[65ch]">
             {parsed.themes.map((t) => (
