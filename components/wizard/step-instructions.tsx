@@ -41,7 +41,7 @@ export function StepInstructions({ onNext, onSubmitJson }: StepInstructionsProps
   };
 
   return (
-    <div className="max-w-2xl space-y-14">
+    <div className="max-w-2xl space-y-10">
       {/* Hero */}
       <div>
         <h2 className="text-[2rem] font-semibold tracking-tight mb-3 leading-[1.05]">
@@ -149,7 +149,7 @@ export function StepInstructions({ onNext, onSubmitJson }: StepInstructionsProps
                   if (errors.length > 0) setErrors([]);
                 }}
                 placeholder='Paste JSON here — it should start with { "title": ...'
-                rows={8}
+                rows={4}
                 className="w-full rounded-lg border border-border/60 bg-background/60 px-4 py-3 text-[12px] font-mono leading-[1.7] text-foreground/85 resize-none focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary placeholder:text-muted-foreground/40"
               />
 
@@ -194,18 +194,19 @@ export function StepInstructions({ onNext, onSubmitJson }: StepInstructionsProps
         </div>
       </div>
 
-      {/* Divider */}
-      <div className="flex items-center gap-4">
-        <div className="flex-1 h-px bg-border/60" />
-        <span className="text-[11px] font-mono uppercase tracking-[0.15em] text-muted-foreground">or</span>
-        <div className="flex-1 h-px bg-border/60" />
-      </div>
+      {/* Divider + Demo card */}
+      <div className="space-y-4 -mt-4">
+        <div className="flex items-center gap-4">
+          <div className="flex-1 h-px bg-border/60" />
+          <span className="text-[11px] font-mono uppercase tracking-[0.15em] text-muted-foreground">or</span>
+          <div className="flex-1 h-px bg-border/60" />
+        </div>
 
-      {/* Demo card */}
-      <a
-        href="/demo"
-        className="group block rounded-[12px] bg-card/40 shadow-paper hover:shadow-paper-hover transition-all overflow-hidden"
-      >
+        {/* Demo card */}
+        <a
+          href="/demo"
+          className="group block rounded-[12px] bg-card/40 shadow-paper hover:shadow-paper-hover transition-all overflow-hidden"
+        >
         <div className="flex items-center gap-5 px-6 py-5">
           <div className="shrink-0 w-[56px] rounded-lg overflow-hidden bg-muted/30" style={{ aspectRatio: "5/7" }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -229,8 +230,9 @@ export function StepInstructions({ onNext, onSubmitJson }: StepInstructionsProps
           <span className="text-[13px] text-muted-foreground group-hover:text-foreground transition-colors shrink-0">
             View demo →
           </span>
-        </div>
-      </a>
+          </div>
+        </a>
+      </div>
     </div>
   );
 }
