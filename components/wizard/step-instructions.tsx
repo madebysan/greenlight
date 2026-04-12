@@ -46,15 +46,16 @@ export function StepInstructions({ onNext }: StepInstructionsProps) {
               <p className="text-[13px] leading-[1.6] text-muted-foreground mb-3">
                 Open{" "}
                 <a
-                  href="https://aistudio.google.com"
+                  href="https://gemini.google.com/app"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="underline underline-offset-2 decoration-border hover:decoration-foreground text-foreground"
                 >
-                  Google AI Studio
-                </a>{" "}
-                <span className="text-[11px] text-muted-foreground/70">(Gemini 2.5 Pro recommended)</span>,
-                upload your screenplay, copy the prompt below, and paste it alongside.
+                  Gemini
+                </a>
+                , select the{" "}
+                <span className="text-foreground">Pro</span>{" "}
+                model, upload your screenplay, copy the prompt below, and paste it alongside.
               </p>
               <div className="flex items-center gap-3">
                 <button
