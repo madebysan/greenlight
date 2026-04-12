@@ -15,6 +15,7 @@ type StepGeneratingProps = {
   // pre-populated documents. Used for the cached-project "bonus round" demo
   // path where a matching film title already has all its markdown on disk.
   prefilledDocs?: DocumentResult[];
+  onStop?: () => void;
 };
 
 async function generateOne(
@@ -87,8 +88,10 @@ export function StepGenerating({
   setDocuments,
   onComplete,
   prefilledDocs,
+  onStop,
 }: StepGeneratingProps) {
   const hasStarted = useRef(false);
+  const cancelRef = useRef(false);
   const sessionStartRef = useRef<number>(Date.now());
   // Per-document start and end times so we can show per-row elapsed.
   const docTimesRef = useRef<Record<string, { start?: number; end?: number }>>({});
@@ -153,6 +156,7 @@ export function StepGenerating({
       const results: { slug: string; content: string | null; error: string | null }[] = [];
 
       for (const doc of documents) {
+        if (cancelRef.current) break;
         const start = Date.now();
         const result = await generateOne(doc, jsonData, apiKey, setDocuments);
         results.push(result);
@@ -169,6 +173,9 @@ export function StepGenerating({
             content: result.content,
             error: result.error,
           };
+        }
+        if (cancelRef.current) {
+          return { ...doc, status: "pending" as const };
         }
         return { ...doc, status: "error" as const, error: "Generation failed" };
       });
@@ -221,13 +228,24 @@ export function StepGenerating({
               <span className="text-muted-foreground"> / {total.toString().padStart(2, "0")}</span>
             </span>
           </div>
-          <div className="flex items-baseline gap-4">
+          <div className="flex items-center gap-4">
             <span className="font-mono text-[11px] text-muted-foreground tabular-nums tracking-tight">
               {formatSeconds(sessionElapsed)}
             </span>
             <span className="font-mono text-[11px] text-foreground tabular-nums tracking-tight">
               {Math.round(progress * 100)}%
             </span>
+            {progress < 1 && !prefilledDocs && (
+              <button
+                onClick={() => {
+                  cancelRef.current = true;
+                  onStop?.();
+                }}
+                className="font-mono text-[10px] uppercase tracking-[0.14em] text-destructive hover:text-destructive/80 transition-colors ml-1"
+              >
+                Stop
+              </button>
+            )}
           </div>
         </div>
 
