@@ -3,7 +3,7 @@ import { fal } from "@fal-ai/client";
 import { writeFileSync, mkdirSync } from "fs";
 import { join } from "path";
 import { randomUUID } from "crypto";
-import { DEFAULT_IMAGE_PROMPTS } from "@/lib/image-prompts";
+import { DEFAULT_IMAGE_PROMPTS, STYLE_OVERRIDE_PREFIX, STYLE_REINFORCEMENT } from "@/lib/image-prompts";
 
 fal.config({ credentials: process.env.FAL_KEY });
 
@@ -29,8 +29,11 @@ export async function POST(request: NextRequest) {
 
     const storyboardPrompt = [
       STYLE_PREFIX,
-      camera ? `Hand-drawn arrows showing camera movement: ${camera}.` : "",
+      STYLE_OVERRIDE_PREFIX,
+      camera ? `Camera: ${camera}.` : "",
+      "Subject:",
       prompt,
+      STYLE_REINFORCEMENT,
     ].filter(Boolean).join(" ");
 
     const result = await fal.subscribe("fal-ai/flux-pro/v1.1-ultra", {

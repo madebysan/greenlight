@@ -34,6 +34,17 @@ export const DEFAULT_IMAGE_PROMPTS: Record<ImagePromptKind, string> = {
     "Not finished art — a quick 5-minute poster thumbnail.",
 };
 
+// Wraps the user's subject prose on both sides. The AI-generated subject text
+// is full of color, lighting, and mood words ("warm amber", "disco lights",
+// "bittersweet") which overpower the style prefix on its own. Sandwiching the
+// subject with explicit "ignore color" instructions before AND after is the
+// only reliable way to keep FLUX in graphite-sketch mode on colorful prompts.
+export const STYLE_OVERRIDE_PREFIX =
+  "Render strictly as loose graphite pencil sketch — ignore any color, lighting, mood, or rendering descriptions in the subject below.";
+
+export const STYLE_REINFORCEMENT =
+  "Render this strictly as a loose graphite pencil sketch on white paper — monochrome graphite only, NO color whatsoever, no rendering, no shading detail, gestural construction lines with unfinished edges. Ignore any color, lighting, mood, or rendering details described in the subject above. Working sketchbook quality — not finished art.";
+
 export const IMAGE_PROMPT_STORAGE = "greenlight-image-prompts";
 
 type StoredPrompts = Partial<Record<ImagePromptKind, string>>;

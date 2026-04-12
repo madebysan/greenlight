@@ -3,7 +3,7 @@ import { fal } from "@fal-ai/client";
 import { writeFileSync, mkdirSync } from "fs";
 import { join } from "path";
 import { randomUUID } from "crypto";
-import { DEFAULT_IMAGE_PROMPTS } from "@/lib/image-prompts";
+import { DEFAULT_IMAGE_PROMPTS, STYLE_OVERRIDE_PREFIX, STYLE_REINFORCEMENT } from "@/lib/image-prompts";
 
 fal.config({ credentials: process.env.FAL_KEY });
 
@@ -23,7 +23,13 @@ export async function POST(request: NextRequest) {
         : DEFAULT_IMAGE_PROMPTS.prop;
 
     const description = notes ? `${name}. ${notes}` : name;
-    const prompt = `${STYLE_PREFIX} Subject: ${description}`;
+    const prompt = [
+      STYLE_PREFIX,
+      STYLE_OVERRIDE_PREFIX,
+      "Subject:",
+      description,
+      STYLE_REINFORCEMENT,
+    ].join(" ");
 
     const result = await fal.subscribe("fal-ai/flux-pro/v1.1-ultra", {
       input: {
