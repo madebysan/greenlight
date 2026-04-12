@@ -135,7 +135,7 @@ export function StepResults({
       )}
 
       <div className="min-h-[600px]">
-        <div className="flex items-center gap-1 py-2 -mx-1">
+        <div className="flex items-center gap-1 pt-6 pb-2 -mx-1">
           {TABS.map((tab) => {
             const isActive = tab.key === activeTab;
             const Icon = tab.icon;
