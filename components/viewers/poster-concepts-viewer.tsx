@@ -268,7 +268,7 @@ export function PosterConceptsViewer({ content, savedImages, onImagesChange }: P
         <div className="flex-1 h-px bg-border mr-2" />
         <button
           onClick={expandedConcepts.size === concepts.length ? collapseAll : expandAll}
-          className="text-[11px] text-muted-foreground hover:text-foreground px-2 py-1 rounded transition-colors"
+          className="text-[10px] font-mono uppercase tracking-[0.1em] text-muted-foreground hover:text-foreground px-2 py-1 rounded transition-colors"
         >
           {expandedConcepts.size === concepts.length ? "Collapse all" : "Expand all"}
         </button>
