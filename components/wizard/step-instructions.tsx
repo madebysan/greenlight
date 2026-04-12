@@ -2,15 +2,37 @@
 
 import { useState } from "react";
 import { STAGE_0_PROMPT } from "@/lib/prompts/stage-0";
+import { validateScreenplayJson } from "@/lib/schema";
+import { SAMPLES } from "@/lib/sample-data";
 import { Check, Copy, ChevronDown } from "lucide-react";
 
 type StepInstructionsProps = {
   onNext: () => void;
+  onSubmitJson?: (json: string) => void;
 };
 
-export function StepInstructions({ onNext }: StepInstructionsProps) {
+export function StepInstructions({ onNext, onSubmitJson }: StepInstructionsProps) {
   const [copied, setCopied] = useState(false);
   const [showPrompt, setShowPrompt] = useState(false);
+  const [jsonInput, setJsonInput] = useState("");
+  const [errors, setErrors] = useState<string[]>([]);
+
+  const hasContent = jsonInput.trim().length > 0;
+
+  const handleGenerate = () => {
+    const trimmed = jsonInput.trim();
+    if (!trimmed) {
+      setErrors(["Please paste your JSON data"]);
+      return;
+    }
+    const result = validateScreenplayJson(trimmed);
+    if (!result.valid) {
+      setErrors(result.errors);
+      return;
+    }
+    setErrors([]);
+    onSubmitJson?.(trimmed);
+  };
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(STAGE_0_PROMPT);
@@ -97,17 +119,75 @@ export function StepInstructions({ onNext }: StepInstructionsProps) {
             </span>
             <div>
               <h3 className="text-[15px] font-medium tracking-tight mb-1.5">
-                Copy the JSON and paste it here
+                Copy the JSON answer from Gemini
+              </h3>
+              <p className="text-[13px] leading-[1.6] text-muted-foreground">
+                Gemini will return structured JSON with your screenplay data. Select all and copy it.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Step 3 */}
+        <div className="rounded-[12px] bg-card/40 shadow-paper px-6 py-5">
+          <div className="flex items-start gap-4">
+            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-foreground text-background text-[12px] font-mono font-medium shrink-0 mt-0.5">
+              3
+            </span>
+            <div className="flex-1 min-w-0">
+              <h3 className="text-[15px] font-medium tracking-tight mb-1.5">
+                Paste it here
               </h3>
               <p className="text-[13px] leading-[1.6] text-muted-foreground mb-3">
-                Gemini will return structured JSON. Copy its answer and paste it below — Greenlight
-                takes it from there.
+                Greenlight takes it from there — scenes, locations, cast, key art, and more.
               </p>
+
+              <textarea
+                value={jsonInput}
+                onChange={(e) => {
+                  setJsonInput(e.target.value);
+                  if (errors.length > 0) setErrors([]);
+                }}
+                placeholder='Paste JSON here — it should start with { "title": ...'
+                rows={8}
+                className="w-full rounded-lg border border-border/60 bg-background/60 px-4 py-3 text-[12px] font-mono leading-[1.7] text-foreground/85 resize-none focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary placeholder:text-muted-foreground/40"
+              />
+
+              {!hasContent && SAMPLES.length > 0 && (
+                <div className="flex items-center gap-1 mt-2 text-[12px] text-muted-foreground">
+                  <span>Or try with:</span>
+                  {SAMPLES.map((s, i) => (
+                    <span key={s.title}>
+                      {i > 0 && <span className="mx-0.5">&middot;</span>}
+                      <button
+                        onClick={() => setJsonInput(s.json)}
+                        className="hover:text-foreground transition-colors underline underline-offset-2"
+                      >
+                        {s.title}
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              {errors.length > 0 && (
+                <div className="rounded-lg border border-destructive/50 bg-destructive/5 p-3 mt-3">
+                  <ul className="space-y-1">
+                    {errors.map((error, i) => (
+                      <li key={i} className="text-[12px] text-destructive/80">
+                        {error}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
               <button
-                onClick={onNext}
-                className="inline-flex items-center justify-center gap-2 rounded-lg bg-foreground text-background px-5 py-2.5 text-[13px] font-medium hover:bg-foreground/90 transition-colors"
+                onClick={handleGenerate}
+                disabled={!hasContent}
+                className="mt-4 inline-flex items-center justify-center gap-2 rounded-lg bg-foreground text-background px-5 py-2.5 text-[13px] font-medium hover:bg-foreground/90 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
               >
-                I have my JSON &rarr;
+                Generate &rarr;
               </button>
             </div>
           </div>
