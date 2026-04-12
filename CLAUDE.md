@@ -38,8 +38,10 @@ The `README.md` describes what Greenlight *is* publicly (a 0→1 tool for indie 
 - `acceleration: "regular"` on all image routes for ~40% faster generation
 - Committed demo assets: `public/demo-images/` (used by /demo and /share)
 - Active project: localStorage key `greenlight-project` (single-project architecture)
-- Cached projects (title-match fake-gen): `lib/cached-projects.ts` + dev-only `/api/save-cached`
+- Cached projects (title-match fake-gen): `lib/cached-projects.ts` + dev-only `/api/save-cached`. EEAAO has full images in `public/demo-images/eeaao/`
 - Demo snapshot: `lib/demo-project.ts` + dev-only `/api/save-demo`
+- PDF extraction: `/api/extract-screenplay` — Claude Sonnet 4.6, ~$0.66/extraction. EEAAO PDF auto-detected by filename (skips real extraction)
+- Parallel image gen: staggered 500ms starts, cancel support, payment error detection
 - **Deployed:** Vercel at `greenlight-app-red.vercel.app` with password gate (`ACCESS_PASSWORD` env var)
 - All API keys set as Vercel env vars (Claude, fal.ai, TMDB) — users don't need their own keys
 - Password gate: `components/password-gate.tsx` + `/api/verify-access` — skips itself when `ACCESS_PASSWORD` not set (dev mode)
