@@ -830,7 +830,7 @@ export function WizardShell() {
             <div className="font-mono text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground pb-3 border-b border-border/60">
               Image Styles
             </div>
-            <p className="text-[12px] text-foreground/60 tracking-tight leading-[1.55] max-w-[60ch]">
+            <p className="text-[12px] text-foreground/60 tracking-tight leading-[1.55]">
               The style prefix prepended to every image-generation prompt. Defaults
               are hand-drawn black &amp; white sketches (Ridley Scott-style
               storyboards) so the whole bible reads as a single artist&apos;s hand.
