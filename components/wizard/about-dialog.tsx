@@ -12,65 +12,20 @@ type AboutDialogProps = {
   onOpenChange: (open: boolean) => void;
 };
 
-const STEPS = [
-  {
-    num: "1",
-    label: "Extract",
-    desc: "Upload your screenplay to Claude or ChatGPT with the extraction prompt",
-    color: "text-violet-400",
-  },
-  {
-    num: "2",
-    label: "Paste",
-    desc: "Paste the structured JSON output into the app",
-    color: "text-sky-400",
-  },
-  {
-    num: "3",
-    label: "Generate",
-    desc: "AI creates a first-pass breakdown for every department",
-    color: "text-emerald-400",
-  },
-  {
-    num: "4",
-    label: "Refine",
-    desc: "Edit, regenerate images, shuffle taglines, and iterate",
-    color: "text-amber-400",
-  },
-];
-
 const TABS = [
-  {
-    color: "text-violet-400 bg-violet-500/15",
-    title: "Overview",
-    desc: "Logline, taglines, synopsis, written-by credit, themes, and a scope-at-a-glance card for the whole film.",
-  },
-  {
-    color: "text-sky-400 bg-sky-500/15",
-    title: "Mood & Tone",
-    desc: "Atmosphere prose, tonal descriptors, reference points, music & sound direction with soundtrack references, and Similar Moods — each film resolved through TMDB.",
-  },
-  {
-    color: "text-emerald-400 bg-emerald-500/15",
-    title: "Scenes",
-    desc: "Scene-by-scene breakdown with inline storyboard frames. Toggle between sequence and location grouping. Generate all frames in batch.",
-  },
-  {
-    color: "text-amber-400 bg-amber-500/15",
-    title: "Locations · Cast & Crew · Production Design",
-    desc: "Derived directly from the screenplay JSON. Cast & Crew gets AI portraits. Production Design gets AI prop reference sketches. Every card can be disabled.",
-  },
-  {
-    color: "text-pink-400 bg-pink-500/15",
-    title: "Key Art",
-    desc: "Color palette with reshuffle, title treatment powered by the full Google Fonts catalog, and 15 AI-generated poster concepts across 5 categories.",
-  },
+  { title: "Overview", desc: "Logline, synopsis, themes, comparables, and scope at a glance." },
+  { title: "Mood & Tone", desc: "Atmosphere, tonal descriptors, color palette, music direction, and similar moods." },
+  { title: "Scenes", desc: "Scene-by-scene map with inline storyboard frames." },
+  { title: "Locations", desc: "Unique locations grouped with scenes, time variations, and set requirements." },
+  { title: "Cast & Crew", desc: "Characters with AI portraits plus production insights." },
+  { title: "Production Design", desc: "Cross-referenced props and wardrobe with reference sketches." },
+  { title: "Key Art", desc: "Poster concepts, color palette, and title treatment." },
 ];
 
 export function AboutDialog({ open, onOpenChange }: AboutDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-3xl max-h-[85vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-xl max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <div className="flex items-center gap-3 mb-1">
             <div className="h-10 w-10 shrink-0 rounded-[8px] bg-white flex items-center justify-center shadow-pill text-black">
@@ -80,76 +35,55 @@ export function AboutDialog({ open, onOpenChange }: AboutDialogProps) {
             <div>
               <DialogTitle className="text-lg">Greenlight</DialogTitle>
               <p className="text-[12px] text-muted-foreground mt-0.5">
-                A 1st AD&apos;s first pass.
+                Script to pre-production bible in minutes.
               </p>
             </div>
           </div>
         </DialogHeader>
 
-        <div className="space-y-6 py-3 text-[13px] leading-relaxed">
-          <p className="text-foreground/70">
-            Turn any screenplay into a complete first-pass breakdown. Extract structured
-            data, generate a brief for every department, and produce visual assets — all
-            from a single JSON file.
+        <div className="space-y-6 py-3">
+          <p className="text-[13px] leading-[1.65] text-foreground/70 tracking-tight">
+            Paste a structured screenplay extraction and Greenlight generates a
+            full pre-production bible — seven documents covering every department,
+            with AI-generated storyboard frames, character portraits, prop
+            references, and poster concepts.
           </p>
 
           <div>
-            <h3 className="text-sm font-semibold text-foreground mb-3">How it works</h3>
-            <div className="grid grid-cols-4 gap-3">
-              {STEPS.map((step) => (
-                <div key={step.num} className="rounded-xl border bg-card/50 p-3">
-                  <span className={`text-lg font-bold ${step.color}`}>{step.num}</span>
-                  <div className="text-[12px] font-semibold text-foreground mt-1">
-                    {step.label}
-                  </div>
-                  <div className="text-[11px] text-muted-foreground mt-0.5 leading-snug">
-                    {step.desc}
-                  </div>
-                </div>
-              ))}
+            <div className="font-mono text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground mb-3">
+              Documents generated
             </div>
-          </div>
-
-          <div>
-            <h3 className="text-sm font-semibold text-foreground mb-3">What you get</h3>
-            <div className="space-y-2.5">
-              {TABS.map((tab) => (
+            <div className="space-y-px rounded-[10px] overflow-hidden border border-border/60">
+              {TABS.map((tab, i) => (
                 <div
                   key={tab.title}
-                  className="flex items-start gap-3 rounded-lg border px-3.5 py-3"
+                  className="flex items-baseline gap-3 px-4 py-2.5 bg-card/40"
                 >
-                  <div
-                    className={`flex h-8 w-8 items-center justify-center rounded-lg shrink-0 text-[11px] font-mono uppercase ${tab.color}`}
-                  >
-                    ●
-                  </div>
-                  <div>
-                    <div className="text-[13px] font-semibold text-foreground">
-                      {tab.title}
-                    </div>
-                    <p className="text-[12px] text-muted-foreground mt-0.5 leading-snug">
-                      {tab.desc}
-                    </p>
-                  </div>
+                  <span className="font-mono text-[10px] text-muted-foreground tabular-nums w-4 shrink-0">
+                    {(i + 1).toString().padStart(2, "0")}
+                  </span>
+                  <span className="text-[13px] font-medium text-foreground tracking-tight shrink-0">
+                    {tab.title}
+                  </span>
+                  <span className="text-[12px] text-muted-foreground tracking-tight">
+                    {tab.desc}
+                  </span>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="flex items-center gap-4 pt-3 border-t text-[11px] text-muted-foreground">
-            <span>Powered by Claude (Anthropic) + FLUX Schnell (fal.ai) + TMDB</span>
+          <div className="flex items-center gap-4 pt-3 border-t border-border/60 text-[11px] text-muted-foreground tracking-tight">
+            <span>Claude · FLUX + Gesture Draw LoRA · TMDB</span>
             <span className="flex-1" />
-            <span>
-              Made by{" "}
-              <a
-                href="https://santiagoalonso.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="underline hover:text-foreground transition-colors"
-              >
-                santiagoalonso.com
-              </a>
-            </span>
+            <a
+              href="https://santiagoalonso.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline underline-offset-2 hover:text-foreground transition-colors"
+            >
+              santiagoalonso.com
+            </a>
           </div>
         </div>
       </DialogContent>
