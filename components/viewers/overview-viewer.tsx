@@ -137,16 +137,16 @@ export function OverviewViewer({
     <div className="max-w-5xl space-y-16">
       <header className="grid grid-cols-1 md:grid-cols-[1fr_240px] gap-10 items-start">
         <div>
-          <SectionLabelPill icon={<Compass size={10} />} className="mb-4">
+          <SectionLabelPill icon={<Compass size={10} />} className="mb-3">
             Overview
           </SectionLabelPill>
           {parsed.title && (
-            <h1 className="text-[44px] font-light tracking-[-0.03em] leading-[1.02] mb-5 text-foreground">
+            <h1 className="text-[32px] font-light tracking-[-0.025em] leading-[1.05] mb-2 text-foreground">
               {parsed.title}
             </h1>
           )}
           {parsed.logline && (
-            <p className="text-[17px] leading-[1.55] text-foreground/80 max-w-[58ch] font-normal tracking-tight">
+            <p className="text-[15px] leading-[1.6] text-foreground/75 max-w-[58ch] tracking-tight">
               {parsed.logline}
             </p>
           )}

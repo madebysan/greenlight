@@ -206,10 +206,10 @@ export function MoodAndToneViewer({ content, jsonData, onContentUpdate }: MoodAn
         <SectionLabelPill icon={<Sparkles size={10} />} className="mb-3">
           Atmosphere
         </SectionLabelPill>
-        <h1 className="text-[44px] font-light tracking-[-0.03em] leading-[1.02] mb-3 text-foreground">
+        <h1 className="text-[32px] font-light tracking-[-0.025em] leading-[1.05] mb-2 text-foreground">
           Mood & Tone
         </h1>
-        <p className="text-[14px] text-foreground/70 max-w-[58ch] tracking-tight leading-[1.55]">
+        <p className="text-[13px] text-foreground/60 tracking-tight max-w-[60ch]">
           The film&apos;s atmospheric identity — for the director, DP, production designer, and composer.
         </p>
       </header>
