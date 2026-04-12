@@ -10,7 +10,7 @@ export function HeaderButton({
   title,
 }: {
   icon: ReactNode;
-  label: string;
+  label?: string;
   onClick: () => void;
   title?: string;
 }) {

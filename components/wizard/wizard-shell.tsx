@@ -212,6 +212,9 @@ export function WizardShell() {
       .forEach((doc) => {
         downloadBlob(doc.content!, `${doc.slug}.md`, "text/markdown");
       });
+    if (jsonData) {
+      downloadBlob(jsonData, "screenplay-data.json", "application/json");
+    }
   };
 
   const handleDownloadJson = () => {
@@ -615,13 +618,6 @@ export function WizardShell() {
                         icon: <Download size={14} />,
                         label: "Download all documents",
                         onClick: handleDownloadAll,
-                      }
-                    : null,
-                  hasActiveProject && jsonData
-                    ? {
-                        icon: <FileText size={14} />,
-                        label: "Download JSON",
-                        onClick: handleDownloadJson,
                       }
                     : null,
                   "divider",
