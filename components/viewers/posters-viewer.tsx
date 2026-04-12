@@ -25,7 +25,7 @@ export function PostersViewer({
         <h1 className="text-[32px] font-light tracking-[-0.025em] leading-[1.05] mb-2 text-foreground">
           Posters
         </h1>
-        <p className="text-[13px] text-foreground/60 tracking-tight max-w-[58ch]">
+        <p className="text-[13px] text-foreground/60 tracking-tight">
           Poster concepts across categories — character-driven, abstract,
           object-led. Each one a different angle on how the film presents
           itself to an audience.
