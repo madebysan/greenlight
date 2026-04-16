@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { RefreshCw, Loader2, Wind, Tag, BookOpen, Music, Film, Sparkles } from "lucide-react";
+import { Wind, Tag, BookOpen, Music, Film, Sparkles } from "lucide-react";
 import { replaceMarkdownSection } from "@/lib/markdown-utils";
 import { SectionHead } from "@/components/ui/section-head";
 import { SectionLabelPill } from "@/components/ui/inline-chip";
+import { ShuffleButton, useShuffleState } from "@/components/ui/shuffle-button";
 
 type ColorEntry = { name: string; hex: string; description: string };
 type ReferenceEntry = { title: string; description: string };
@@ -159,10 +160,16 @@ function CollapsibleProse({ text, sentenceCount = 3 }: { text: string; sentenceC
   );
 }
 
-function AtmosphereSection({ atmosphere }: { atmosphere: string }) {
+function AtmosphereSection({
+  atmosphere,
+  shuffleSlot,
+}: {
+  atmosphere: string;
+  shuffleSlot?: React.ReactNode;
+}) {
   return (
     <section>
-      <SectionHead index={1} label="Atmosphere" labelIcon={<Wind size={10} />}>
+      <SectionHead index={1} label="Atmosphere" labelIcon={<Wind size={10} />} meta={shuffleSlot}>
         Feel of the film
       </SectionHead>
       <CollapsibleProse text={atmosphere} />
@@ -178,27 +185,59 @@ type MoodAndToneViewerProps = {
 
 export function MoodAndToneViewer({ content, jsonData, onContentUpdate }: MoodAndToneViewerProps) {
   const parsed = useMemo(() => parseMoodAndTone(content), [content]);
-  const [reshufflingMusic, setReshufflingMusic] = useState(false);
+  const musicShuffle = useShuffleState();
+  const atmosphereShuffle = useShuffleState();
+  const referencesShuffle = useShuffleState();
+  const similarMoodsShuffle = useShuffleState();
 
-  const handleReshuffleMusic = async () => {
+  // Replace multiple ## sections in one pass. The returned content may contain
+  // several ## headings; we split it on those boundaries and replace each in
+  // turn. Used by atmosphere (Atmosphere + Tonal Descriptors) and music
+  // (Music & Sound Direction includes a sub-### Soundtrack References, but the
+  // top-level heading is just one ## so single-replace works for that case).
+  function applyMultiSectionReplace(md: string, returnedBlock: string): string {
+    const trimmed = returnedBlock.trim();
+    if (!trimmed.startsWith("##")) {
+      // Doesn't look like our format — bail and let single replace try.
+      return md;
+    }
+    // Split into [headingLine, body] pairs at each ## (top-level only, not ###)
+    const sections = trimmed.split(/^##\s+/m).filter((s) => s.trim());
+    let result = md;
+    for (const section of sections) {
+      const lines = section.split("\n");
+      const heading = lines[0].trim();
+      const body = lines.slice(1).join("\n").trim();
+      const fullSection = `## ${heading}\n${body}`;
+      result = replaceMarkdownSection(result, heading, fullSection);
+    }
+    return result;
+  }
+
+  async function shuffleSection(
+    state: ReturnType<typeof useShuffleState>,
+    sectionKey: string,
+    primarySectionHeading: string,
+  ) {
     if (!jsonData || !onContentUpdate) return;
-    setReshufflingMusic(true);
-    try {
+    await state.run(async () => {
       const res = await fetch("/api/regenerate-section", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sectionKey: "mood-and-tone/music", jsonData }),
+        body: JSON.stringify({ sectionKey, jsonData }),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const { content: newSection } = await res.json();
-      const updated = replaceMarkdownSection(content, "Music & Sound Direction", newSection);
+      // Detect multi-section payload — if Claude returned more than one ##
+      // heading, splice each separately. Otherwise standard single replace.
+      const headingCount = (newSection.match(/^##\s+/gm) || []).length;
+      const updated =
+        headingCount > 1
+          ? applyMultiSectionReplace(content, newSection)
+          : replaceMarkdownSection(content, primarySectionHeading, newSection);
       onContentUpdate(updated);
-    } catch (e) {
-      console.error("Music reshuffle failed", e);
-    } finally {
-      setReshufflingMusic(false);
-    }
-  };
+    });
+  }
 
   return (
     <div className="max-w-4xl space-y-16">
@@ -215,11 +254,34 @@ export function MoodAndToneViewer({ content, jsonData, onContentUpdate }: MoodAn
       </header>
 
       {parsed.atmosphere && (
-        <AtmosphereSection atmosphere={parsed.atmosphere} />
+        <div
+          className={`transition-opacity duration-200 ${
+            atmosphereShuffle.state === "loading" ? "opacity-40" : "opacity-100"
+          }`}
+        >
+          <AtmosphereSection
+            atmosphere={parsed.atmosphere}
+            shuffleSlot={
+              onContentUpdate && jsonData ? (
+                <ShuffleButton
+                  onClick={() =>
+                    shuffleSection(atmosphereShuffle, "mood-and-tone/atmosphere", "Atmosphere")
+                  }
+                  state={atmosphereShuffle.state}
+                  title="Rewrite the atmosphere prose and tonal descriptors"
+                />
+              ) : null
+            }
+          />
+        </div>
       )}
 
       {parsed.descriptors.length > 0 && (
-        <section>
+        <section
+          className={`transition-opacity duration-200 ${
+            atmosphereShuffle.state === "loading" ? "opacity-40" : "opacity-100"
+          }`}
+        >
           <SectionHead index={2} label="Tonal" labelIcon={<Tag size={10} />}>
             Tonal Descriptors
           </SectionHead>
@@ -238,10 +300,33 @@ export function MoodAndToneViewer({ content, jsonData, onContentUpdate }: MoodAn
 
       {parsed.references.length > 0 && (
         <section>
-          <SectionHead index={3} label="References" labelIcon={<BookOpen size={10} />}>
+          <SectionHead
+            index={3}
+            label="References"
+            labelIcon={<BookOpen size={10} />}
+            meta={
+              onContentUpdate && jsonData ? (
+                <ShuffleButton
+                  onClick={() =>
+                    shuffleSection(
+                      referencesShuffle,
+                      "mood-and-tone/reference-points",
+                      "Reference Points",
+                    )
+                  }
+                  state={referencesShuffle.state}
+                  title="Generate new reference points"
+                />
+              ) : null
+            }
+          >
             Reference Points
           </SectionHead>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div
+            className={`grid grid-cols-1 md:grid-cols-2 gap-3 transition-opacity duration-200 ${
+              referencesShuffle.state === "loading" ? "opacity-40" : "opacity-100"
+            }`}
+          >
             {parsed.references.map((r) => (
               <div
                 key={r.title}
@@ -267,46 +352,65 @@ export function MoodAndToneViewer({ content, jsonData, onContentUpdate }: MoodAn
             labelIcon={<Music size={10} />}
             meta={
               onContentUpdate && jsonData ? (
-                <button
-                  onClick={handleReshuffleMusic}
-                  disabled={reshufflingMusic}
-                  className="inline-flex items-center gap-1 text-[10px] font-mono uppercase tracking-[0.1em] text-muted-foreground hover:text-foreground disabled:opacity-50 transition-colors"
+                <ShuffleButton
+                  onClick={() =>
+                    shuffleSection(musicShuffle, "mood-and-tone/music", "Music & Sound Direction")
+                  }
+                  state={musicShuffle.state}
                   title="Regenerate music direction"
-                >
-                  {reshufflingMusic ? (
-                    <Loader2 size={11} className="animate-spin" />
-                  ) : (
-                    <RefreshCw size={11} />
-                  )}
-                  Shuffle
-                </button>
+                />
               ) : null
             }
           >
             Music & Sound
           </SectionHead>
 
-          {parsed.musicProse && (
-            <CollapsibleProse text={parsed.musicProse} />
-          )}
+          <div
+            className={`transition-opacity duration-200 ${
+              musicShuffle.state === "loading" ? "opacity-40" : "opacity-100"
+            }`}
+          >
+            {parsed.musicProse && <CollapsibleProse text={parsed.musicProse} />}
 
-          {parsed.soundtracks.length > 0 && (
-            <div className="mt-6">
-              <h3 className="font-mono text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground mb-3">
-                Soundtrack References
-              </h3>
-              <SoundtrackGrid tracks={parsed.soundtracks} />
-            </div>
-          )}
+            {parsed.soundtracks.length > 0 && (
+              <div className="mt-6">
+                <h3 className="font-mono text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground mb-3">
+                  Soundtrack References
+                </h3>
+                <SoundtrackGrid tracks={parsed.soundtracks} />
+              </div>
+            )}
+          </div>
         </section>
       )}
 
       {parsed.similarMoods.length > 0 && (
         <section>
-          <SectionHead index={5} label="Echoes" labelIcon={<Film size={10} />}>
+          <SectionHead
+            index={5}
+            label="Echoes"
+            labelIcon={<Film size={10} />}
+            meta={
+              onContentUpdate && jsonData ? (
+                <ShuffleButton
+                  onClick={() =>
+                    shuffleSection(similarMoodsShuffle, "mood-and-tone/similar-moods", "Similar Moods")
+                  }
+                  state={similarMoodsShuffle.state}
+                  title="Generate new similar films"
+                />
+              ) : null
+            }
+          >
             Similar Moods
           </SectionHead>
-          <SimilarMoodsGrid films={parsed.similarMoods.slice(0, 4)} />
+          <div
+            className={`transition-opacity duration-200 ${
+              similarMoodsShuffle.state === "loading" ? "opacity-40" : "opacity-100"
+            }`}
+          >
+            <SimilarMoodsGrid films={parsed.similarMoods.slice(0, 4)} />
+          </div>
         </section>
       )}
     </div>

@@ -726,6 +726,23 @@ export function WizardShell() {
                     : null,
                   hasActiveProject && documents.some((d) => d.status === "done")
                     ? {
+                        icon: <FileText size={14} />,
+                        label: "Download as PDF",
+                        onClick: () => {
+                          // Open the print-ready /share view in a new tab and
+                          // auto-trigger the browser print dialog so the user
+                          // can save as PDF (Cmd/Ctrl+P also works there).
+                          const win = window.open("/share", "_blank");
+                          if (!win) return;
+                          win.addEventListener("load", () => {
+                            // Small delay so fonts + TMDB posters settle.
+                            setTimeout(() => win.print(), 800);
+                          });
+                        },
+                      }
+                    : null,
+                  hasActiveProject && documents.some((d) => d.status === "done")
+                    ? {
                         icon: <Download size={14} />,
                         label: "Download all documents",
                         onClick: handleDownloadAll,

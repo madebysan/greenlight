@@ -1,10 +1,11 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { RefreshCw, Loader2, Palette, Type } from "lucide-react";
+import { useMemo } from "react";
+import { Palette, Type } from "lucide-react";
 import { TitleTreatment } from "@/components/viewers/title-treatment";
 import { SectionHead } from "@/components/ui/section-head";
 import { SectionLabelPill } from "@/components/ui/inline-chip";
+import { ShuffleButton, useShuffleState } from "@/components/ui/shuffle-button";
 import { replaceMarkdownSection } from "@/lib/markdown-utils";
 
 type ColorEntry = { name: string; hex: string; description: string };
@@ -53,15 +54,14 @@ export function IdentityViewer({
   moodContent,
   onMoodContentUpdate,
 }: IdentityViewerProps) {
-  const [reshufflingPalette, setReshufflingPalette] = useState(false);
+  const paletteShuffle = useShuffleState();
 
   const palette = useMemo(() => parsePalette(moodContent), [moodContent]);
   const title = useMemo(() => parseTitleFromJson(jsonData), [jsonData]);
 
   const handleReshufflePalette = async () => {
     if (!moodContent || !onMoodContentUpdate) return;
-    setReshufflingPalette(true);
-    try {
+    await paletteShuffle.run(async () => {
       const res = await fetch("/api/regenerate-section", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -71,11 +71,7 @@ export function IdentityViewer({
       const { content: newSection } = await res.json();
       const updated = replaceMarkdownSection(moodContent, "Color Palette", newSection);
       onMoodContentUpdate(updated);
-    } catch (e) {
-      console.error("Palette reshuffle failed", e);
-    } finally {
-      setReshufflingPalette(false);
-    }
+    });
   };
 
   return (
@@ -101,19 +97,11 @@ export function IdentityViewer({
             labelIcon={<Palette size={10} />}
             meta={
               onMoodContentUpdate ? (
-                <button
+                <ShuffleButton
                   onClick={handleReshufflePalette}
-                  disabled={reshufflingPalette}
-                  className="inline-flex items-center gap-1 text-[10px] font-mono uppercase tracking-[0.1em] text-muted-foreground hover:text-foreground disabled:opacity-50 transition-colors"
+                  state={paletteShuffle.state}
                   title="Reshuffle color palette"
-                >
-                  {reshufflingPalette ? (
-                    <Loader2 size={11} className="animate-spin" />
-                  ) : (
-                    <RefreshCw size={11} />
-                  )}
-                  Reshuffle
-                </button>
+                />
               ) : null
             }
           >
@@ -125,7 +113,11 @@ export function IdentityViewer({
               No palette generated yet. Check the Mood & Tone document.
             </p>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+            <div
+              className={`grid grid-cols-1 md:grid-cols-2 gap-2 transition-opacity duration-200 ${
+                paletteShuffle.state === "loading" ? "opacity-40" : "opacity-100"
+              }`}
+            >
               {palette.map((c) => (
                 <div
                   key={c.hex}

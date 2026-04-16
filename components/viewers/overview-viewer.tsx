@@ -1,10 +1,11 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { RefreshCw, Loader2, FileText, Sparkles, BarChart3, Compass, ImageIcon } from "lucide-react";
+import { useMemo, useState, useRef, useEffect } from "react";
+import { FileText, Sparkles, BarChart3, Compass, ImageIcon, Pencil, Check } from "lucide-react";
 import { replaceMarkdownSection } from "@/lib/markdown-utils";
 import { SectionHead } from "@/components/ui/section-head";
 import { SectionLabelPill } from "@/components/ui/inline-chip";
+import { ShuffleButton, useShuffleState } from "@/components/ui/shuffle-button";
 import { PosterCarousel } from "./poster-carousel";
 import type { SavedImage } from "@/lib/reports";
 
@@ -109,27 +110,42 @@ export function OverviewViewer({
   onNavigateToPosters,
 }: OverviewViewerProps) {
   const parsed = useMemo(() => parseOverview(content), [content]);
-  const [refreshingTaglines, setRefreshingTaglines] = useState(false);
+  const taglinesShuffle = useShuffleState();
+  const synopsisShuffle = useShuffleState();
+  const themesShuffle = useShuffleState();
 
-  const handleRefreshTaglines = async () => {
+  // Each shuffle uses its own state so they can run independently.
+  async function shuffleSection(
+    state: ReturnType<typeof useShuffleState>,
+    sectionKey: string,
+    sectionHeading: string,
+  ) {
     if (!jsonData || !onContentUpdate) return;
-    setRefreshingTaglines(true);
-    try {
+    await state.run(async () => {
       const res = await fetch("/api/regenerate-section", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sectionKey: "overview/taglines", jsonData }),
+        body: JSON.stringify({ sectionKey, jsonData }),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const { content: newSection } = await res.json();
-      const updated = replaceMarkdownSection(content, "Taglines", newSection);
+      const updated = replaceMarkdownSection(content, sectionHeading, newSection);
       onContentUpdate(updated);
-    } catch (e) {
-      console.error("Tagline refresh failed", e);
-    } finally {
-      setRefreshingTaglines(false);
-    }
-  };
+    });
+  }
+
+  function handleIdentityEdit(label: string, newValue: string) {
+    if (!onContentUpdate) return;
+    const updatedIdentity = parsed.identity.map((item) =>
+      item.label === label ? { ...item, value: newValue } : item,
+    );
+    const newSectionMd = [
+      "## Film Identity",
+      ...updatedIdentity.map((item) => `- **${item.label}:** ${item.value}`),
+    ].join("\n");
+    const updated = replaceMarkdownSection(content, "Film Identity", newSectionMd);
+    onContentUpdate(updated);
+  }
 
   const hasCarousel = !!posterContent && !!posterImages && Object.keys(posterImages).length > 0;
 
@@ -159,22 +175,18 @@ export function OverviewViewer({
                 </h3>
                 <div className="flex-1 h-px bg-border/60" />
                 {onContentUpdate && jsonData && (
-                  <button
-                    onClick={handleRefreshTaglines}
-                    disabled={refreshingTaglines}
-                    className="inline-flex items-center gap-1 text-[10px] font-mono uppercase tracking-[0.1em] text-muted-foreground hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  <ShuffleButton
+                    onClick={() => shuffleSection(taglinesShuffle, "overview/taglines", "Taglines")}
+                    state={taglinesShuffle.state}
                     title="Generate new taglines"
-                  >
-                    {refreshingTaglines ? (
-                      <Loader2 size={11} className="animate-spin" />
-                    ) : (
-                      <RefreshCw size={11} />
-                    )}
-                    Shuffle
-                  </button>
+                  />
                 )}
               </div>
-              <ul className="space-y-2">
+              <ul
+                className={`space-y-2 transition-opacity duration-200 ${
+                  taglinesShuffle.state === "loading" ? "opacity-40" : "opacity-100"
+                }`}
+              >
                 {parsed.taglines.map((t, i) => (
                   <li
                     key={`${i}-${t}`}
@@ -194,12 +206,13 @@ export function OverviewViewer({
               </h3>
               <dl className="grid grid-cols-2 gap-x-6 gap-y-3">
                 {parsed.identity.map((item) => (
-                  <div key={item.label} className="space-y-1 min-w-0">
-                    <dt className="font-mono text-[9px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
-                      {item.label}
-                    </dt>
-                    <dd className="text-[13px] text-foreground/85 truncate tracking-tight">{item.value}</dd>
-                  </div>
+                  <IdentityField
+                    key={item.label}
+                    label={item.label}
+                    value={item.value}
+                    editable={Boolean(onContentUpdate)}
+                    onSave={(next) => handleIdentityEdit(item.label, next)}
+                  />
                 ))}
               </dl>
             </div>
@@ -221,10 +234,25 @@ export function OverviewViewer({
 
       {parsed.synopsis && (
         <section>
-          <SectionHead index={1} label="Synopsis" labelIcon={<FileText size={10} />}>
-            Story in brief
-          </SectionHead>
-          <p className="text-[15px] leading-[1.75] text-foreground/80 whitespace-pre-line max-w-[65ch] tracking-tight">
+          <div className="flex items-baseline gap-3 mb-4">
+            <div className="flex-1">
+              <SectionHead index={1} label="Synopsis" labelIcon={<FileText size={10} />}>
+                Story in brief
+              </SectionHead>
+            </div>
+            {onContentUpdate && jsonData && (
+              <ShuffleButton
+                onClick={() => shuffleSection(synopsisShuffle, "overview/synopsis", "Synopsis")}
+                state={synopsisShuffle.state}
+                title="Rewrite the synopsis"
+              />
+            )}
+          </div>
+          <p
+            className={`text-[15px] leading-[1.75] text-foreground/80 whitespace-pre-line max-w-[65ch] tracking-tight transition-opacity duration-200 ${
+              synopsisShuffle.state === "loading" ? "opacity-40" : "opacity-100"
+            }`}
+          >
             {parsed.synopsis}
           </p>
         </section>
@@ -232,10 +260,25 @@ export function OverviewViewer({
 
       {parsed.themes.length > 0 && (
         <section>
-          <SectionHead index={2} label="Themes" labelIcon={<Sparkles size={10} />}>
-            Core Themes
-          </SectionHead>
-          <div className="space-y-6 max-w-[65ch]">
+          <div className="flex items-baseline gap-3 mb-4">
+            <div className="flex-1">
+              <SectionHead index={2} label="Themes" labelIcon={<Sparkles size={10} />}>
+                Core Themes
+              </SectionHead>
+            </div>
+            {onContentUpdate && jsonData && (
+              <ShuffleButton
+                onClick={() => shuffleSection(themesShuffle, "overview/themes", "Themes")}
+                state={themesShuffle.state}
+                title="Rewrite the themes"
+              />
+            )}
+          </div>
+          <div
+            className={`space-y-6 max-w-[65ch] transition-opacity duration-200 ${
+              themesShuffle.state === "loading" ? "opacity-40" : "opacity-100"
+            }`}
+          >
             {parsed.themes.map((t) => (
               <div key={t.title}>
                 <h3 className="text-[14px] font-medium text-foreground mb-2 tracking-tight">
@@ -288,6 +331,98 @@ export function OverviewViewer({
           )}
         </section>
       )}
+    </div>
+  );
+}
+
+// Inline-editable Film Identity field. Hover reveals an edit affordance; click
+// flips to a small text input. Save commits via `onSave`. Esc cancels.
+function IdentityField({
+  label,
+  value,
+  editable,
+  onSave,
+}: {
+  label: string;
+  value: string;
+  editable: boolean;
+  onSave: (next: string) => void;
+}) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(value);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    setDraft(value);
+  }, [value]);
+
+  useEffect(() => {
+    if (editing && inputRef.current) {
+      inputRef.current.focus();
+      inputRef.current.select();
+    }
+  }, [editing]);
+
+  function commit() {
+    const trimmed = draft.trim();
+    if (trimmed && trimmed !== value) onSave(trimmed);
+    setEditing(false);
+  }
+
+  function cancel() {
+    setDraft(value);
+    setEditing(false);
+  }
+
+  return (
+    <div className="space-y-1 min-w-0 group">
+      <dt className="font-mono text-[9px] font-medium uppercase tracking-[0.18em] text-muted-foreground flex items-center gap-1.5">
+        {label}
+        {editable && !editing && (
+          <button
+            onClick={() => setEditing(true)}
+            className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground"
+            title={`Edit ${label}`}
+          >
+            <Pencil size={9} />
+          </button>
+        )}
+      </dt>
+      <dd className="text-[13px] text-foreground/85 truncate tracking-tight">
+        {editing ? (
+          <div className="flex items-center gap-1">
+            <input
+              ref={inputRef}
+              type="text"
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") commit();
+                if (e.key === "Escape") cancel();
+              }}
+              onBlur={commit}
+              className="w-full rounded-[6px] bg-background/60 border border-border px-2 py-0.5 text-[13px] tracking-tight focus:outline-none focus:border-foreground/40"
+            />
+            <button
+              onClick={commit}
+              className="shrink-0 text-muted-foreground hover:text-foreground"
+              title="Save"
+            >
+              <Check size={11} />
+            </button>
+          </div>
+        ) : editable ? (
+          <button
+            onClick={() => setEditing(true)}
+            className="text-left hover:text-foreground transition-colors w-full truncate"
+            title="Click to edit"
+          >
+            {value}
+          </button>
+        ) : (
+          value
+        )}
+      </dd>
     </div>
   );
 }

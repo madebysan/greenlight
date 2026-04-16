@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Compass, Wind, ListOrdered, MapPin, Users, Palette, Fingerprint, Frame } from "lucide-react";
 import { OverviewViewer } from "@/components/viewers/overview-viewer";
@@ -71,6 +71,42 @@ export function StepResults({
   onDisabledItemsChange,
 }: StepResultsProps) {
   const [activeTab, setActiveTab] = useState<TabKey>("overview");
+
+  // Keyboard shortcuts for tab navigation:
+  //   ⌥/Alt + ←/→  → previous / next tab
+  //   ⌥/Alt + 1..8 → jump to tab N
+  // Modifier required so single arrow keys keep working in textareas/inputs
+  // and don't fight inline-edit affordances.
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (!e.altKey) return;
+      const target = e.target as HTMLElement | null;
+      // Bail if we're inside any editable surface — the user is typing.
+      if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable)) {
+        return;
+      }
+      const idx = TABS.findIndex((t) => t.key === activeTab);
+      if (e.key === "ArrowRight") {
+        e.preventDefault();
+        const next = TABS[(idx + 1) % TABS.length];
+        setActiveTab(next.key);
+        return;
+      }
+      if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        const prev = TABS[(idx - 1 + TABS.length) % TABS.length];
+        setActiveTab(prev.key);
+        return;
+      }
+      const numKey = Number(e.key);
+      if (Number.isInteger(numKey) && numKey >= 1 && numKey <= TABS.length) {
+        e.preventDefault();
+        setActiveTab(TABS[numKey - 1].key);
+      }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [activeTab]);
 
   const getDoc = (slug: string) => documents.find((d) => d.slug === slug);
   const getDocContent = (slug: string): string | null => {
