@@ -35,6 +35,7 @@ type TabKey = (typeof TABS)[number]["key"];
 type StepResultsProps = {
   documents: DocumentResult[];
   jsonData?: string;
+  onJsonDataChange?: (newJsonData: string) => void;
   onStartOver: () => void;
   onDocumentUpdate?: (slug: string, newContent: string) => void;
   onDocumentRewrite?: (slug: string) => Promise<void>;
@@ -55,6 +56,7 @@ type StepResultsProps = {
 export function StepResults({
   documents,
   jsonData,
+  onJsonDataChange,
   onStartOver,
   onDocumentUpdate,
   storyboardImages,
@@ -256,6 +258,7 @@ export function StepResults({
             {activeTab === "cast-and-crew" && (
               <CastAndCrewViewer
                 jsonData={jsonData}
+                onJsonDataChange={onJsonDataChange}
                 portraits={portraits}
                 onPortraitsChange={onPortraitsChange}
                 disabledItems={disabledItems}

@@ -266,6 +266,17 @@ export function WizardShell() {
     updateProject({ disabledItems: disabled });
   }, []);
 
+  const handleJsonDataChange = useCallback((newJsonData: string) => {
+    setJsonData(newJsonData);
+    updateProject({ jsonData: newJsonData });
+  }, []);
+
+  // Count of failures from the most recent "Generate all images" batch. Cleared
+  // on the next run. Used to surface a "Retry N failed" action in the More menu
+  // — the retry itself is just re-invoking handleGenerateAllImages, which will
+  // automatically only re-fire tasks whose images didn't land in state.
+  const [lastFailedCount, setLastFailedCount] = useState(0);
+
   const [genAllImages, setGenAllImages] = useState<{
     running: boolean;
     done: number;
@@ -505,8 +516,10 @@ export function WizardShell() {
 
     genAllCancelRef.current = false;
     setGenAllImages({ running: true, done: 0, total: tasks.length });
+    setLastFailedCount(0); // clear previous badge when a new batch starts
 
     let completed = 0;
+    let failed = 0;
     let abortedByError = false;
 
     // Staggered parallel: fire all tasks with 500ms delay between each.
@@ -529,6 +542,7 @@ export function WizardShell() {
               console.error(`[generate-all] API credits exhausted — stopping all tasks`);
               alert("Image generation stopped — your fal.ai API key is out of credits.");
             } else {
+              failed++;
               console.error(`[generate-all] ${task.kind} failed:`, msg);
             }
           }
@@ -541,6 +555,7 @@ export function WizardShell() {
 
     await Promise.all(promises);
     setGenAllImages({ running: false, done: 0, total: 0 });
+    setLastFailedCount(failed);
   };
 
   const [savingDemo, setSavingDemo] = useState<"idle" | "saving" | "saved">("idle");
@@ -721,6 +736,18 @@ export function WizardShell() {
                         onClick: handleGenerateAllImages,
                       }
                     : null,
+                  // Show a separate "Retry N failed" action when the last batch
+                  // had failures. It's literally the same handler — but the
+                  // label primes the user that we know something went wrong.
+                  !genAllImages.running && lastFailedCount > 0 && hasActiveProject
+                    ? {
+                        icon: <RotateCcw size={14} />,
+                        label: `Retry ${lastFailedCount} failed ${
+                          lastFailedCount === 1 ? "image" : "images"
+                        }`,
+                        onClick: handleGenerateAllImages,
+                      }
+                    : null,
                   hasActiveProject && documents.some((d) => d.status === "done")
                     ? "divider"
                     : null,
@@ -883,6 +910,7 @@ export function WizardShell() {
           <StepResults
             documents={documents}
             jsonData={jsonData}
+            onJsonDataChange={handleJsonDataChange}
             onStartOver={handleStartOver}
             onDocumentUpdate={handleDocumentUpdate}
             onDocumentRewrite={handleDocumentRewrite}

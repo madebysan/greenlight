@@ -3,6 +3,7 @@
 import { useState, useRef, useMemo } from "react";
 import { Loader2, Camera, RefreshCw, Images, X, EyeOff, Eye, Users, Lightbulb } from "lucide-react";
 import { SectionLabelPill } from "@/components/ui/inline-chip";
+import { EditableText } from "@/components/ui/editable-text";
 import { getStylePrefix } from "@/lib/image-prompts";
 import type { SavedImage } from "@/lib/reports";
 
@@ -19,6 +20,7 @@ type PortraitState = { status: "idle" | "generating" | "done" | "error"; url?: s
 
 type CastAndCrewViewerProps = {
   jsonData: string;
+  onJsonDataChange?: (newJsonData: string) => void;
   portraits: Record<string, SavedImage>;
   onPortraitsChange: (portraits: Record<string, SavedImage>) => void;
   disabledItems: Record<string, boolean>;
@@ -267,6 +269,7 @@ function computeInsights(data: ScreenplayData): Insight[] {
 
 export function CastAndCrewViewer({
   jsonData,
+  onJsonDataChange,
   portraits,
   onPortraitsChange,
   disabledItems,
@@ -278,6 +281,25 @@ export function CastAndCrewViewer({
     else next[key] = true;
     onDisabledItemsChange(next);
   };
+
+  function handleCharacterFieldEdit(
+    charName: string,
+    field: "description" | "arc_summary",
+    newValue: string,
+  ) {
+    if (!onJsonDataChange) return;
+    try {
+      const parsed = JSON.parse(jsonData);
+      const chars = (parsed.characters || []) as Array<{ name: string; [k: string]: unknown }>;
+      const updated = chars.map((c) =>
+        c.name === charName ? { ...c, [field]: newValue } : c,
+      );
+      const next = { ...parsed, characters: updated };
+      onJsonDataChange(JSON.stringify(next, null, 2));
+    } catch {
+      // Malformed JSON — shouldn't happen, but fail silently.
+    }
+  }
   const data = parseData(jsonData);
   const characters = data.characters || [];
   const [tab, setTab] = useState<"cast" | "insights">("cast");
@@ -509,13 +531,43 @@ export function CastAndCrewViewer({
                     <h2 className="text-[14px] font-semibold text-foreground uppercase tracking-[0.04em]">
                       {char.name}
                     </h2>
-                    <p className="text-[13px] text-foreground/80 mt-1.5 leading-[1.55]">
-                      {char.description}
-                    </p>
-                    {char.arc_summary && (
-                      <p className="text-[12px] text-muted-foreground/90 italic mt-2 leading-[1.55]">
-                        {char.arc_summary}
-                      </p>
+                    <div className="mt-1.5 pr-5 relative">
+                      <EditableText
+                        value={char.description}
+                        onSave={(next) => handleCharacterFieldEdit(char.name, "description", next)}
+                        editable={Boolean(onJsonDataChange)}
+                        multiline
+                        title="Edit character description"
+                        pencilSize={11}
+                        renderDisplay={(v) => (
+                          <p className="text-[13px] text-foreground/80 leading-[1.55]">{v}</p>
+                        )}
+                        inputClassName="text-[13px] leading-[1.55]"
+                      />
+                    </div>
+                    {(char.arc_summary || onJsonDataChange) && (
+                      <div className="mt-2 pr-5 relative">
+                        <EditableText
+                          value={char.arc_summary || ""}
+                          onSave={(next) => handleCharacterFieldEdit(char.name, "arc_summary", next)}
+                          editable={Boolean(onJsonDataChange)}
+                          multiline
+                          title="Edit arc summary"
+                          pencilSize={10}
+                          renderDisplay={(v) =>
+                            v ? (
+                              <p className="text-[12px] text-muted-foreground/90 italic leading-[1.55]">
+                                {v}
+                              </p>
+                            ) : (
+                              <p className="text-[12px] text-muted-foreground/50 italic leading-[1.55]">
+                                (Click to add arc summary)
+                              </p>
+                            )
+                          }
+                          inputClassName="text-[12px] italic leading-[1.55]"
+                        />
+                      </div>
                     )}
                     <div className="flex items-center gap-2 mt-3 font-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
                       <span className="tabular-nums">

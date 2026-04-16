@@ -6,6 +6,7 @@ import { replaceMarkdownSection } from "@/lib/markdown-utils";
 import { SectionHead } from "@/components/ui/section-head";
 import { SectionLabelPill } from "@/components/ui/inline-chip";
 import { ShuffleButton, useShuffleState } from "@/components/ui/shuffle-button";
+import { EditableText } from "@/components/ui/editable-text";
 import { PosterCarousel } from "./poster-carousel";
 import type { SavedImage } from "@/lib/reports";
 
@@ -147,6 +148,13 @@ export function OverviewViewer({
     onContentUpdate(updated);
   }
 
+  function handleLoglineEdit(newValue: string) {
+    if (!onContentUpdate) return;
+    const newSectionMd = `## Logline\n${newValue}`;
+    const updated = replaceMarkdownSection(content, "Logline", newSectionMd);
+    onContentUpdate(updated);
+  }
+
   const hasCarousel = !!posterContent && !!posterImages && Object.keys(posterImages).length > 0;
 
   return (
@@ -162,9 +170,21 @@ export function OverviewViewer({
             </h1>
           )}
           {parsed.logline && (
-            <p className="text-[15px] leading-[1.6] text-foreground/75 max-w-[58ch] tracking-tight">
-              {parsed.logline}
-            </p>
+            <div className="max-w-[58ch] pr-6">
+              <EditableText
+                value={parsed.logline}
+                onSave={handleLoglineEdit}
+                editable={Boolean(onContentUpdate)}
+                multiline
+                title="Edit the logline"
+                renderDisplay={(v) => (
+                  <p className="text-[15px] leading-[1.6] text-foreground/75 tracking-tight">
+                    {v}
+                  </p>
+                )}
+                inputClassName="text-[15px] leading-[1.6] text-foreground/85"
+              />
+            </div>
           )}
 
           {parsed.taglines.length > 0 && (
