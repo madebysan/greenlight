@@ -5,6 +5,35 @@ Updated every session via `/save-session`.
 
 ---
 
+## 2026-04-16 (session 8 — wave 1 polish + tier 2 edits + red balloon demo + deploy)
+
+Second half of session 7's work shipped live. Site deployed publicly for tomorrow's A24 demo, password gate removed.
+
+### Features
+- **Wardrobe matcher fix** — scene-co-presence replaces substring matching in `production-viewer.tsx`. Fires correctly on real screenplay uploads (no more "JOY"→"joyful" collisions).
+- **Shared ShuffleButton + useShuffleState** (`components/ui/shuffle-button.tsx`) — optimistic feedback with idle → loading spinner → Check flash. Content dims to 40% during regen.
+- **Extended section shuffles** — Synopsis, Themes, Atmosphere, Reference Points, Similar Moods added to `/api/regenerate-section` alongside existing Taglines, Music, Palette.
+- **Shared EditableText** (`components/ui/editable-text.tsx`) — hover pencil, Enter save, Esc cancel, auto-blur commit.
+- **Inline-editable Overview fields** — runtime, genre, format, setting, tone, logline.
+- **Inline-editable color palette** — name + description per swatch.
+- **Inline-editable character cards** — description + arc summary. Required threading `handleJsonDataChange` from wizard-shell → StepResults → CastAndCrewViewer.
+- **PDF export button** — More menu → opens `/share` with auto-print.
+- **Keyboard shortcuts** — Alt+←/→ cycles tabs, Alt+1..8 jumps (disabled while typing).
+- **Retry-failed-images surface** — More menu shows "Retry N failed images" when batch ends with failures.
+- **Red Balloon demo** — second pre-baked demo at `/demo/red-balloon`. All 64 sketches committed to `public/demo-images/red-balloon/`. Extracted shared `<DemoContent>` (`components/demo/demo-content.tsx`) used by both `/demo` and `/demo/red-balloon`.
+- **Two demo cards on landing** — Night of the Living Dead (feature, 1968) + The Red Balloon (short, 1956).
+
+### Data
+- **Red Balloon images committed** — 64 files (10 portraits + 19 props + 20 storyboards + 15 posters) in `public/demo-images/red-balloon/`, ~7.5 MB. Downloaded from fal.ai before CDN URLs expired.
+- **Red Balloon project file** — `lib/demos/red-balloon.ts`, full SavedProject snapshot with all docs + local image paths.
+
+### Fixes
+- **Password gate removed for production** — `ACCESS_PASSWORD` env var deleted from Vercel. Site is now publicly accessible. `<PasswordGate>` wrapper stays in the tree (self-disables when env var missing), so re-enabling is just setting the var again.
+
+### Status: deployed to greenlight-app-red.vercel.app
+
+---
+
 ## 2026-04-16 (session 7 — audit + wave 1 landing fix)
 
 Five-agent deep-refactor audit. Wave 1 Phase 1.1 (landing hierarchy) shipped here; Wave 2 structural work moved to parallel `greenlight-refactor` folder.
