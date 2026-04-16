@@ -14,110 +14,17 @@ type StepInstructionsProps = {
 
 export function StepInstructions({ onNext, onSubmitJson }: StepInstructionsProps) {
   const [mode, setMode] = useState<"upload" | "manual">("upload");
-  const [loadingEeaao, setLoadingEeaao] = useState(false);
-
-  const handleEeaaoClick = async () => {
-    if (loadingEeaao) return;
-    setLoadingEeaao(true);
-    const cached = findCachedProject("Everything Everywhere All At Once");
-    if (cached?.jsonData && onSubmitJson) {
-      // Brief pause so the click feels intentional, not instant.
-      await new Promise((r) => setTimeout(r, 400));
-      onSubmitJson(cached.jsonData);
-    }
-    setLoadingEeaao(false);
-  };
 
   return (
     <div className="max-w-2xl space-y-10">
       {/* Hero */}
       <div>
         <h2 className="text-[2rem] font-semibold tracking-tight mb-3 leading-[1.05]">
-          Script to vision deck in minutes.
+          How it works
         </h2>
         <p className="text-[15px] leading-[1.6] text-muted-foreground max-w-[52ch]">
-          See what it does with two films — or feed it your own screenplay.
+          Upload a screenplay and Greenlight builds your vision deck.
         </p>
-      </div>
-
-      {/* Demo cards — primary affordance */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        {/* NotLD — finished deck */}
-        <a
-          href="/demo"
-          className="group relative block rounded-[12px] bg-card/40 shadow-paper hover:shadow-paper-hover transition-all overflow-hidden"
-        >
-          <div className="flex items-stretch gap-0">
-            <div className="shrink-0 w-[90px] bg-muted/30 self-stretch" style={{ aspectRatio: "5/7" }}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/demo-images/poster-f96b783b-8f3.jpg"
-                alt="Night of the Living Dead poster sketch"
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <div className="flex-1 min-w-0 px-4 py-4 flex flex-col">
-              <div className="text-[10px] font-mono uppercase tracking-[0.15em] text-muted-foreground mb-1">
-                Finished deck
-              </div>
-              <h3 className="text-[15px] font-medium tracking-tight leading-snug">
-                Night of the Living Dead
-              </h3>
-              <p className="text-[11.5px] text-muted-foreground mt-1 leading-[1.45]">
-                1968 · Romero · Horror
-              </p>
-              <span className="mt-auto text-[12px] text-foreground/70 group-hover:text-foreground transition-colors pt-2">
-                View deck →
-              </span>
-            </div>
-          </div>
-        </a>
-
-        {/* EEAAO — live fake-gen walkthrough */}
-        <button
-          onClick={handleEeaaoClick}
-          disabled={loadingEeaao}
-          className="group relative block text-left rounded-[12px] bg-card/40 shadow-paper hover:shadow-paper-hover transition-all overflow-hidden disabled:opacity-70 disabled:cursor-wait"
-        >
-          <div className="flex items-stretch gap-0">
-            <div className="shrink-0 w-[90px] bg-muted/30 self-stretch" style={{ aspectRatio: "5/7" }}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/demo-images/eeaao/poster-1.jpg"
-                alt="Everything Everywhere All At Once poster sketch"
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <div className="flex-1 min-w-0 px-4 py-4 flex flex-col">
-              <div className="text-[10px] font-mono uppercase tracking-[0.15em] text-muted-foreground mb-1">
-                Watch it build
-              </div>
-              <h3 className="text-[15px] font-medium tracking-tight leading-snug">
-                Everything Everywhere All At Once
-              </h3>
-              <p className="text-[11.5px] text-muted-foreground mt-1 leading-[1.45]">
-                2022 · Daniels · Sci-Fi
-              </p>
-              <span className="mt-auto text-[12px] text-foreground/70 group-hover:text-foreground transition-colors pt-2 inline-flex items-center gap-1.5">
-                {loadingEeaao ? (
-                  <>
-                    <Loader2 size={12} className="animate-spin" />
-                    Loading…
-                  </>
-                ) : (
-                  <>Run demo →</>
-                )}
-              </span>
-            </div>
-          </div>
-        </button>
-      </div>
-
-      {/* Divider to secondary affordance */}
-      <div className="flex items-center gap-4 pt-2">
-        <div className="flex-1 h-px bg-border/60" />
-        <span className="text-[11px] font-mono uppercase tracking-[0.15em] text-muted-foreground">Or bring your own</span>
-        <div className="flex-1 h-px bg-border/60" />
       </div>
 
       {/* Mode switcher */}
@@ -151,6 +58,46 @@ export function StepInstructions({ onNext, onSubmitJson }: StepInstructionsProps
       ) : (
         <ManualMode onNext={onNext} onSubmitJson={onSubmitJson} />
       )}
+
+      {/* Divider + Demo card */}
+      <div className="space-y-4 -mt-4">
+        <div className="flex items-center gap-4">
+          <div className="flex-1 h-px bg-border/60" />
+          <span className="text-[11px] font-mono uppercase tracking-[0.15em] text-muted-foreground">or</span>
+          <div className="flex-1 h-px bg-border/60" />
+        </div>
+
+        {/* Demo card — finished deck */}
+        <a
+          href="/demo"
+          className="group block rounded-[12px] bg-card/40 shadow-paper hover:shadow-paper-hover transition-all overflow-hidden"
+        >
+          <div className="flex items-center gap-5 px-6 py-5">
+            <div className="shrink-0 w-[56px] rounded-lg overflow-hidden bg-muted/30" style={{ aspectRatio: "5/7" }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/demo-images/poster-f96b783b-8f3.jpg"
+                alt="Night of the Living Dead poster sketch"
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-[10px] font-mono uppercase tracking-[0.15em] text-muted-foreground mb-1">
+                Vision Deck
+              </div>
+              <h3 className="text-[15px] font-medium tracking-tight group-hover:text-foreground transition-colors">
+                Night of the Living Dead
+              </h3>
+              <p className="text-[12px] text-muted-foreground mt-0.5">
+                1968 · George A. Romero · Horror · 13 scenes · 5 locations · 8 cast
+              </p>
+            </div>
+            <span className="text-[13px] text-muted-foreground group-hover:text-foreground transition-colors shrink-0">
+              View demo →
+            </span>
+          </div>
+        </a>
+      </div>
     </div>
   );
 }
