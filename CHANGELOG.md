@@ -5,6 +5,27 @@ Updated every session via `/save-session`.
 
 ---
 
+## 2026-04-16 (session 7 — audit + wave 1 landing fix)
+
+Five-agent deep-refactor audit. Wave 1 Phase 1.1 (landing hierarchy) shipped here; Wave 2 structural work moved to parallel `greenlight-refactor` folder.
+
+### Features
+- **Landing hierarchy inverted** (`step-instructions.tsx`) — demo cards are now the hero instead of buried below an "or" divider. Two cards: Night of the Living Dead (finished deck, links to `/demo`) + Everything Everywhere All At Once (live walkthrough via cached-JSON submission). Upload/Paste drops to secondary affordance under a "Or bring your own" divider.
+- **Deep-refactor audit** — `deep-refactor-report.md` from 5 parallel agents (Architect / Optimizer / Pragmatist / Domain Expert / Outsider). 11/20 health score, two-wave migration blueprint.
+
+### Deferred to Wave 1 (pre-interview, still to do)
+- Phase 1.2 — wardrobe matcher bug (`production-viewer.tsx` substring collision on character names)
+- Phase 1.3 — shuffle/regenerate optimistic feedback (mood, overview, identity viewers)
+
+### Deferred to Wave 2 (post-interview, tracked in `greenlight-refactor` folder)
+- Markdown → JSON migration (the "Big Idea" 3/5 agents independently named)
+- `shareable-view.tsx` unification (`variant="print"` on viewers, delete 1060-line duplicate)
+- Zustand store (full Phase 2.3)
+
+### Status: committed to main, not yet deployed to greenlight-app-red
+
+---
+
 ## 2026-04-12 (session 6)
 
 Audit-driven copy overhaul, PDF upload, EEAAO images, parallel image generation.
