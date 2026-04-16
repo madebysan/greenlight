@@ -6,6 +6,7 @@ import { TitleTreatment } from "@/components/viewers/title-treatment";
 import { SectionHead } from "@/components/ui/section-head";
 import { SectionLabelPill } from "@/components/ui/inline-chip";
 import { ShuffleButton, useShuffleState } from "@/components/ui/shuffle-button";
+import { EditableText } from "@/components/ui/editable-text";
 import { replaceMarkdownSection } from "@/lib/markdown-utils";
 
 type ColorEntry = { name: string; hex: string; description: string };
@@ -74,6 +75,21 @@ export function IdentityViewer({
     });
   };
 
+  function handleColorEdit(hex: string, field: "name" | "description", newValue: string) {
+    if (!moodContent || !onMoodContentUpdate) return;
+    const updatedPalette = palette.map((c) =>
+      c.hex === hex ? { ...c, [field]: newValue } : c,
+    );
+    const newSectionMd = [
+      "## Color Palette",
+      ...updatedPalette.map(
+        (c) => `- **${c.name}** \`${c.hex}\` — ${c.description}`,
+      ),
+    ].join("\n");
+    const updated = replaceMarkdownSection(moodContent, "Color Palette", newSectionMd);
+    onMoodContentUpdate(updated);
+  }
+
   return (
     <div className="max-w-4xl">
       <div className="mb-8">
@@ -129,16 +145,41 @@ export function IdentityViewer({
                   />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-baseline gap-2 flex-wrap">
-                      <span className="text-[13px] font-medium text-foreground leading-tight tracking-tight">
-                        {c.name}
-                      </span>
+                      <div className="min-w-0 flex-1 pr-5 relative">
+                        <EditableText
+                          value={c.name}
+                          onSave={(next) => handleColorEdit(c.hex, "name", next)}
+                          editable={Boolean(onMoodContentUpdate)}
+                          title="Edit color name"
+                          pencilSize={10}
+                          renderDisplay={(v) => (
+                            <span className="text-[13px] font-medium text-foreground leading-tight tracking-tight">
+                              {v}
+                            </span>
+                          )}
+                          inputClassName="text-[13px] font-medium"
+                        />
+                      </div>
                       <span className="font-mono text-[9px] uppercase tracking-[0.12em] text-muted-foreground tabular-nums">
                         {c.hex}
                       </span>
                     </div>
-                    <p className="text-[12px] text-foreground/70 leading-[1.55] mt-1 line-clamp-2 tracking-tight">
-                      {c.description}
-                    </p>
+                    <div className="mt-1 pr-5 relative">
+                      <EditableText
+                        value={c.description}
+                        onSave={(next) => handleColorEdit(c.hex, "description", next)}
+                        editable={Boolean(onMoodContentUpdate)}
+                        multiline
+                        title="Edit color description"
+                        pencilSize={10}
+                        renderDisplay={(v) => (
+                          <p className="text-[12px] text-foreground/70 leading-[1.55] tracking-tight">
+                            {v}
+                          </p>
+                        )}
+                        inputClassName="text-[12px] leading-[1.55]"
+                      />
+                    </div>
                   </div>
                 </div>
               ))}
