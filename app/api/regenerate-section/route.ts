@@ -50,6 +50,98 @@ Output ONLY the section in this exact markdown format:
 - **[Film Title] ([Year])** — [Composer] — [one sentence]
 
 No commentary, no extra text.`,
+
+  "mood-and-tone/similar-moods": `Pick 4 NEW films whose MOOD this script most resembles — not plot, not genre, but emotional and atmospheric register. Reach past the obvious. Mix art-house with mainstream, mix decades, include at least one that would surprise a film-literate reader. Use exact common film titles so they can be looked up.
+
+For each, write one sentence on the SHARED EMOTIONAL TEXTURE — what specifically these two films feel like in the same way. Don't just say "tense" or "atmospheric" — name the specific feeling.
+
+Output ONLY the section in this exact markdown format:
+
+## Similar Moods
+- **[Film Title] ([Year])** — [one sentence on the shared emotional texture]
+- **[Film Title] ([Year])** — [one sentence]
+- **[Film Title] ([Year])** — [one sentence]
+- **[Film Title] ([Year])** — [one sentence]
+
+No commentary, no extra text.`,
+
+  "mood-and-tone/reference-points": `Generate 5-6 NEW Reference Points for this film's visual and emotional language. Reference points are NOT films — they should be: photographers, painters, architectural movements, books, music genres, specific historical moments, art movements, or specific artists. Reach past the obvious. Each reference should illuminate something specific the script is doing.
+
+For each, write one sentence on what to STEAL from this reference — what visual or emotional technique the film should borrow.
+
+Output ONLY the section in this exact markdown format:
+
+## Reference Points
+- **[Reference name]** — [one sentence on what specifically to steal or learn]
+- **[Reference name]** — [one sentence]
+- **[Reference name]** — [one sentence]
+- **[Reference name]** — [one sentence]
+- **[Reference name]** — [one sentence]
+- **[Reference name]** — [one sentence, optional 6th]
+
+No commentary, no extra text.`,
+
+  "mood-and-tone/atmosphere": `Rewrite the Atmosphere section for this film. Write 2-3 paragraphs (not bullet points) of cinephile-grade prose describing the film's atmospheric DNA — what it feels like to inhabit this story scene by scene. Ground claims in specific screenplay moments (reference scene numbers where it sharpens the point). Avoid generic adjectives like "tense" or "moody"; reach for specific, sensory language.
+
+Then list 8-10 TONAL DESCRIPTORS — short, evocative, sometimes-paradoxical phrases (like "exhausted wonder" or "baroque fatigue") separated by middle dots.
+
+Output ONLY the section in this exact markdown format:
+
+## Atmosphere
+
+[paragraph 1]
+
+[paragraph 2]
+
+[paragraph 3, optional]
+
+## Tonal Descriptors
+
+[Descriptor 1] · [Descriptor 2] · [Descriptor 3] · [Descriptor 4] · [Descriptor 5] · [Descriptor 6] · [Descriptor 7] · [Descriptor 8] · [Descriptor 9] · [Descriptor 10]
+
+No commentary, no extra text.`,
+
+  "overview/synopsis": `Rewrite the Synopsis for this film. 2-3 paragraphs. Write it like the back of a Criterion DVD — atmospheric, specific, lingers on emotional truth rather than plot mechanics. Reach past obvious "and then" plot recap. Should make a reader want to watch the film. Around 150-220 words total.
+
+Output ONLY the section in this exact markdown format:
+
+## Synopsis
+
+[paragraph 1]
+
+[paragraph 2]
+
+[paragraph 3, optional]
+
+No commentary, no extra text.`,
+
+  "overview/themes": `Rewrite the Themes section for this film. Identify 4-5 DIFFERENT thematic threads from any obvious first pass. Reach for the second or third theme a thoughtful reader would notice — not the surface "good vs evil" but something specific to THIS script. Each theme gets a 2-3 sentence paragraph explaining how the screenplay surfaces it (reference characters or scene numbers).
+
+Output ONLY the section in this exact markdown format:
+
+## Themes
+
+**[Theme name]**
+
+[paragraph]
+
+**[Theme name]**
+
+[paragraph]
+
+**[Theme name]**
+
+[paragraph]
+
+**[Theme name]**
+
+[paragraph]
+
+**[Theme name, optional 5th]**
+
+[paragraph]
+
+No commentary, no extra text.`,
 };
 
 export async function POST(request: NextRequest) {

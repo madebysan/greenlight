@@ -20,6 +20,7 @@ type PropMaster = {
 type SceneData = {
   scene_number: number;
   slug_line: string;
+  characters_present?: string[];
   props?: string[];
   wardrobe_notes?: string[];
   vfx_stunts?: string[];
@@ -135,45 +136,62 @@ export function ProductionViewer({
   const missingPropImages = propsMaster.filter((p) => !propImages[p.item]).length;
 
   const wardrobeByCharacter = useMemo(() => {
-    const allNotes: WardrobeEntry[] = [];
+    type NoteRecord = WardrobeEntry & { scenePresent: string[] };
+    const allNotes: NoteRecord[] = [];
     for (const s of scenes) {
+      const present = s.characters_present || [];
       for (const note of s.wardrobe_notes || []) {
-        allNotes.push({ scene: s.scene_number, note });
+        allNotes.push({ scene: s.scene_number, note, scenePresent: present });
       }
     }
     if (allNotes.length === 0) return { byCharacter: [], general: [] };
 
-    // Build search tokens: full name + each individual word (for partial matches
-    // like "Evelyn" matching "EVELYN WANG", or "Deirdre" matching "DEIRDRE ATKINS").
-    // Skip short words (2 chars or less) to avoid false positives on "of", "in", etc.
-    const charTokens = characters.map((c) => {
-      const full = c.name.toUpperCase();
-      const words = full.split(/\s+/).filter((w) => w.length > 2);
-      return { name: c.name, tokens: [full, ...words] };
-    });
+    // Attribute wardrobe notes to characters using scene-co-presence first,
+    // then text matching as a tiebreaker. The old approach was substring-only
+    // and collided badly: "JOE" matched "JOEL", "GONG" matched both "GONG GONG"
+    // and "ALPHA GONG GONG", and short tokens ("JOY") fired on prose like
+    // "joyful" inside a wardrobe note. Co-presence avoids all of that — a note
+    // can only be attributed to a character who's actually in that scene.
+
+    const charNames = characters.map((c) => c.name);
+    const upperToCanonical = new Map<string, string>();
+    for (const name of charNames) upperToCanonical.set(name.toUpperCase(), name);
+
+    function findInNote(note: string, candidates: string[]): string | null {
+      if (candidates.length === 0) return null;
+      if (candidates.length === 1) return candidates[0];
+      const upper = note.toUpperCase();
+      // Prefer candidates whose full name appears in the note text. Use full
+      // name (not single-word tokens) so "JOY" doesn't match "JOY WANG" inside
+      // a sentence about something else.
+      const textMatch = candidates.find((c) => upper.includes(c.toUpperCase()));
+      return textMatch || null;
+    }
 
     const byChar: Record<string, WardrobeEntry[]> = {};
     const general: WardrobeEntry[] = [];
 
     for (const entry of allNotes) {
-      const upper = entry.note.toUpperCase();
-      const matched = charTokens.find((ct) =>
-        ct.tokens.some((token) => upper.includes(token)),
-      );
+      // Resolve scene's present characters to canonical character names.
+      const candidates = entry.scenePresent
+        .map((p) => upperToCanonical.get(p.toUpperCase()))
+        .filter((c): c is string => Boolean(c));
+
+      const matched = findInNote(entry.note, candidates);
       if (matched) {
-        if (!byChar[matched.name]) byChar[matched.name] = [];
-        byChar[matched.name].push(entry);
+        if (!byChar[matched]) byChar[matched] = [];
+        byChar[matched].push({ scene: entry.scene, note: entry.note });
       } else {
-        general.push(entry);
+        general.push({ scene: entry.scene, note: entry.note });
       }
     }
 
     const byCharacter = characters
-      .filter((c) => byChar[c.name.toUpperCase()] || (c.wardrobe_changes && c.wardrobe_changes > 0))
+      .filter((c) => byChar[c.name] || (c.wardrobe_changes && c.wardrobe_changes > 0))
       .map((c) => ({
         name: c.name,
         changes: c.wardrobe_changes ?? 0,
-        notes: byChar[c.name.toUpperCase()] || [],
+        notes: byChar[c.name] || [],
       }));
 
     return { byCharacter, general };
