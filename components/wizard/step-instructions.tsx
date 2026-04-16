@@ -59,15 +59,15 @@ export function StepInstructions({ onNext, onSubmitJson }: StepInstructionsProps
         <ManualMode onNext={onNext} onSubmitJson={onSubmitJson} />
       )}
 
-      {/* Divider + Demo card */}
+      {/* Divider + Demo cards */}
       <div className="space-y-4 -mt-4">
         <div className="flex items-center gap-4">
           <div className="flex-1 h-px bg-border/60" />
-          <span className="text-[11px] font-mono uppercase tracking-[0.15em] text-muted-foreground">or</span>
+          <span className="text-[11px] font-mono uppercase tracking-[0.15em] text-muted-foreground">or explore a finished deck</span>
           <div className="flex-1 h-px bg-border/60" />
         </div>
 
-        {/* Demo card — finished deck */}
+        {/* Night of the Living Dead — feature */}
         <a
           href="/demo"
           className="group block rounded-[12px] bg-card/40 shadow-paper hover:shadow-paper-hover transition-all overflow-hidden"
@@ -83,17 +83,48 @@ export function StepInstructions({ onNext, onSubmitJson }: StepInstructionsProps
             </div>
             <div className="flex-1 min-w-0">
               <div className="text-[10px] font-mono uppercase tracking-[0.15em] text-muted-foreground mb-1">
-                Vision Deck
+                Feature · 1968
               </div>
               <h3 className="text-[15px] font-medium tracking-tight group-hover:text-foreground transition-colors">
                 Night of the Living Dead
               </h3>
               <p className="text-[12px] text-muted-foreground mt-0.5">
-                1968 · George A. Romero · Horror · 13 scenes · 5 locations · 8 cast
+                George A. Romero · Horror · 13 scenes · 5 locations · 8 cast
               </p>
             </div>
             <span className="text-[13px] text-muted-foreground group-hover:text-foreground transition-colors shrink-0">
-              View demo →
+              View deck →
+            </span>
+          </div>
+        </a>
+
+        {/* The Red Balloon — short film */}
+        <a
+          href="/demo/red-balloon"
+          className="group block rounded-[12px] bg-card/40 shadow-paper hover:shadow-paper-hover transition-all overflow-hidden"
+        >
+          <div className="flex items-center gap-5 px-6 py-5">
+            <div className="shrink-0 w-[56px] rounded-lg overflow-hidden bg-muted/30" style={{ aspectRatio: "5/7" }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/demo-images/red-balloon/poster-2.jpg"
+                alt="The Red Balloon poster sketch"
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-[10px] font-mono uppercase tracking-[0.15em] text-muted-foreground mb-1">
+                Short film · 1956
+              </div>
+              <h3 className="text-[15px] font-medium tracking-tight group-hover:text-foreground transition-colors">
+                The Red Balloon
+              </h3>
+              <p className="text-[12px] text-muted-foreground mt-0.5">
+                Albert Lamorisse · Fantasy · 20 scenes · 14 locations · 10 cast
+              </p>
+            </div>
+            <span className="text-[13px] text-muted-foreground group-hover:text-foreground transition-colors shrink-0">
+              View deck →
             </span>
           </div>
         </a>
