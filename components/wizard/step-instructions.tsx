@@ -14,7 +14,12 @@ type StepInstructionsProps = {
 };
 
 export function StepInstructions({ onNext, onSubmitJson }: StepInstructionsProps) {
-  const [mode, setMode] = useState<"upload" | "manual">("upload");
+  // PDF upload is temporarily disabled — Vercel's serverless function
+  // timeouts can't reliably accommodate Claude's PDF extraction for
+  // feature-length scripts. Defaulting to the Gemini + Paste JSON flow
+  // until we solve the long-running-request problem. The UploadMode
+  // component and its route are intentionally kept in the codebase so we
+  // can flip the tab back on once the infra side is sorted.
 
   return (
     <div className="max-w-2xl space-y-10">
@@ -24,41 +29,35 @@ export function StepInstructions({ onNext, onSubmitJson }: StepInstructionsProps
           How it works
         </h2>
         <p className="text-[15px] leading-[1.6] text-muted-foreground max-w-[52ch]">
-          Upload a screenplay and Greenlight builds your vision deck.
+          Give Greenlight your screenplay as structured JSON and it builds your vision deck.
         </p>
       </div>
 
-      {/* Mode switcher */}
+      {/* Mode switcher — PDF upload shown as coming soon */}
       <div className="flex items-center gap-1 rounded-lg border border-border bg-muted/50 p-1 w-fit">
         <button
-          onClick={() => setMode("upload")}
-          className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md text-[13px] font-medium transition-colors ${
-            mode === "upload"
-              ? "bg-foreground text-background shadow-sm"
-              : "text-muted-foreground hover:text-foreground"
-          }`}
+          type="button"
+          disabled
+          aria-disabled="true"
+          title="PDF extraction is in testing — use Paste JSON for now"
+          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md text-[13px] font-medium text-muted-foreground/60 cursor-not-allowed"
         >
           <Upload size={14} />
           Upload PDF
+          <span className="ml-1 inline-flex items-center rounded-sm bg-muted/70 px-1.5 py-0.5 font-mono text-[9px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+            Soon
+          </span>
         </button>
         <button
-          onClick={() => setMode("manual")}
-          className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md text-[13px] font-medium transition-colors ${
-            mode === "manual"
-              ? "bg-foreground text-background shadow-sm"
-              : "text-muted-foreground hover:text-foreground"
-          }`}
+          type="button"
+          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md text-[13px] font-medium bg-foreground text-background shadow-sm"
         >
           <FileText size={14} />
           Paste JSON
         </button>
       </div>
 
-      {mode === "upload" ? (
-        <UploadMode onSubmitJson={onSubmitJson} />
-      ) : (
-        <ManualMode onNext={onNext} onSubmitJson={onSubmitJson} />
-      )}
+      <ManualMode onNext={onNext} onSubmitJson={onSubmitJson} />
 
       {/* Divider + Demo cards */}
       <div className="space-y-4 -mt-4">
