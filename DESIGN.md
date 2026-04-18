@@ -97,11 +97,14 @@ All AI-generated images use the **Gesture Draw LoRA** on FLUX dev via `fal-ai/fl
 - `components/ui/section-head.tsx` — `SectionHead` with optional `label` + `labelIcon` props that render a `SectionLabelPill` above the numbered section title
 - `components/wizard/header-menu.tsx` — `HeaderButton`, `MoreMenu` (used by both wizard and `/demo`)
 - `components/wizard/about-dialog.tsx` — `AboutDialog` (shared between wizard and `/demo`)
+- `components/wizard/api-keys-dialog.tsx` — `ApiKeysDialog` (onboarding modal; Claude required, fal.ai + TMDB optional; shows time + cost estimates)
+- `lib/api-keys-context.tsx` — `<ApiKeysProvider>` + `useApiKeys()` hook; `ensureKeys({requireFal?})` opens the modal if keys are missing
 - `components/viewers/poster-carousel.tsx` — `PosterCarousel` (used in Overview hero)
 - `components/viewers/title-treatment.tsx` — `TitleTreatment` (used in Identity tab)
 - `lib/markdown-utils.ts` — `replaceMarkdownSection` (used by every section regenerate handler)
 - `lib/image-prompts.ts` — `getStylePrefix`, `loadImagePrompts`, `saveImagePrompts` — user-editable image generation prompts persisted to localStorage
 - `lib/cached-projects.ts` — `findCachedProject`, `normalizeTitle`
+- `lib/site-url.ts` — `getSiteUrl()` for canonical base URL (metadataBase, robots, sitemap)
 - `components/share/shareable-view.tsx` — full-bible print view (reuses parsers from every viewer)
 
 ## Decisions
@@ -124,6 +127,9 @@ All AI-generated images use the **Gesture Draw LoRA** on FLUX dev via `fal-ai/fl
 - **Start Over requires AlertDialog confirmation** — destructive action, styled modal not browser confirm(). (2026-04-12)
 - **Theme toggle + Share in main nav** — no longer buried in More menu. (2026-04-12)
 - **Poster prompt updated** — A24 arthouse risograph style prefix for new generations. Demo images untouched. (2026-04-12)
+- **Bring-your-own-keys architecture** — all paid API routes accept `apiKey` in the body with `process.env.X` fallback. On the public deployment no server env vars are set; the `ApiKeysDialog` modal is the only path to fresh generation. Cached-project paths (EEAAO) skip the gate. (2026-04-18)
+- **Parallel Claude docs + background image queue** — `step-generating.tsx` fires all 5 doc routes concurrently via `Promise.all`; `wizard-shell.tsx` runs a single-worker image queue that auto-triggers portraits/props on JSON submit and storyboard/poster images when their parent docs land. 500ms stagger between task starts. (2026-04-18)
+- **PDF upload shown as `Soon`** — `/api/extract-screenplay` works locally but Vercel's timeout constraints break feature-length PDFs. Kept in-tree, disabled in UI. (2026-04-18)
 
 ## Anti-patterns
 - Light-mode color classes (bg-sky-50, text-amber-700) — always use `/15` opacity + `400` shade pattern for theme safety
