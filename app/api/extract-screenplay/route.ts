@@ -2,6 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { STAGE_0_PROMPT } from "@/lib/prompts/stage-0";
 
+// Allow the serverless function to run for up to 5 minutes — screenplay
+// extraction with max_tokens=32k can legitimately take 1-3 minutes on a
+// feature-length script. Default Vercel timeout would kill it mid-response.
+export const maxDuration = 300;
+
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
@@ -23,7 +28,12 @@ export async function POST(request: NextRequest) {
 
     const client = new Anthropic({ apiKey });
 
-    const message = await client.messages.create({
+    // Stream the response and await the final assembled message. Required
+    // because non-streaming requests are capped at 10 minutes by the SDK, and
+    // max_tokens=32k on a long PDF can legitimately run beyond that cap.
+    // .finalMessage() still gives us the full assembled Message object with
+    // stop_reason + usage, so downstream parsing works unchanged.
+    const stream = client.messages.stream({
       model: "claude-sonnet-4-6",
       // Sonnet 4.6 supports up to 64k output tokens. Screenplay extractions
       // can easily run 20-30k tokens of JSON, so 16k was too tight and caused
@@ -49,6 +59,7 @@ export async function POST(request: NextRequest) {
         },
       ],
     });
+    const message = await stream.finalMessage();
 
     const output = message.content[0]?.type === "text" ? message.content[0].text : "";
     const stopReason = message.stop_reason;
