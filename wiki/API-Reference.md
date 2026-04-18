@@ -2,6 +2,8 @@
 
 All routes are Next.js App Router route handlers in `app/api/`.
 
+**Bring-your-own-keys:** Every paid route accepts `apiKey` in the body with `process.env.X` as fallback. On the public deployment (`greenlight-public.vercel.app`) no server env vars are set, so visitors must provide their own Claude + fal.ai + TMDB keys via the onboarding modal. The `apiKey` field is required in production and optional in local dev (where `.env.local` fills the gap).
+
 ## Document Generation
 
 Five parallel routes, identical shape. Each trims the input JSON differently and uses a different Claude prompt.
@@ -29,14 +31,14 @@ Five parallel routes, identical shape. Each trims the input JSON differently and
 
 ## Image Generation
 
-Four routes, each targeting a different image type. All use the same model and LoRA.
+Four routes, each targeting a different image type. All use the same model and LoRA. Each accepts `apiKey` in the body (fal.ai key, falls back to `FAL_KEY` env var) and configures fal via `fal.config({ credentials })` inside the handler.
 
 ### POST /api/generate-image
 Storyboard frames. 1280x720.
 
 **Request:**
 ```json
-{ "prompt": "scene description...", "camera": "Wide shot...", "stylePrefix": "optional override" }
+{ "prompt": "scene description...", "stylePrefix": "optional override", "apiKey": "fal-..." }
 ```
 
 ### POST /api/generate-portrait
@@ -44,7 +46,7 @@ Character portraits. 720x720.
 
 **Request:**
 ```json
-{ "description": "character description...", "name": "CHARACTER", "stylePrefix": "optional" }
+{ "description": "character description...", "name": "CHARACTER", "stylePrefix": "optional", "apiKey": "fal-..." }
 ```
 
 ### POST /api/generate-prop
@@ -52,7 +54,7 @@ Prop reference sketches. 720x720.
 
 **Request:**
 ```json
-{ "name": "prop name", "notes": "special requirements", "stylePrefix": "optional" }
+{ "name": "prop name", "notes": "special requirements", "stylePrefix": "optional", "apiKey": "fal-..." }
 ```
 
 ### POST /api/generate-poster-image
@@ -60,15 +62,17 @@ Poster concepts. 720x1008.
 
 **Request:**
 ```json
-{ "prompt": "poster concept description...", "stylePrefix": "optional" }
+{ "prompt": "poster concept description...", "stylePrefix": "optional", "apiKey": "fal-..." }
 ```
 
 **All image routes respond:**
 ```json
-{ "url": "/api/serve-image/uuid.jpg" }
+{ "url": "https://fal.media/..." }
 ```
 
-**Errors:** `400` missing required field, `500` fal.ai failure.
+**Errors:** `400` missing required field / missing fal key, `500` fal.ai failure.
+
+> **Caveat:** `fal.config` is module-global. Under concurrent users with different keys there's a theoretical race. Acceptable for a portfolio demo; would need per-request client instantiation at scale.
 
 ---
 
@@ -82,6 +86,29 @@ Serves JPEGs from `.cache/images/`. Filename must match `/^[\w-]+\.jpg$/`.
 
 ---
 
+## PDF Extraction
+
+### POST /api/extract-screenplay
+
+Extracts structured JSON from a screenplay PDF via Claude Sonnet 4.6. **Currently disabled in the UI** (shown as "Soon") because Vercel's serverless timeout constraints can't reliably handle feature-length scripts — route works in isolation but times out behind the edge proxy. Kept in-tree for future re-enable.
+
+**Request:** `multipart/form-data` with `file` (PDF) + `apiKey` (Claude key).
+
+**Response:**
+```json
+{ "json": "{...screenplay...}", "tokens": { "input": 50000, "output": 28000 } }
+```
+
+**Errors:** `400` missing file/key, `413` output truncated (screenplay too long for one pass — `stop_reason === "max_tokens"`), `422` Claude returned invalid JSON, `500` extraction failed.
+
+**Implementation notes:**
+- `max_tokens: 32768`, `maxDuration: 300` (5 min)
+- Uses `client.messages.stream().finalMessage()` to bypass the SDK's 10-minute non-streaming cap
+- Three-stage JSON extractor: raw → fenced block → balanced-brace scan (recovers from preamble/trailing prose)
+- Logs stop_reason, token usage, first/last 200 chars of response on failure
+
+---
+
 ## Section Regeneration
 
 ### POST /api/regenerate-section
@@ -90,10 +117,10 @@ Hotswap a single markdown section without regenerating the full document.
 
 **Request:**
 ```json
-{ "sectionKey": "overview/taglines", "jsonData": "...", "apiKey": "optional" }
+{ "sectionKey": "overview/taglines", "jsonData": "...", "apiKey": "sk-ant-..." }
 ```
 
-**Supported keys:** `overview/taglines`, `mood-and-tone/color-palette`, `mood-and-tone/music`
+**Supported keys:** `overview/taglines`, `mood-and-tone/color-palette`, `mood-and-tone/music`, `overview/synopsis`, `overview/themes`, `mood-and-tone/atmosphere`, `mood-and-tone/references`, `mood-and-tone/similar-moods`
 
 **Response:**
 ```json
@@ -124,13 +151,35 @@ Batch lookup film posters and metadata from TMDB.
 
 **Request:**
 ```json
-{ "queries": [{ "title": "The Seventh Seal", "year": 1957 }] }
+{ "queries": [{ "title": "The Seventh Seal", "year": 1957 }], "apiKey": "tmdb-v3-key" }
 ```
 
 **Response:**
 ```json
-{ "resolved": [{ "query": "The Seventh Seal", "tmdb_id": 490, "title": "The Seventh Seal", "year": 1957, "poster_url": "https://image.tmdb.org/..." }] }
+{ "films": [{ "query": "The Seventh Seal", "tmdb_id": 490, "title": "The Seventh Seal", "year": 1957, "poster_url": "https://image.tmdb.org/..." }] }
 ```
+
+`apiKey` is optional — falls back to `TMDB_API_KEY` env var.
+
+---
+
+## SEO Routes
+
+### GET /robots.txt
+Auto-generated by `app/robots.ts`. Allows all user agents, disallows `/api/` + `/share`, points to sitemap.
+
+### GET /sitemap.xml
+Auto-generated by `app/sitemap.ts`. Lists `/`, `/demo`, `/demo/red-balloon`.
+
+Both use `getSiteUrl()` from `lib/site-url.ts` to resolve the canonical base URL (NEXT_PUBLIC_SITE_URL → VERCEL_PROJECT_PRODUCTION_URL → localhost).
+
+---
+
+## Access Gate
+
+### POST /api/verify-access
+
+Password gate used when `ACCESS_PASSWORD` env var is set on the server. Auto-skipped (returns 200) when unset — which is the case in the current public deployment.
 
 ---
 

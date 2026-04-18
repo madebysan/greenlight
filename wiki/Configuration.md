@@ -2,13 +2,17 @@
 
 ## Environment Variables
 
-Set in `.env.local` (gitignored). All can alternatively be entered via the Settings dialog in-browser.
+Server-side env vars act as fallbacks when the user hasn't provided a key via the in-browser modal. **On the public deployment, none of these are set** — every visitor brings their own keys via the onboarding modal, which persists them to localStorage.
 
 | Variable | Required | Purpose |
 |----------|----------|---------|
-| `ANTHROPIC_API_KEY` | For doc generation | Claude Haiku 4.5 API key |
-| `FAL_KEY` | For image generation | fal.ai API key |
-| `TMDB_API_KEY` | For film lookups | TMDB v3 API key |
+| `ANTHROPIC_API_KEY` | Optional fallback | Claude API key — fallback for all 6 Claude routes when user hasn't set one |
+| `FAL_KEY` | Optional fallback | fal.ai API key — fallback for all 4 image routes |
+| `TMDB_API_KEY` | Optional fallback | TMDB v3 key — fallback for `/api/tmdb-search` (poster lookups on Mood & Tone tab) |
+| `ACCESS_PASSWORD` | Optional | Password gate. Unset = gate disabled (public). Set = `<PasswordGate>` wraps the app. |
+| `NEXT_PUBLIC_SITE_URL` | Optional | Canonical base URL for SEO (metadataBase, robots, sitemap). Falls back to `VERCEL_PROJECT_PRODUCTION_URL` → `localhost:3001`. Set to `https://greenlight.santiagoalonso.com` once DNS is live. |
+
+Local dev: `.env.local` with the three API keys skips the modal entirely.
 
 ## localStorage Keys
 
@@ -17,8 +21,10 @@ Set in `.env.local` (gitignored). All can alternatively be entered via the Setti
 | `greenlight-project` | `SavedProject` JSON | Full project state (JSON, docs, images, overrides) |
 | `greenlight-theme` | `"light"` \| `"dark"` | Theme preference (dark default) |
 | `greenlight-image-prompts` | Partial `Record<ImagePromptKind, string>` | User style prefix overrides for image generation |
-| `stp-api-key` | string | User-provided Claude API key (from Settings) |
-| `stp-fal-key` | string | User-provided fal.ai key (from Settings) |
+| `stp-api-key` | string | User-provided Claude API key |
+| `stp-fal-key` | string | User-provided fal.ai key |
+| `stp-tmdb-key` | string | User-provided TMDB key |
+| `greenlight-access` | string | Password gate sessionStorage marker (only when ACCESS_PASSWORD is set) |
 
 ## File-Based Cache
 

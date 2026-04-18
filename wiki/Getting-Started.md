@@ -44,15 +44,22 @@ Opens at [http://localhost:3001](http://localhost:3001).
 ## First Use
 
 1. Open the app — you'll see the instructions page
-2. Click "Get started" to move to JSON input
-3. Paste screenplay JSON (see `lib/prompts/stage-0.ts` for the extraction prompt to use with Claude.ai or ChatGPT)
-4. Click "Generate" — 5 documents generate in parallel (~30-60s)
+2. Paste screenplay JSON (see `lib/prompts/stage-0.ts` for the extraction prompt to use with Claude.ai, Gemini Pro, or ChatGPT)
+3. Click "Generate" — if no API keys are set, the onboarding modal appears asking for Claude (required), fal.ai (optional, enables images), and TMDB (optional, enables Mood & Tone poster thumbs)
+4. All 5 documents generate in parallel (~30-60s). If a fal key is present, portraits + props auto-fire in the background; storyboards + posters fire when their parent doc lands.
 5. Browse the tabbed results: Overview, Mood & Tone, Scenes, Locations, Cast & Crew, Production Design, Identity, Posters
-6. Click image generation buttons on individual cards to create storyboards, portraits, props, and poster concepts
+6. Individual image-generation buttons on each card still work for regenerating single assets
+
+> **PDF upload** is visible as a coming-soon option — currently disabled because Vercel's serverless timeouts can't reliably handle feature-length script extraction. Paste JSON is the happy path.
 
 ## Demo Mode
 
-Visit [http://localhost:3001/demo](http://localhost:3001/demo) to see a pre-generated bible for Night of the Living Dead — no API keys needed.
+Two demos available, both work without any keys:
+
+- [http://localhost:3001/demo](http://localhost:3001/demo) — Night of the Living Dead (George A. Romero, 1968)
+- [http://localhost:3001/demo/red-balloon](http://localhost:3001/demo/red-balloon) — The Red Balloon (Albert Lamorisse, 1956)
+
+Public deployment: [greenlight-public.vercel.app](https://greenlight-public.vercel.app) (custom domain `greenlight.santiagoalonso.com` pending DNS setup).
 
 ## Costs Per Bible
 
