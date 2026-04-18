@@ -424,6 +424,7 @@ export function MoodAndToneViewer({ content, jsonData, onContentUpdate }: MoodAn
 function SimilarMoodsGrid({ films }: { films: SimilarMoodEntry[] }) {
   const [resolved, setResolved] = useState<Record<string, ResolvedFilm>>({});
   const [loading, setLoading] = useState(true);
+  const { tmdbKey } = useApiKeys();
 
   const queryKey = useMemo(
     () => films.map((f) => `${f.title}|${f.year || ""}`).join("\n"),
@@ -438,6 +439,7 @@ function SimilarMoodsGrid({ films }: { films: SimilarMoodEntry[] }) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         queries: films.map((f) => ({ title: f.title, year: f.year })),
+        apiKey: tmdbKey,
       }),
     })
       .then((r) => r.json())
@@ -455,7 +457,7 @@ function SimilarMoodsGrid({ films }: { films: SimilarMoodEntry[] }) {
     return () => {
       cancelled = true;
     };
-  }, [queryKey, films]);
+  }, [queryKey, films, tmdbKey]);
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -499,6 +501,7 @@ function SimilarMoodsGrid({ films }: { films: SimilarMoodEntry[] }) {
 function SoundtrackGrid({ tracks }: { tracks: SoundtrackEntry[] }) {
   const [resolved, setResolved] = useState<Record<string, ResolvedFilm>>({});
   const [loading, setLoading] = useState(true);
+  const { tmdbKey } = useApiKeys();
 
   const queryKey = useMemo(
     () => tracks.map((t) => `${t.title}|${t.year || ""}`).join("\n"),
@@ -513,6 +516,7 @@ function SoundtrackGrid({ tracks }: { tracks: SoundtrackEntry[] }) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         queries: tracks.map((t) => ({ title: t.title, year: t.year })),
+        apiKey: tmdbKey,
       }),
     })
       .then((r) => r.json())
@@ -530,7 +534,7 @@ function SoundtrackGrid({ tracks }: { tracks: SoundtrackEntry[] }) {
     return () => {
       cancelled = true;
     };
-  }, [queryKey, tracks]);
+  }, [queryKey, tracks, tmdbKey]);
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">

@@ -25,17 +25,19 @@ type ResolvedFilm = {
 };
 
 export async function POST(request: NextRequest) {
-  const apiKey = process.env.TMDB_API_KEY;
-  if (!apiKey) {
-    return NextResponse.json({ error: "TMDB_API_KEY not configured" }, { status: 500 });
-  }
-
   let queries: Query[];
+  let clientKey: string | undefined;
   try {
     const body = await request.json();
     queries = Array.isArray(body.queries) ? body.queries : [];
+    clientKey = typeof body.apiKey === "string" ? body.apiKey : undefined;
   } catch {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+  }
+
+  const apiKey = (clientKey && clientKey.trim()) || process.env.TMDB_API_KEY;
+  if (!apiKey) {
+    return NextResponse.json({ error: "TMDB_API_KEY not configured" }, { status: 500 });
   }
 
   const resolved: ResolvedFilm[] = await Promise.all(

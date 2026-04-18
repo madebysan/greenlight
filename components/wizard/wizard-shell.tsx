@@ -70,7 +70,7 @@ const INITIAL_DOCS: DocumentResult[] = [
 ];
 
 export function WizardShell() {
-  const { apiKey, falKey, setApiKey, setFalKey, ensureKeys } = useApiKeys();
+  const { apiKey, falKey, tmdbKey, setApiKey, setFalKey, setTmdbKey, ensureKeys } = useApiKeys();
   const [hydrated, setHydrated] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const [jsonData, setJsonData] = useState<string>("");
@@ -1110,6 +1110,25 @@ export function WizardShell() {
                 placeholder="fal-..."
                 value={falKey}
                 onChange={(e) => setFalKey(e.target.value)}
+                className="w-full rounded-[8px] bg-card/60 shadow-pill px-3 py-2.5 text-[13px] font-mono placeholder:text-muted-foreground/50 focus:outline-none focus:shadow-paper-hover"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-[13px] font-medium tracking-tight">
+                TMDB API Key{" "}
+                <span className="text-muted-foreground font-normal">· optional</span>
+              </label>
+              <p className="text-[12px] text-foreground/60 tracking-tight">
+                Resolves poster thumbnails for Similar Moods and Soundtrack References on the Mood &amp; Tone tab. Free to get.{" "}
+                <a href="https://www.themoviedb.org/settings/api" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-foreground">
+                  Get a key
+                </a>
+              </p>
+              <input
+                type="password"
+                placeholder="TMDB API key (v3 auth)"
+                value={tmdbKey}
+                onChange={(e) => setTmdbKey(e.target.value)}
                 className="w-full rounded-[8px] bg-card/60 shadow-pill px-3 py-2.5 text-[13px] font-mono placeholder:text-muted-foreground/50 focus:outline-none focus:shadow-paper-hover"
               />
             </div>
