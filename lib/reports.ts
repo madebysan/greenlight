@@ -28,6 +28,7 @@ export type SavedProject = {
 export const PROJECT_KEY = "greenlight-project";
 export const API_KEY_STORAGE = "stp-api-key";
 export const FAL_KEY_STORAGE = "stp-fal-key";
+export const TMDB_KEY_STORAGE = "stp-tmdb-key";
 
 export function loadProject(): SavedProject | null {
   if (typeof window === "undefined") return null;
