@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Space_Grotesk, Space_Mono } from "next/font/google";
 import { Agentation } from "agentation";
 import { PasswordGate } from "@/components/password-gate";
+import { ApiKeysProvider } from "@/lib/api-keys-context";
 import "./globals.css";
 
 const spaceGrotesk = Space_Grotesk({
@@ -60,7 +61,9 @@ export default function RootLayout({
       <body
         className={`${spaceGrotesk.variable} ${spaceMono.variable} antialiased`}
       >
-        <PasswordGate>{children}</PasswordGate>
+        <PasswordGate>
+          <ApiKeysProvider>{children}</ApiKeysProvider>
+        </PasswordGate>
         {process.env.NODE_ENV === "development" && <Agentation />}
       </body>
     </html>

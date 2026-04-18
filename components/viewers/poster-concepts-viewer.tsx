@@ -3,6 +3,7 @@
 import { useState, useMemo, useRef } from "react";
 import { ImageIcon, Loader2, Download, Images, RefreshCw, FileText, Copy, Check } from "lucide-react";
 import { getStylePrefix } from "@/lib/image-prompts";
+import { useApiKeys } from "@/lib/api-keys-context";
 
 type PosterImageState = { status: "idle" | "generating" | "done" | "error"; url?: string };
 
@@ -125,6 +126,7 @@ export function PosterConceptsViewer({ content, savedImages, onImagesChange }: P
   const [generatingAll, setGeneratingAll] = useState(false);
   const [genAllProgress, setGenAllProgress] = useState({ done: 0, total: 0 });
   const cancelRef = useRef(false);
+  const { ensureKeys } = useApiKeys();
 
   // Merge saved + local images
   const posterImages: Record<number, PosterImageState> = useMemo(() => {
@@ -161,6 +163,8 @@ export function PosterConceptsViewer({ content, savedImages, onImagesChange }: P
   };
 
   const rewritePrompt = async (concept: PosterConcept) => {
+    const keys = await ensureKeys();
+    if (!keys) return;
     setRegenPromptStates((prev) => ({ ...prev, [concept.number]: "loading" }));
     try {
       const res = await fetch("/api/regenerate-prompt", {
@@ -169,6 +173,7 @@ export function PosterConceptsViewer({ content, savedImages, onImagesChange }: P
         body: JSON.stringify({
           prompt: getPrompt(concept),
           slugLine: concept.name,
+          apiKey: keys.apiKey,
         }),
       });
       if (!res.ok) throw new Error("Failed");
@@ -193,7 +198,10 @@ export function PosterConceptsViewer({ content, savedImages, onImagesChange }: P
   // accumulated saved state — see generateAllPosters for the batch pattern.
   // Avoids the stale-closure bug where sequential spreads would wipe each
   // other's work in the parent.
-  const fetchPosterImage = async (concept: PosterConcept): Promise<{ url: string } | null> => {
+  const fetchPosterImage = async (
+    concept: PosterConcept,
+    falKey: string,
+  ): Promise<{ url: string } | null> => {
     setLocalImages((prev) => ({ ...prev, [concept.number]: { status: "generating" } }));
     const prompt = getPrompt(concept) || [
       concept.composition,
@@ -207,6 +215,7 @@ export function PosterConceptsViewer({ content, savedImages, onImagesChange }: P
         body: JSON.stringify({
           prompt,
           stylePrefix: getStylePrefix("poster"),
+          apiKey: falKey,
         }),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -220,7 +229,9 @@ export function PosterConceptsViewer({ content, savedImages, onImagesChange }: P
   };
 
   const generatePosterImage = async (concept: PosterConcept) => {
-    const result = await fetchPosterImage(concept);
+    const keys = await ensureKeys({ requireFal: true });
+    if (!keys) return;
+    const result = await fetchPosterImage(concept, keys.falKey);
     if (result) {
       onImagesChange({ ...savedImages, [concept.number]: { status: "done", url: result.url } });
     }
@@ -229,6 +240,9 @@ export function PosterConceptsViewer({ content, savedImages, onImagesChange }: P
   const generateAllPosters = async () => {
     const toGenerate = concepts.filter((c) => !savedImages[c.number]);
     if (toGenerate.length === 0) return;
+
+    const keys = await ensureKeys({ requireFal: true });
+    if (!keys) return;
 
     cancelRef.current = false;
     setGeneratingAll(true);
@@ -239,7 +253,7 @@ export function PosterConceptsViewer({ content, savedImages, onImagesChange }: P
     for (let i = 0; i < toGenerate.length; i++) {
       if (cancelRef.current) break;
       const concept = toGenerate[i];
-      const result = await fetchPosterImage(concept);
+      const result = await fetchPosterImage(concept, keys.falKey);
       if (result) {
         accumulated = { ...accumulated, [concept.number]: { status: "done", url: result.url } };
         onImagesChange(accumulated);

@@ -21,6 +21,7 @@ import { ListOrdered, BarChart3, Film } from "lucide-react";
 import { SectionLabelPill } from "@/components/ui/inline-chip";
 import { getStylePrefix } from "@/lib/image-prompts";
 import type { SavedImage } from "@/lib/reports";
+import { useApiKeys } from "@/lib/api-keys-context";
 
 type ImageState = { status: "idle" | "generating" | "done" | "error"; url?: string; error?: string };
 
@@ -232,6 +233,7 @@ export function SceneBreakdownViewer({
   const [generatingAll, setGeneratingAll] = useState(false);
   const [genAllProgress, setGenAllProgress] = useState({ done: 0, total: 0 });
   const cancelRef = useRef(false);
+  const { ensureKeys } = useApiKeys();
 
   // Build a lookup from scene number → storyboard scene for fast per-card access.
   const storyboardByNumber = useMemo((): Record<number, StoryboardScene> => {
@@ -266,6 +268,8 @@ export function SceneBreakdownViewer({
   const generateImage = async (sceneNumber: number) => {
     const sb = resolveStoryboardScene(sceneNumber);
     if (!sb || !onStoryboardImagesChange || !storyboardImages) return;
+    const keys = await ensureKeys({ requireFal: true });
+    if (!keys) return;
     setLocalImages((prev) => ({ ...prev, [sceneNumber]: { status: "generating" } }));
     try {
       const res = await fetch("/api/generate-image", {
@@ -275,6 +279,7 @@ export function SceneBreakdownViewer({
           prompt: sb.prompt,
           camera: sb.camera,
           stylePrefix: getStylePrefix("storyboard"),
+          apiKey: keys.falKey,
         }),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -299,6 +304,9 @@ export function SceneBreakdownViewer({
     );
     if (toGenerate.length === 0) return;
 
+    const keys = await ensureKeys({ requireFal: true });
+    if (!keys) return;
+
     cancelRef.current = false;
     setGeneratingAll(true);
     setGenAllProgress({ done: 0, total: toGenerate.length });
@@ -320,6 +328,7 @@ export function SceneBreakdownViewer({
             prompt: sb.prompt,
             camera: sb.camera,
             stylePrefix: getStylePrefix("storyboard"),
+            apiKey: keys.falKey,
           }),
         });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -341,12 +350,14 @@ export function SceneBreakdownViewer({
   const regenPrompt = async (sceneNumber: number) => {
     const sb = resolveStoryboardScene(sceneNumber);
     if (!sb || !onPromptOverridesChange) return;
+    const keys = await ensureKeys();
+    if (!keys) return;
     setRegenPromptStates((prev) => ({ ...prev, [sceneNumber]: "loading" }));
     try {
       const res = await fetch("/api/regenerate-prompt", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: sb.prompt, slugLine: sb.slugLine }),
+        body: JSON.stringify({ prompt: sb.prompt, slugLine: sb.slugLine, apiKey: keys.apiKey }),
       });
       if (!res.ok) throw new Error("Failed");
       const { prompt } = await res.json();

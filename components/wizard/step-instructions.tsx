@@ -6,6 +6,7 @@ import { validateScreenplayJson } from "@/lib/schema";
 import { SAMPLES } from "@/lib/sample-data";
 import { Check, Copy, ChevronDown, Upload, FileText, Loader2 } from "lucide-react";
 import { findCachedProject } from "@/lib/cached-projects";
+import { useApiKeys } from "@/lib/api-keys-context";
 
 type StepInstructionsProps = {
   onNext: () => void;
@@ -141,6 +142,7 @@ function UploadMode({ onSubmitJson }: { onSubmitJson?: (json: string) => void })
   const [fileName, setFileName] = useState("");
   const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { ensureKeys } = useApiKeys();
 
   // Map known filenames to cached project titles for fake-gen demo
   const KNOWN_PDFS: Record<string, string> = {
@@ -155,15 +157,16 @@ function UploadMode({ onSubmitJson }: { onSubmitJson?: (json: string) => void })
     }
 
     setFileName(file.name);
-    setStatus("extracting");
     setError("");
 
-    // Check if this PDF matches a cached project — skip extraction
+    // Check if this PDF matches a cached project — skip extraction AND the
+    // keys modal. The cached path is key-free.
     const nameSlug = file.name.replace(/\.[^.]+$/, "").toLowerCase();
     for (const [pattern, title] of Object.entries(KNOWN_PDFS)) {
       if (nameSlug.includes(pattern)) {
         const cached = findCachedProject(title);
         if (cached?.jsonData) {
+          setStatus("extracting");
           // Fake a realistic delay
           await new Promise((r) => setTimeout(r, 8000 + Math.random() * 2000));
           setStatus("done");
@@ -173,9 +176,21 @@ function UploadMode({ onSubmitJson }: { onSubmitJson?: (json: string) => void })
       }
     }
 
+    // Real-extraction path needs a Claude key. Prompt if missing; bail cleanly
+    // if the user cancels so the drop zone stays in its idle state.
+    const keys = await ensureKeys();
+    if (!keys) {
+      setStatus("idle");
+      setFileName("");
+      return;
+    }
+
+    setStatus("extracting");
+
     try {
       const formData = new FormData();
       formData.append("file", file);
+      formData.append("apiKey", keys.apiKey);
 
       const res = await fetch("/api/extract-screenplay", {
         method: "POST",

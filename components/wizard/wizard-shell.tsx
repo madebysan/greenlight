@@ -31,14 +31,13 @@ import { StepResults } from "./step-results";
 import {
   type SavedImage,
   type SavedProject,
-  API_KEY_STORAGE,
-  FAL_KEY_STORAGE,
   loadProject,
   saveProject,
   updateProject,
   clearProject,
   extractTitle,
 } from "@/lib/reports";
+import { useApiKeys } from "@/lib/api-keys-context";
 import {
   type ImagePromptKind,
   DEFAULT_IMAGE_PROMPTS,
@@ -71,14 +70,13 @@ const INITIAL_DOCS: DocumentResult[] = [
 ];
 
 export function WizardShell() {
+  const { apiKey, falKey, setApiKey, setFalKey, ensureKeys } = useApiKeys();
   const [hydrated, setHydrated] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
-  const [apiKey, setApiKey] = useState<string>("");
   const [jsonData, setJsonData] = useState<string>("");
   const [documents, setDocuments] = useState<DocumentResult[]>(INITIAL_DOCS);
   const [showAbout, setShowAbout] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
-  const [falKey, setFalKey] = useState<string>("");
   const [imagePrompts, setImagePrompts] = useState<Record<ImagePromptKind, string>>({
     storyboard: DEFAULT_IMAGE_PROMPTS.storyboard,
     portrait: DEFAULT_IMAGE_PROMPTS.portrait,
@@ -119,8 +117,6 @@ export function WizardShell() {
       setDisabledItems(project.disabledItems || {});
       setCurrentStep(3);
     }
-    setApiKey(localStorage.getItem(API_KEY_STORAGE) || "");
-    setFalKey(localStorage.getItem(FAL_KEY_STORAGE) || "");
     setTheme(localStorage.getItem("greenlight-theme") === "light" ? "light" : "dark");
     // Merge stored overrides into defaults so blank fields fall back cleanly.
     const stored = loadImagePrompts();
@@ -133,11 +129,6 @@ export function WizardShell() {
     setHydrated(true);
     /* eslint-enable react-hooks/set-state-in-effect */
   }, []);
-
-  const handleApiKeyChange = (key: string) => {
-    setApiKey(key);
-    localStorage.setItem(API_KEY_STORAGE, key);
-  };
 
   const handleImagePromptChange = (kind: ImagePromptKind, value: string) => {
     const next = { ...imagePrompts, [kind]: value };
@@ -156,33 +147,38 @@ export function WizardShell() {
     handleImagePromptChange(kind, DEFAULT_IMAGE_PROMPTS[kind]);
   };
 
-  const handleJsonSubmit = (json: string) => {
-    setJsonData(json);
-
-    // Check if this film title matches a pre-cached project. If so, we'll
-    // fake the generation step using the cached documents. Fresh image state
-    // — we deliberately don't restore images so the demo walkthrough still
-    // shows image generation as a live step.
+  const handleJsonSubmit = async (json: string) => {
+    // Figure out whether this is a cached demo project (title match). Cached
+    // projects take the fake-gen path and don't need any API keys — so we
+    // skip the ensureKeys prompt for them.
+    let isCached = false;
+    let prefilled: DocumentResult[] | null = null;
     try {
       const parsed = JSON.parse(json);
       const cached = findCachedProject(parsed.title || "");
       if (cached) {
-        setPrefilledDocs(
-          cached.documents.map((d) => ({
-            name: d.name,
-            slug: d.slug,
-            status: d.status as DocumentResult["status"],
-            content: d.content,
-            error: d.error,
-          })),
-        );
-      } else {
-        setPrefilledDocs(null);
+        isCached = true;
+        prefilled = cached.documents.map((d) => ({
+          name: d.name,
+          slug: d.slug,
+          status: d.status as DocumentResult["status"],
+          content: d.content,
+          error: d.error,
+        }));
       }
     } catch {
-      setPrefilledDocs(null);
+      /* parse failed — treat as non-cached */
     }
 
+    // Non-cached path needs a Claude key. fal is optional but if supplied
+    // the auto-enqueue effect will kick off images in parallel.
+    if (!isCached) {
+      const keys = await ensureKeys();
+      if (!keys) return; // user cancelled — stay on step 1
+    }
+
+    setJsonData(json);
+    setPrefilledDocs(prefilled);
     setCurrentStep(2);
   };
 
@@ -271,18 +267,51 @@ export function WizardShell() {
     updateProject({ jsonData: newJsonData });
   }, []);
 
-  // Count of failures from the most recent "Generate all images" batch. Cleared
-  // on the next run. Used to surface a "Retry N failed" action in the More menu
-  // — the retry itself is just re-invoking handleGenerateAllImages, which will
-  // automatically only re-fire tasks whose images didn't land in state.
-  const [lastFailedCount, setLastFailedCount] = useState(0);
+  // --- Image generation: task queue ---
+  //
+  // Tasks are enqueued incrementally. Portraits + props fire the moment JSON
+  // is ready; storyboard + poster images fire the moment their parent Claude
+  // doc lands. Everything runs in the background in parallel with text
+  // generation. A single worker drains the queue with 500ms stagger between
+  // task starts — each task runs independently and updates its accumulator
+  // ref atomically (JS's single-threaded event loop makes the read-modify-
+  // write safe for concurrent task resolutions).
+  type ImageTaskKind = "portrait" | "prop" | "storyboard" | "poster";
+  type ImageTask = {
+    key: string;
+    kind: ImageTaskKind;
+    run: (falKey: string) => Promise<void>;
+  };
 
-  const [genAllImages, setGenAllImages] = useState<{
+  const [imageGen, setImageGen] = useState<{
     running: boolean;
     done: number;
     total: number;
-  }>({ running: false, done: 0, total: 0 });
-  const genAllCancelRef = useRef(false);
+    failed: number;
+  }>({ running: false, done: 0, total: 0, failed: 0 });
+
+  const imageQueueRef = useRef<ImageTask[]>([]);
+  const imageEnqueuedKeysRef = useRef<Set<string>>(new Set());
+  const imageWorkerActiveRef = useRef(false);
+  const imageInFlightRef = useRef(0);
+  const imageCancelRef = useRef(false);
+
+  // Accumulator refs stay in sync with state so concurrent tasks can merge
+  // results without clobbering each other. Declared BEFORE the auto-enqueue
+  // effect so hydration syncs land before we start reading refs.
+  const portraitsRef = useRef<Record<string, SavedImage>>(portraits);
+  const propImagesRef = useRef<Record<string, SavedImage>>(propImages);
+  const storyboardImagesRef = useRef<Record<number, SavedImage>>(storyboardImages);
+  const posterImagesRef = useRef<Record<number, SavedImage>>(posterImages);
+  const falKeyRef = useRef<string>(falKey);
+  const promptOverridesRef = useRef<Record<number, string>>(promptOverrides);
+
+  useEffect(() => { portraitsRef.current = portraits; }, [portraits]);
+  useEffect(() => { propImagesRef.current = propImages; }, [propImages]);
+  useEffect(() => { storyboardImagesRef.current = storyboardImages; }, [storyboardImages]);
+  useEffect(() => { posterImagesRef.current = posterImages; }, [posterImages]);
+  useEffect(() => { falKeyRef.current = falKey; }, [falKey]);
+  useEffect(() => { promptOverridesRef.current = promptOverrides; }, [promptOverrides]);
 
   const fakeGenerateAllImages = async (cached: SavedProject) => {
     type FakeTask = { apply: () => void };
@@ -346,24 +375,290 @@ export function WizardShell() {
 
     if (tasks.length === 0) return;
 
-    genAllCancelRef.current = false;
-    setGenAllImages({ running: true, done: 0, total: tasks.length });
+    imageCancelRef.current = false;
+    setImageGen({ running: true, done: 0, total: tasks.length, failed: 0 });
 
     // Stagger: reveal one image every 300-600ms (randomized)
     for (let i = 0; i < tasks.length; i++) {
-      if (genAllCancelRef.current) break;
+      if (imageCancelRef.current) break;
       tasks[i].apply();
-      setGenAllImages({ running: true, done: i + 1, total: tasks.length });
+      setImageGen((p) => ({ ...p, done: i + 1 }));
       const delay = 300 + Math.random() * 300;
       await new Promise((r) => setTimeout(r, delay));
     }
 
-    setGenAllImages({ running: false, done: 0, total: 0 });
+    setImageGen({ running: false, done: 0, total: 0, failed: 0 });
   };
 
+  const buildPortraitTasks = (
+    json: string,
+    existing: Record<string, SavedImage>,
+  ): ImageTask[] => {
+    let parsed: { characters?: { name: string; description?: string }[] } = {};
+    try { parsed = JSON.parse(json); } catch { return []; }
+    const tasks: ImageTask[] = [];
+    for (const char of parsed.characters || []) {
+      if (existing[char.name]) continue;
+      tasks.push({
+        key: `portrait:${char.name}`,
+        kind: "portrait",
+        run: async (fk) => {
+          const res = await fetch("/api/generate-portrait", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              name: char.name,
+              description: char.description,
+              stylePrefix: getStylePrefix("portrait"),
+              apiKey: fk,
+            }),
+          });
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const { url } = await res.json();
+          const next = { ...portraitsRef.current, [char.name]: { status: "done" as const, url } };
+          portraitsRef.current = next;
+          handlePortraitsChange(next);
+        },
+      });
+    }
+    return tasks;
+  };
+
+  const buildPropTasks = (
+    json: string,
+    existing: Record<string, SavedImage>,
+  ): ImageTask[] => {
+    let parsed: { props_master?: { item: string; notes?: string }[] } = {};
+    try { parsed = JSON.parse(json); } catch { return []; }
+    const tasks: ImageTask[] = [];
+    for (const prop of parsed.props_master || []) {
+      if (existing[prop.item]) continue;
+      tasks.push({
+        key: `prop:${prop.item}`,
+        kind: "prop",
+        run: async (fk) => {
+          const res = await fetch("/api/generate-prop", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              name: prop.item,
+              notes: prop.notes,
+              stylePrefix: getStylePrefix("prop"),
+              apiKey: fk,
+            }),
+          });
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const { url } = await res.json();
+          const next = { ...propImagesRef.current, [prop.item]: { status: "done" as const, url } };
+          propImagesRef.current = next;
+          handlePropImagesChange(next);
+        },
+      });
+    }
+    return tasks;
+  };
+
+  const buildStoryboardTasks = (
+    sbContent: string,
+    existing: Record<number, SavedImage>,
+    overrides: Record<number, string>,
+  ): ImageTask[] => {
+    const tasks: ImageTask[] = [];
+    const { acts } = parseStoryboardPrompts(sbContent);
+    for (const act of acts) {
+      for (const scene of act.scenes) {
+        if (existing[scene.number]) continue;
+        const prompt = overrides[scene.number] || scene.prompt;
+        const camera = scene.camera;
+        const num = scene.number;
+        tasks.push({
+          key: `storyboard:${num}`,
+          kind: "storyboard",
+          run: async (fk) => {
+            const res = await fetch("/api/generate-image", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                prompt,
+                camera,
+                stylePrefix: getStylePrefix("storyboard"),
+                apiKey: fk,
+              }),
+            });
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const { url } = await res.json();
+            const next = { ...storyboardImagesRef.current, [num]: { status: "done" as const, url } };
+            storyboardImagesRef.current = next;
+            handleImagesChange(next);
+          },
+        });
+      }
+    }
+    return tasks;
+  };
+
+  const buildPosterTasks = (
+    posterContent: string,
+    existing: Record<number, SavedImage>,
+  ): ImageTask[] => {
+    const tasks: ImageTask[] = [];
+    const { concepts } = parsePosterConcepts(posterContent);
+    for (const concept of concepts) {
+      if (existing[concept.number]) continue;
+      const prompt = [
+        concept.composition,
+        concept.style ? `Style: ${concept.style}.` : "",
+      ].filter(Boolean).join(" ");
+      const num = concept.number;
+      tasks.push({
+        key: `poster:${num}`,
+        kind: "poster",
+        run: async (fk) => {
+          const res = await fetch("/api/generate-poster-image", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              prompt,
+              stylePrefix: getStylePrefix("poster"),
+              apiKey: fk,
+            }),
+          });
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const { url } = await res.json();
+          const next = { ...posterImagesRef.current, [num]: { status: "done" as const, url } };
+          posterImagesRef.current = next;
+          handlePosterImagesChange(next);
+        },
+      });
+    }
+    return tasks;
+  };
+
+  // Core enqueue + worker. Dedupes via a Set so overlapping enqueues don't
+  // fire the same task twice, but releases the key on task settle so failed
+  // tasks can be retried on a subsequent manual run.
+  const enqueueImageTasks = useCallback((tasks: ImageTask[]) => {
+    if (!falKeyRef.current) return;
+    const novel = tasks.filter((t) => !imageEnqueuedKeysRef.current.has(t.key));
+    if (novel.length === 0) return;
+    for (const t of novel) imageEnqueuedKeysRef.current.add(t.key);
+    imageQueueRef.current.push(...novel);
+    const workerWasIdle = !imageWorkerActiveRef.current;
+    // When the worker was idle, we're starting a fresh wave — reset counters
+    // so the progress badge reads cleanly for this run.
+    setImageGen((p) =>
+      workerWasIdle
+        ? { running: true, done: 0, total: novel.length, failed: 0 }
+        : { ...p, total: p.total + novel.length, running: true },
+    );
+    if (workerWasIdle) runImageWorker();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const runImageWorker = () => {
+    if (imageWorkerActiveRef.current) return;
+    imageWorkerActiveRef.current = true;
+    imageCancelRef.current = false;
+    (async () => {
+      let paymentAborted = false;
+      while (imageQueueRef.current.length > 0) {
+        if (imageCancelRef.current) break;
+        const fk = falKeyRef.current;
+        if (!fk) {
+          imageQueueRef.current.length = 0;
+          imageEnqueuedKeysRef.current.clear();
+          break;
+        }
+        const task = imageQueueRef.current.shift()!;
+        imageInFlightRef.current++;
+        // Fire-and-forget — stagger starts by 500ms but let each task
+        // resolve independently so a slow one doesn't block the rest.
+        task.run(fk)
+          .catch((e) => {
+            const msg = e instanceof Error ? e.message : String(e);
+            if (/402|payment|quota|insufficient/.test(msg)) {
+              paymentAborted = true;
+              imageCancelRef.current = true;
+              imageQueueRef.current.length = 0;
+              console.error("[images] credits exhausted", msg);
+            } else {
+              console.error(`[images] ${task.kind} ${task.key} failed:`, msg);
+            }
+            setImageGen((p) => ({ ...p, failed: p.failed + 1 }));
+          })
+          .finally(() => {
+            imageInFlightRef.current--;
+            imageEnqueuedKeysRef.current.delete(task.key);
+            setImageGen((p) => {
+              const newDone = p.done + 1;
+              const idle =
+                imageQueueRef.current.length === 0 &&
+                imageInFlightRef.current === 0;
+              return { ...p, done: newDone, running: !idle };
+            });
+          });
+        await new Promise((r) => setTimeout(r, 500));
+      }
+      // Wait for the last in-flight tasks to settle before releasing.
+      while (imageInFlightRef.current > 0) {
+        await new Promise((r) => setTimeout(r, 100));
+      }
+      imageWorkerActiveRef.current = false;
+      if (paymentAborted) {
+        alert("Image generation stopped — your fal.ai API key is out of credits.");
+      }
+    })();
+  };
+
+  const cancelImageGen = () => {
+    imageCancelRef.current = true;
+    imageQueueRef.current.length = 0;
+    imageEnqueuedKeysRef.current.clear();
+  };
+
+  // Auto-fire portrait + prop tasks as soon as we have jsonData and a fal key.
+  // This runs in parallel with Claude text generation — storyboard and poster
+  // images kick off later from the handleDocReady callback when their parent
+  // docs land. Skipped for cached projects (they take the fake-gen path).
+  const autoStartedForRef = useRef<string>("");
+  useEffect(() => {
+    if (!jsonData || !falKey) return;
+    if (autoStartedForRef.current === jsonData) return;
+    try {
+      const title = JSON.parse(jsonData).title || "";
+      if (findCachedProject(title)) return;
+    } catch { /* proceed anyway */ }
+    autoStartedForRef.current = jsonData;
+    enqueueImageTasks([
+      ...buildPortraitTasks(jsonData, portraitsRef.current),
+      ...buildPropTasks(jsonData, propImagesRef.current),
+    ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [jsonData, falKey]);
+
+  // Called by StepGenerating the moment each Claude doc lands. Lets us fire
+  // storyboard / poster image tasks as soon as their source markdown exists
+  // instead of waiting for the whole Claude batch to finish.
+  const handleDocReady = useCallback(
+    (slug: string, content: string) => {
+      if (!falKeyRef.current || !content) return;
+      if (slug === "storyboard-prompts") {
+        enqueueImageTasks(
+          buildStoryboardTasks(content, storyboardImagesRef.current, promptOverridesRef.current),
+        );
+      } else if (slug === "poster-concepts") {
+        enqueueImageTasks(buildPosterTasks(content, posterImagesRef.current));
+      }
+    },
+    // buildStoryboardTasks / buildPosterTasks are inline closures that read
+    // from refs — they don't need to be in the dependency array.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [enqueueImageTasks],
+  );
+
   const handleGenerateAllImages = async () => {
-    if (genAllImages.running) {
-      genAllCancelRef.current = true;
+    if (imageGen.running) {
+      cancelImageGen();
       return;
     }
     if (!jsonData) return;
@@ -375,187 +670,28 @@ export function WizardShell() {
       if (cached && (cached.images || cached.posterImages || cached.portraits || cached.propImages)) {
         return fakeGenerateAllImages(cached);
       }
-    } catch { /* not cached, proceed normally */ }
+    } catch { /* not cached */ }
 
-    type Task = { kind: string; run: () => Promise<void> };
-    const tasks: Task[] = [];
+    // Manual button click — require a fal key (prompt if missing).
+    const keys = await ensureKeys({ requireFal: true });
+    if (!keys) return;
 
-    // --- Parse inputs ---
-    let parsed: {
-      characters?: { name: string; description?: string }[];
-      props_master?: { item: string; notes?: string }[];
-    } = {};
-    try {
-      parsed = JSON.parse(jsonData);
-    } catch {
-      return;
-    }
-
-    // --- Accumulate state as we go so each setState call gets the full picture ---
-    let accPortraits = { ...portraits };
-    let accPropImages = { ...propImages };
-    let accStoryboardImages = { ...storyboardImages };
-    let accPosterImages = { ...posterImages };
-
-    // Character portraits
-    for (const char of parsed.characters || []) {
-      if (accPortraits[char.name]) continue;
-      tasks.push({
-        kind: "portrait",
-        run: async () => {
-          const res = await fetch("/api/generate-portrait", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              name: char.name,
-              description: char.description,
-              stylePrefix: getStylePrefix("portrait"),
-            }),
-          });
-          if (!res.ok) throw new Error(`HTTP ${res.status}`);
-          const { url } = await res.json();
-          accPortraits = { ...accPortraits, [char.name]: { status: "done" as const, url } };
-          handlePortraitsChange(accPortraits);
-        },
-      });
-    }
-
-    // Prop reference images
-    for (const prop of parsed.props_master || []) {
-      if (accPropImages[prop.item]) continue;
-      tasks.push({
-        kind: "prop",
-        run: async () => {
-          const res = await fetch("/api/generate-prop", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              name: prop.item,
-              notes: prop.notes,
-              stylePrefix: getStylePrefix("prop"),
-            }),
-          });
-          if (!res.ok) throw new Error(`HTTP ${res.status}`);
-          const { url } = await res.json();
-          accPropImages = { ...accPropImages, [prop.item]: { status: "done" as const, url } };
-          handlePropImagesChange(accPropImages);
-        },
-      });
-    }
-
-    // Storyboard frames
+    const tasks: ImageTask[] = [
+      ...buildPortraitTasks(jsonData, portraitsRef.current),
+      ...buildPropTasks(jsonData, propImagesRef.current),
+    ];
     const sbDoc = documents.find((d) => d.slug === "storyboard-prompts");
     if (sbDoc?.content) {
-      const { acts } = parseStoryboardPrompts(sbDoc.content);
-      for (const act of acts) {
-        for (const scene of act.scenes) {
-          if (accStoryboardImages[scene.number]) continue;
-          const prompt = promptOverrides[scene.number] || scene.prompt;
-          const camera = scene.camera;
-          tasks.push({
-            kind: "storyboard",
-            run: async () => {
-              const res = await fetch("/api/generate-image", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  prompt,
-                  camera,
-                  stylePrefix: getStylePrefix("storyboard"),
-                }),
-              });
-              if (!res.ok) throw new Error(`HTTP ${res.status}`);
-              const { url } = await res.json();
-              accStoryboardImages = {
-                ...accStoryboardImages,
-                [scene.number]: { status: "done" as const, url },
-              };
-              handleImagesChange(accStoryboardImages);
-            },
-          });
-        }
-      }
+      tasks.push(
+        ...buildStoryboardTasks(sbDoc.content, storyboardImagesRef.current, promptOverridesRef.current),
+      );
     }
-
-    // Poster concepts
     const posterDoc = documents.find((d) => d.slug === "poster-concepts");
     if (posterDoc?.content) {
-      const { concepts } = parsePosterConcepts(posterDoc.content);
-      for (const concept of concepts) {
-        if (accPosterImages[concept.number]) continue;
-        const prompt = [
-          concept.composition,
-          concept.style ? `Style: ${concept.style}.` : "",
-        ]
-          .filter(Boolean)
-          .join(" ");
-        tasks.push({
-          kind: "poster",
-          run: async () => {
-            const res = await fetch("/api/generate-poster-image", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                prompt,
-                stylePrefix: getStylePrefix("poster"),
-              }),
-            });
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-            const { url } = await res.json();
-            accPosterImages = {
-              ...accPosterImages,
-              [concept.number]: { status: "done" as const, url },
-            };
-            handlePosterImagesChange(accPosterImages);
-          },
-        });
-      }
+      tasks.push(...buildPosterTasks(posterDoc.content, posterImagesRef.current));
     }
 
-    if (tasks.length === 0) return;
-
-    genAllCancelRef.current = false;
-    setGenAllImages({ running: true, done: 0, total: tasks.length });
-    setLastFailedCount(0); // clear previous badge when a new batch starts
-
-    let completed = 0;
-    let failed = 0;
-    let abortedByError = false;
-
-    // Staggered parallel: fire all tasks with 500ms delay between each.
-    // Each task runs independently; results land as they finish.
-    const promises = tasks.map((task, i) =>
-      new Promise<void>((resolve) => {
-        // Stagger start by 500ms per task
-        setTimeout(async () => {
-          if (genAllCancelRef.current || abortedByError) {
-            resolve();
-            return;
-          }
-          try {
-            await task.run();
-          } catch (e) {
-            const msg = e instanceof Error ? e.message : String(e);
-            // Detect payment/quota errors and abort everything
-            if (msg.includes("402") || msg.includes("payment") || msg.includes("quota") || msg.includes("insufficient")) {
-              abortedByError = true;
-              console.error(`[generate-all] API credits exhausted — stopping all tasks`);
-              alert("Image generation stopped — your fal.ai API key is out of credits.");
-            } else {
-              failed++;
-              console.error(`[generate-all] ${task.kind} failed:`, msg);
-            }
-          }
-          completed++;
-          setGenAllImages({ running: true, done: completed, total: tasks.length });
-          resolve();
-        }, i * 500);
-      })
-    );
-
-    await Promise.all(promises);
-    setGenAllImages({ running: false, done: 0, total: 0 });
-    setLastFailedCount(failed);
+    enqueueImageTasks(tasks);
   };
 
   const [savingDemo, setSavingDemo] = useState<"idle" | "saving" | "saved">("idle");
@@ -666,7 +802,7 @@ export function WizardShell() {
             </div>
 
             <div className="flex items-center gap-2 ml-auto">
-              {genAllImages.running && (
+              {imageGen.running && (
                 <button
                   onClick={handleGenerateAllImages}
                   title="Click to cancel"
@@ -674,7 +810,7 @@ export function WizardShell() {
                 >
                   <Loader2 size={13} className="animate-spin" />
                   <span className="tabular-nums">
-                    {genAllImages.done}/{genAllImages.total}
+                    {imageGen.done}/{imageGen.total}
                   </span>
                   <span className="text-primary/70">images</span>
                 </button>
@@ -725,13 +861,13 @@ export function WizardShell() {
                 items={[
                   hasActiveProject && documents.some((d) => d.status === "done")
                     ? {
-                        icon: genAllImages.running ? (
+                        icon: imageGen.running ? (
                           <Loader2 size={14} className="animate-spin" />
                         ) : (
                           <Images size={14} />
                         ),
-                        label: genAllImages.running
-                          ? `Generating ${genAllImages.done}/${genAllImages.total}… (click to cancel)`
+                        label: imageGen.running
+                          ? `Generating ${imageGen.done}/${imageGen.total}… (click to cancel)`
                           : "Generate all images",
                         onClick: handleGenerateAllImages,
                       }
@@ -739,11 +875,11 @@ export function WizardShell() {
                   // Show a separate "Retry N failed" action when the last batch
                   // had failures. It's literally the same handler — but the
                   // label primes the user that we know something went wrong.
-                  !genAllImages.running && lastFailedCount > 0 && hasActiveProject
+                  !imageGen.running && imageGen.failed > 0 && hasActiveProject
                     ? {
                         icon: <RotateCcw size={14} />,
-                        label: `Retry ${lastFailedCount} failed ${
-                          lastFailedCount === 1 ? "image" : "images"
+                        label: `Retry ${imageGen.failed} failed ${
+                          imageGen.failed === 1 ? "image" : "images"
                         }`,
                         onClick: handleGenerateAllImages,
                       }
@@ -902,6 +1038,7 @@ export function WizardShell() {
             documents={documents}
             setDocuments={setDocuments}
             onComplete={handleGenerationComplete}
+            onDocReady={handleDocReady}
             prefilledDocs={prefilledDocs || undefined}
             onStop={() => handleGenerationComplete(documents)}
           />
@@ -953,7 +1090,26 @@ export function WizardShell() {
                 type="password"
                 placeholder="sk-ant-api03-..."
                 value={apiKey}
-                onChange={(e) => handleApiKeyChange(e.target.value)}
+                onChange={(e) => setApiKey(e.target.value)}
+                className="w-full rounded-[8px] bg-card/60 shadow-pill px-3 py-2.5 text-[13px] font-mono placeholder:text-muted-foreground/50 focus:outline-none focus:shadow-paper-hover"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-[13px] font-medium tracking-tight">
+                fal.ai API Key{" "}
+                <span className="text-muted-foreground font-normal">· optional</span>
+              </label>
+              <p className="text-[12px] text-foreground/60 tracking-tight">
+                Enables storyboard, portrait, prop, and poster image generation. Leave blank for a text-only deck.{" "}
+                <a href="https://fal.ai/dashboard/keys" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-foreground">
+                  Get a key
+                </a>
+              </p>
+              <input
+                type="password"
+                placeholder="fal-..."
+                value={falKey}
+                onChange={(e) => setFalKey(e.target.value)}
                 className="w-full rounded-[8px] bg-card/60 shadow-pill px-3 py-2.5 text-[13px] font-mono placeholder:text-muted-foreground/50 focus:outline-none focus:shadow-paper-hover"
               />
             </div>

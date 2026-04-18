@@ -5,6 +5,7 @@ import { Star, Camera, Loader2, RefreshCw, Images, X, Package } from "lucide-rea
 import { SectionLabelPill } from "@/components/ui/inline-chip";
 import { getStylePrefix } from "@/lib/image-prompts";
 import type { SavedImage } from "@/lib/reports";
+import { useApiKeys } from "@/lib/api-keys-context";
 
 type SubTab = "props" | "wardrobe";
 
@@ -69,6 +70,7 @@ export function ProductionViewer({
   const [generatingAll, setGeneratingAll] = useState(false);
   const [genAllProgress, setGenAllProgress] = useState({ done: 0, total: 0 });
   const cancelRef = useRef(false);
+  const { ensureKeys } = useApiKeys();
 
   const mergedPropImages: Record<string, PropImageState> = useMemo(() => {
     const merged: Record<string, PropImageState> = {};
@@ -81,7 +83,10 @@ export function ProductionViewer({
     return merged;
   }, [propImages, localPropImages]);
 
-  const fetchPropImage = async (prop: PropMaster): Promise<{ url: string } | null> => {
+  const fetchPropImage = async (
+    prop: PropMaster,
+    falKey: string,
+  ): Promise<{ url: string } | null> => {
     setLocalPropImages((prev) => ({ ...prev, [prop.item]: { status: "generating" } }));
     try {
       const res = await fetch("/api/generate-prop", {
@@ -91,6 +96,7 @@ export function ProductionViewer({
           name: prop.item,
           notes: prop.notes,
           stylePrefix: getStylePrefix("prop"),
+          apiKey: falKey,
         }),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -104,7 +110,9 @@ export function ProductionViewer({
   };
 
   const generateSingleProp = async (prop: PropMaster) => {
-    const result = await fetchPropImage(prop);
+    const keys = await ensureKeys({ requireFal: true });
+    if (!keys) return;
+    const result = await fetchPropImage(prop, keys.falKey);
     if (result) {
       onPropImagesChange({ ...propImages, [prop.item]: { status: "done", url: result.url } });
     }
@@ -113,6 +121,8 @@ export function ProductionViewer({
   const generateAllPropImages = async () => {
     const toGenerate = propsMaster.filter((p) => !propImages[p.item]);
     if (toGenerate.length === 0) return;
+    const keys = await ensureKeys({ requireFal: true });
+    if (!keys) return;
     cancelRef.current = false;
     setGeneratingAll(true);
     setGenAllProgress({ done: 0, total: toGenerate.length });
@@ -121,7 +131,7 @@ export function ProductionViewer({
     for (let i = 0; i < toGenerate.length; i++) {
       if (cancelRef.current) break;
       const prop = toGenerate[i];
-      const result = await fetchPropImage(prop);
+      const result = await fetchPropImage(prop, keys.falKey);
       if (result) {
         accumulated = { ...accumulated, [prop.item]: { status: "done", url: result.url } };
         onPropImagesChange(accumulated);

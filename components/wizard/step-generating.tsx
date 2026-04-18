@@ -11,6 +11,10 @@ type StepGeneratingProps = {
   documents: DocumentResult[];
   setDocuments: React.Dispatch<React.SetStateAction<DocumentResult[]>>;
   onComplete: (results: DocumentResult[]) => void;
+  // Fires as each individual document lands — lets the wizard kick off
+  // dependent work (like storyboard/poster image generation) the moment a
+  // particular doc is ready, instead of waiting for the whole batch.
+  onDocReady?: (slug: string, content: string) => void;
   // When provided, skip real API calls and fake the progression using these
   // pre-populated documents. Used for the cached-project "bonus round" demo
   // path where a matching film title already has all its markdown on disk.
@@ -22,7 +26,8 @@ async function generateOne(
   doc: DocumentResult,
   jsonData: string,
   apiKey: string,
-  setDocuments: React.Dispatch<React.SetStateAction<DocumentResult[]>>
+  setDocuments: React.Dispatch<React.SetStateAction<DocumentResult[]>>,
+  onDocReady?: (slug: string, content: string) => void,
 ): Promise<{ slug: string; content: string | null; error: string | null }> {
   setDocuments((prev) =>
     prev.map((d) =>
@@ -58,6 +63,11 @@ async function generateOne(
       body: JSON.stringify({ filename: `${doc.slug}.md`, content: data.content }),
     }).catch(() => {});
 
+    // Fire the hook synchronously so the wizard can schedule dependent work
+    // (image generation) the instant this doc's content is available, while
+    // sibling docs are still in-flight.
+    if (data.content) onDocReady?.(doc.slug, data.content);
+
     return { slug: doc.slug, content: data.content, error: null };
   } catch (error) {
     const errMsg = error instanceof Error ? error.message : "Unknown error";
@@ -87,6 +97,7 @@ export function StepGenerating({
   documents,
   setDocuments,
   onComplete,
+  onDocReady,
   prefilledDocs,
   onStop,
 }: StepGeneratingProps) {
@@ -163,32 +174,37 @@ export function StepGenerating({
       onComplete(finalDocs);
     }
 
-    async function generateSequential() {
-      const results: { slug: string; content: string | null; error: string | null }[] = [];
-
-      for (const doc of documents) {
-        if (cancelRef.current) break;
-        const start = Date.now();
-        const result = await generateOne(doc, jsonData, apiKey, setDocuments);
-        results.push(result);
-        const elapsed = Date.now() - start;
-        if (elapsed < 800) await new Promise((r) => setTimeout(r, 800 - elapsed));
-      }
+    async function generateParallel() {
+      // Fire all 5 Claude docs concurrently. Each call's onDocReady fires the
+      // moment its content lands, so dependent image generation in the wizard
+      // can start without waiting for the whole batch. If a single call fails
+      // the others keep going — we record per-doc errors and still advance.
+      const results = await Promise.all(
+        documents.map((doc) =>
+          cancelRef.current
+            ? Promise.resolve({
+                slug: doc.slug,
+                content: null,
+                error: "Cancelled",
+              })
+            : generateOne(doc, jsonData, apiKey, setDocuments, onDocReady),
+        ),
+      );
 
       const finalDocs = documents.map((doc) => {
         const result = results.find((r) => r.slug === doc.slug);
-        if (result) {
-          return {
-            ...doc,
-            status: (result.error ? "error" : "done") as DocumentResult["status"],
-            content: result.content,
-            error: result.error,
-          };
+        if (!result) {
+          return { ...doc, status: "error" as const, error: "Generation failed" };
         }
-        if (cancelRef.current) {
+        if (cancelRef.current && !result.content) {
           return { ...doc, status: "pending" as const };
         }
-        return { ...doc, status: "error" as const, error: "Generation failed" };
+        return {
+          ...doc,
+          status: (result.error ? "error" : "done") as DocumentResult["status"],
+          content: result.content,
+          error: result.error,
+        };
       });
 
       setDocuments(finalDocs);
@@ -198,7 +214,7 @@ export function StepGenerating({
     if (prefilledDocs && prefilledDocs.length > 0) {
       fakeProgression();
     } else {
-      generateSequential();
+      generateParallel();
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
