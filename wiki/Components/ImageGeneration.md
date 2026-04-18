@@ -8,12 +8,17 @@ Greenlight generates four types of images — storyboard frames, character portr
 
 ```mermaid
 graph LR
-    VP[Viewer Component] -->|stylePrefix + subject| Route[API Route]
-    Route -->|prompt + LoRA config| FAL[fal.ai<br/>fal-ai/flux-lora]
-    FAL -->|image URL| Route
-    Route -->|download + save| Cache[.cache/images/]
-    Route -->|/api/serve-image/uuid.jpg| VP
+    Queue[wizard-shell<br/>image task queue] -->|500ms stagger| Route[API Route]
+    VP[Viewer Component] -->|manual regenerate| Route
+    Route -->|fal.config<br/>with user key| FAL[fal.ai<br/>fal-ai/flux-lora]
+    FAL -->|fal.media CDN URL| Route
+    Route -->|url| Queue
+    Route -->|url| VP
+    Queue -->|handle*Change| State[React state<br/>+ localStorage]
+    VP -->|handle*Change| State
 ```
+
+The task queue in `wizard-shell.tsx` is the primary driver — it auto-enqueues portraits + props when JSON is submitted and a fal key is present, then enqueues storyboard + poster images as their parent Claude docs land (via `onDocReady`). Viewers retain their own manual-regenerate buttons that call the routes directly.
 
 ## Configuration
 
@@ -50,6 +55,8 @@ The LoRA trigger word `gstdrw style` at the start of the style prefix is what ac
 ## fal.ai Call Shape
 
 ```typescript
+fal.config({ credentials: clientKey || process.env.FAL_KEY });
+
 fal.subscribe("fal-ai/flux-lora", {
   input: {
     prompt: fullPrompt,
@@ -59,11 +66,14 @@ fal.subscribe("fal-ai/flux-lora", {
     num_images: 1,
     num_inference_steps: 28,
     guidance_scale: 3.5,
+    acceleration: "regular",
   }
 })
 ```
 
-The fal.ai SDK types don't include `negative_prompt` or `loras` yet (types lag behind the API), so the input object uses `as never` type assertion.
+- The fal.ai SDK types don't include `negative_prompt` or `loras` yet (types lag behind the API), so the input object uses `as never` type assertion.
+- `acceleration: "regular"` gives ~40% faster generation at no quality cost.
+- `fal.config` is module-global — under concurrent users with different keys there's a theoretical race. Acceptable at portfolio scale.
 
 ## User Customization
 

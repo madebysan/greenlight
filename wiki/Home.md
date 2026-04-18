@@ -27,8 +27,8 @@ Built as a portfolio piece targeting A24's creative team. See [presentation.md](
 
 ## Status
 
-Active development. Portfolio demo at `/demo` with Night of the Living Dead as the sample screenplay.
+Active development. Two portfolio demos live at `/demo` (Night of the Living Dead, 1968) and `/demo/red-balloon` (The Red Balloon, 1956). Deployed at **greenlight-public.vercel.app** — public, no password gate, zero server-side keys. Visitors bring their own Claude + fal.ai + TMDB keys via the onboarding modal; demos work key-free.
 
 ---
 
-*Last generated: 2026-04-12*
+*Last generated: 2026-04-18*
