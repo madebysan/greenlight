@@ -3,6 +3,7 @@ import { Space_Grotesk, Space_Mono } from "next/font/google";
 import { Agentation } from "agentation";
 import { PasswordGate } from "@/components/password-gate";
 import { ApiKeysProvider } from "@/lib/api-keys-context";
+import { getSiteUrl } from "@/lib/site-url";
 import "./globals.css";
 
 const spaceGrotesk = Space_Grotesk({
@@ -17,12 +18,20 @@ const spaceMono = Space_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Greenlight",
+  metadataBase: new URL(getSiteUrl()),
+  title: {
+    default: "Greenlight",
+    // Per-page titles become "Title — Greenlight" automatically.
+    template: "%s — Greenlight",
+  },
   description: "Turn a script into something tangible, fast. A vision deck generator for indie filmmakers.",
+  alternates: { canonical: "/" },
   openGraph: {
     title: "Greenlight",
     description: "Turn a script into something tangible, fast. A vision deck generator for indie filmmakers.",
     type: "website",
+    url: "/",
+    siteName: "Greenlight",
     images: [{ url: "/og-image.png", width: 1200, height: 630 }],
   },
   twitter: {
