@@ -5,6 +5,44 @@ Updated every session via `/save-session`.
 
 ---
 
+## 2026-04-18 (session 9 — public-release prep + keys architecture + SEO + new deploy)
+
+Moved every paid API call onto user-provided keys, rearchitected image generation as a background task queue running in parallel with text generation, improved basic SEO, and redeployed to a fresh Vercel project so the site can go fully public on GitHub.
+
+### Features
+- **Keys context + onboarding modal** — `lib/api-keys-context.tsx` + `components/wizard/api-keys-dialog.tsx`. Claude required, fal.ai + TMDB optional. Modal shows time + cost estimates. `ensureKeys({requireFal?})` gates every user action.
+- **All 10 API routes accept `apiKey` in body** with `process.env.X` fallback. Covers 5 Claude doc routes, `regenerate-section`, `regenerate-prompt`, `extract-screenplay`, 4 fal routes, `tmdb-search`.
+- **Parallel Claude docs** — `step-generating.tsx` rewritten; all 5 doc routes fire via `Promise.all` with per-doc `onDocReady(slug, content)` callbacks.
+- **Background image task queue** — `wizard-shell.tsx` rewritten. Portraits + props auto-fire on JSON submit; storyboard + poster images fire when their parent Claude doc lands. Single worker with 500ms stagger, dedupe Set, cancel support, payment-error abort.
+- **TMDB key in Settings + onboarding modal** — marked optional everywhere. Powers poster thumbnails on Mood & Tone.
+- **PDF extract route: streaming + 32k tokens + forgiving JSON extractor + truncation detection** — `client.messages.stream().finalMessage()`, `max_tokens: 32768`, three-stage parse (raw → fenced → balanced-brace scan), `stop_reason === "max_tokens"` detection with user-facing message, `export const maxDuration = 300`.
+
+### SEO
+- **`lib/site-url.ts`** — canonical base URL resolver.
+- **`layout.tsx`** — `metadataBase`, title template `"%s — Greenlight"`, root canonical. Eliminates the build warning about localhost metadataBase.
+- **Per-page metadata** on `/demo` and `/demo/red-balloon` — dedicated titles, descriptions, OG URLs, and canonicals. Dropped `"use client"` to allow `export const metadata`.
+- **`app/robots.ts` + `app/sitemap.ts`** — live at `/robots.txt` and `/sitemap.xml`.
+- **JSON-LD `SoftwareApplication`** on home — helps AI assistants cite the tool correctly.
+
+### Fixes
+- **Image counter bug** (`49/33 images`) — clamp `total ≥ done`, snap to `0/0` when worker idles, worker now re-checks queue after settle loop so mid-settle enqueues aren't orphaned.
+- **Task queue orphan bug** — if new tasks arrive while the worker is waiting for in-flight tasks to finish, worker loops back into drain mode instead of releasing.
+- **Password gate env-var-gated** — layout still wraps `<PasswordGate>`, but the gate auto-skips when `ACCESS_PASSWORD` unset on server. Fresh deploy has no keys, no gate.
+
+### UX
+- **PDF upload disabled** in `step-instructions.tsx` — tab shown with `Soon` badge + tooltip explaining it's in testing. Default + only active mode is Paste JSON. UploadMode component + route kept in-tree for future re-enable.
+- **Settings dialog** — Claude + fal.ai + TMDB all present with clear required/optional labeling + "Get a key" links.
+
+### Infra
+- **Created fresh Vercel project** `greenlight-public` (URL: `greenlight-public.vercel.app`). Zero server-side keys; modal is the only path.
+- **Deleted old Vercel project** `greenlight-app` (the `greenlight-app-red.vercel.app` URL is gone).
+- **Local `.vercel/` relinked** to `greenlight-public`.
+- **Smoke test passed 8/8** via Playwright (home + demos + modal gating + Settings). Zero console errors.
+
+### Status: deployed to greenlight-public.vercel.app (custom domain DNS pending)
+
+---
+
 ## 2026-04-16 (session 8 — wave 1 polish + tier 2 edits + red balloon demo + deploy)
 
 Second half of session 7's work shipped live. Site deployed publicly for tomorrow's A24 demo, password gate removed.

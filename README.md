@@ -44,9 +44,11 @@ It sits upstream of StudioBinder, Movie Magic, and real pre-production workflows
 
 ## How It Works
 
-1. **Upload + prompt** — Open [Gemini](https://gemini.google.com/app) (Pro model), upload your screenplay, and paste the built-in extraction prompt. Get structured JSON back.
-2. **Paste** — Paste the JSON into Greenlight.
-3. **Review** — Your vision deck generates automatically. Edit, regenerate images, and iterate.
+1. **Extract + prompt** — Open [Gemini](https://gemini.google.com/app) (Pro model), upload your screenplay, and paste the built-in extraction prompt. Get structured JSON back.
+2. **Paste** — Paste the JSON into Greenlight. On first use you're asked for your Claude and fal.ai keys (both stored locally in your browser, never on a Greenlight server).
+3. **Review** — Your vision deck generates automatically. Claude docs and fal images run in parallel in the background. Edit, regenerate, iterate.
+
+> **PDF upload** is visible in the UI as a coming-soon option. The happy path is Gemini → Paste JSON today.
 
 ## Image Generation
 
@@ -64,7 +66,15 @@ Open [http://localhost:3001](http://localhost:3001).
 
 ### API Keys
 
-Set in `.env.local`:
+Every API call is keyed by the end user, not by Greenlight. On first use the app pops a modal that saves your keys to `localStorage` — nothing touches a Greenlight server.
+
+| Key | Purpose | Required? | Get one at |
+|-----|---------|-----------|-----------|
+| Claude API key | Document generation (Overview, Mood & Tone, Scenes, Storyboards, Poster Concepts) | **Required** | [console.anthropic.com](https://console.anthropic.com/settings/keys) |
+| fal.ai API key | Image generation (storyboards, portraits, props, posters) | Optional — text-only deck without it | [fal.ai/dashboard](https://fal.ai/dashboard/keys) |
+| TMDB API key | Poster thumbnails on Mood & Tone (Similar Moods, Soundtrack References) | Optional — tab works without it, just without poster thumbs | [themoviedb.org/settings/api](https://www.themoviedb.org/settings/api) |
+
+For local development you can skip the modal by adding the same variables to `.env.local`:
 
 ```
 ANTHROPIC_API_KEY=sk-ant-...
@@ -72,11 +82,7 @@ FAL_KEY=...
 TMDB_API_KEY=...
 ```
 
-| Key | Purpose | Get one at |
-|-----|---------|-----------|
-| `ANTHROPIC_API_KEY` | Document generation | [console.anthropic.com](https://console.anthropic.com/settings/keys) |
-| `FAL_KEY` | Image generation | [fal.ai/dashboard](https://fal.ai/dashboard/keys) |
-| `TMDB_API_KEY` | Film poster lookups | [themoviedb.org/settings/api](https://www.themoviedb.org/settings/api) |
+Server-side env vars are used as a fallback when the user hasn't provided a key. On the public deployment no server-side keys are set, so every visitor must bring their own.
 
 ## Tech Stack
 
