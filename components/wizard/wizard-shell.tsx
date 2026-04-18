@@ -561,47 +561,70 @@ export function WizardShell() {
     imageCancelRef.current = false;
     (async () => {
       let paymentAborted = false;
-      while (imageQueueRef.current.length > 0) {
-        if (imageCancelRef.current) break;
-        const fk = falKeyRef.current;
-        if (!fk) {
-          imageQueueRef.current.length = 0;
-          imageEnqueuedKeysRef.current.clear();
-          break;
-        }
-        const task = imageQueueRef.current.shift()!;
-        imageInFlightRef.current++;
-        // Fire-and-forget — stagger starts by 500ms but let each task
-        // resolve independently so a slow one doesn't block the rest.
-        task.run(fk)
-          .catch((e) => {
-            const msg = e instanceof Error ? e.message : String(e);
-            if (/402|payment|quota|insufficient/.test(msg)) {
-              paymentAborted = true;
-              imageCancelRef.current = true;
-              imageQueueRef.current.length = 0;
-              console.error("[images] credits exhausted", msg);
-            } else {
-              console.error(`[images] ${task.kind} ${task.key} failed:`, msg);
-            }
-            setImageGen((p) => ({ ...p, failed: p.failed + 1 }));
-          })
-          .finally(() => {
-            imageInFlightRef.current--;
-            imageEnqueuedKeysRef.current.delete(task.key);
-            setImageGen((p) => {
-              const newDone = p.done + 1;
-              const idle =
-                imageQueueRef.current.length === 0 &&
-                imageInFlightRef.current === 0;
-              return { ...p, done: newDone, running: !idle };
+      // Outer loop: after the drain + settle cycle, re-check the queue. If
+      // enqueueImageTasks was called while we were waiting for in-flight
+      // tasks to finish, those tasks would otherwise be orphaned here —
+      // adding this re-check means the worker picks up mid-settle enqueues
+      // instead of going idle with unprocessed tasks sitting in the queue.
+      while (!imageCancelRef.current) {
+        // Drain loop — fire tasks with 500ms stagger between starts.
+        while (imageQueueRef.current.length > 0) {
+          if (imageCancelRef.current) break;
+          const fk = falKeyRef.current;
+          if (!fk) {
+            imageQueueRef.current.length = 0;
+            imageEnqueuedKeysRef.current.clear();
+            break;
+          }
+          const task = imageQueueRef.current.shift()!;
+          imageInFlightRef.current++;
+          // Fire-and-forget — stagger starts by 500ms but let each task
+          // resolve independently so a slow one doesn't block the rest.
+          task.run(fk)
+            .catch((e) => {
+              const msg = e instanceof Error ? e.message : String(e);
+              if (/402|payment|quota|insufficient/.test(msg)) {
+                paymentAborted = true;
+                imageCancelRef.current = true;
+                imageQueueRef.current.length = 0;
+                console.error("[images] credits exhausted", msg);
+              } else {
+                console.error(`[images] ${task.kind} ${task.key} failed:`, msg);
+              }
+              setImageGen((p) => ({ ...p, failed: p.failed + 1 }));
+            })
+            .finally(() => {
+              imageInFlightRef.current--;
+              imageEnqueuedKeysRef.current.delete(task.key);
+              setImageGen((p) => {
+                const newDone = p.done + 1;
+                const idle =
+                  imageQueueRef.current.length === 0 &&
+                  imageInFlightRef.current === 0;
+                // On the final settle, snap counters clean so the next wave
+                // starts from 0/0 instead of inheriting stale progress.
+                if (idle) {
+                  return { running: false, done: 0, total: 0, failed: p.failed };
+                }
+                // Never let done exceed total — clamp as a safety net so
+                // the badge can't display impossible states like "49/33".
+                return {
+                  ...p,
+                  done: newDone,
+                  total: Math.max(p.total, newDone),
+                  running: true,
+                };
+              });
             });
-          });
-        await new Promise((r) => setTimeout(r, 500));
-      }
-      // Wait for the last in-flight tasks to settle before releasing.
-      while (imageInFlightRef.current > 0) {
-        await new Promise((r) => setTimeout(r, 100));
+          await new Promise((r) => setTimeout(r, 500));
+        }
+        // Wait for the last in-flight tasks to settle.
+        while (imageInFlightRef.current > 0) {
+          await new Promise((r) => setTimeout(r, 100));
+        }
+        // Re-check: if enqueue pushed new tasks while we were settling, loop
+        // back into the drain phase instead of going idle.
+        if (imageQueueRef.current.length === 0) break;
       }
       imageWorkerActiveRef.current = false;
       if (paymentAborted) {
