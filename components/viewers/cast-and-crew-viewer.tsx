@@ -6,6 +6,7 @@ import { SectionLabelPill } from "@/components/ui/inline-chip";
 import { EditableText } from "@/components/ui/editable-text";
 import { getStylePrefix } from "@/lib/image-prompts";
 import type { SavedImage } from "@/lib/reports";
+import { useApiKeys } from "@/lib/api-keys-context";
 
 type CharacterData = {
   name: string;
@@ -308,6 +309,7 @@ export function CastAndCrewViewer({
   const [generatingAll, setGeneratingAll] = useState(false);
   const [genAllProgress, setGenAllProgress] = useState({ done: 0, total: 0 });
   const cancelRef = useRef(false);
+  const { ensureKeys } = useApiKeys();
 
   const insights = useMemo(() => computeInsights(data), [data]);
 
@@ -329,7 +331,10 @@ export function CastAndCrewViewer({
   // through a batch. This avoids the stale-closure bug when multiple calls
   // happen sequentially: each call's spread of `portraits` would otherwise
   // wipe previous calls' work.
-  const fetchPortrait = async (char: CharacterData): Promise<{ url: string } | null> => {
+  const fetchPortrait = async (
+    char: CharacterData,
+    falKey: string,
+  ): Promise<{ url: string } | null> => {
     const key = char.name;
     setLocalPortraits((prev) => ({ ...prev, [key]: { status: "generating" } }));
     try {
@@ -340,6 +345,7 @@ export function CastAndCrewViewer({
           name: char.name,
           description: char.description,
           stylePrefix: getStylePrefix("portrait"),
+          apiKey: falKey,
         }),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -353,7 +359,9 @@ export function CastAndCrewViewer({
   };
 
   const generateSingle = async (char: CharacterData) => {
-    const result = await fetchPortrait(char);
+    const keys = await ensureKeys({ requireFal: true });
+    if (!keys) return;
+    const result = await fetchPortrait(char, keys.falKey);
     if (result) {
       onPortraitsChange({ ...portraits, [char.name]: { status: "done", url: result.url } });
     }
@@ -362,6 +370,9 @@ export function CastAndCrewViewer({
   const generateAllPortraits = async () => {
     const toGenerate = characters.filter((c) => !portraits[c.name]);
     if (toGenerate.length === 0) return;
+
+    const keys = await ensureKeys({ requireFal: true });
+    if (!keys) return;
 
     cancelRef.current = false;
     setGeneratingAll(true);
@@ -374,7 +385,7 @@ export function CastAndCrewViewer({
     for (let i = 0; i < toGenerate.length; i++) {
       if (cancelRef.current) break;
       const char = toGenerate[i];
-      const result = await fetchPortrait(char);
+      const result = await fetchPortrait(char, keys.falKey);
       if (result) {
         accumulated = { ...accumulated, [char.name]: { status: "done", url: result.url } };
         onPortraitsChange(accumulated);

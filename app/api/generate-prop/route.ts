@@ -7,15 +7,19 @@ import {
   GESTURE_DRAW_LORA_SCALE,
 } from "@/lib/image-prompts";
 
-fal.config({ credentials: process.env.FAL_KEY });
-
 export async function POST(request: NextRequest) {
   try {
-    const { name, notes, stylePrefix } = await request.json();
+    const { name, notes, stylePrefix, apiKey: clientKey } = await request.json();
 
     if (!name) {
       return NextResponse.json({ error: "Missing prop name" }, { status: 400 });
     }
+
+    const credentials = clientKey || process.env.FAL_KEY;
+    if (!credentials) {
+      return NextResponse.json({ error: "Missing fal.ai API key" }, { status: 400 });
+    }
+    fal.config({ credentials });
 
     const STYLE_PREFIX =
       typeof stylePrefix === "string" && stylePrefix.trim()

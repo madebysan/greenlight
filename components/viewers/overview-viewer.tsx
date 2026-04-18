@@ -9,6 +9,7 @@ import { ShuffleButton, useShuffleState } from "@/components/ui/shuffle-button";
 import { EditableText } from "@/components/ui/editable-text";
 import { PosterCarousel } from "./poster-carousel";
 import type { SavedImage } from "@/lib/reports";
+import { useApiKeys } from "@/lib/api-keys-context";
 
 type IdentityEntry = { label: string; value: string };
 type ThemeEntry = { title: string; body: string };
@@ -114,6 +115,7 @@ export function OverviewViewer({
   const taglinesShuffle = useShuffleState();
   const synopsisShuffle = useShuffleState();
   const themesShuffle = useShuffleState();
+  const { ensureKeys } = useApiKeys();
 
   // Each shuffle uses its own state so they can run independently.
   async function shuffleSection(
@@ -122,11 +124,13 @@ export function OverviewViewer({
     sectionHeading: string,
   ) {
     if (!jsonData || !onContentUpdate) return;
+    const keys = await ensureKeys();
+    if (!keys) return;
     await state.run(async () => {
       const res = await fetch("/api/regenerate-section", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sectionKey, jsonData }),
+        body: JSON.stringify({ sectionKey, jsonData, apiKey: keys.apiKey }),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const { content: newSection } = await res.json();

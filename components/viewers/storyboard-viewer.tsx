@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useRef } from "react";
 import { Video, Sun, Heart, Check, Copy, ImageIcon, Loader2, Download, RefreshCw, Images, ChevronDown } from "lucide-react";
+import { useApiKeys } from "@/lib/api-keys-context";
 
 export type StoryboardScene = {
   number: number;
@@ -399,6 +400,7 @@ export function StoryboardViewer({ content, savedImages, onImagesChange, savedPr
   const [generatingAll, setGeneratingAll] = useState(false);
   const [genAllProgress, setGenAllProgress] = useState({ done: 0, total: 0 });
   const cancelRef = useRef(false);
+  const { ensureKeys } = useApiKeys();
 
   // Merge saved images into local state on mount/change
   const images: Record<number, ImageState> = useMemo(() => {
@@ -423,12 +425,14 @@ export function StoryboardViewer({ content, savedImages, onImagesChange, savedPr
   };
 
   const generateImage = async (scene: StoryboardScene) => {
+    const keys = await ensureKeys({ requireFal: true });
+    if (!keys) return;
     setLocalImages((prev) => ({ ...prev, [scene.number]: { status: "generating" } }));
     try {
       const res = await fetch("/api/generate-image", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: scene.prompt, camera: scene.camera }),
+        body: JSON.stringify({ prompt: scene.prompt, camera: scene.camera, apiKey: keys.falKey }),
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
@@ -458,6 +462,9 @@ export function StoryboardViewer({ content, savedImages, onImagesChange, savedPr
     );
     if (scenesToGenerate.length === 0) return;
 
+    const keys = await ensureKeys({ requireFal: true });
+    if (!keys) return;
+
     cancelRef.current = false;
     setGeneratingAll(true);
     setGenAllProgress({ done: 0, total: scenesToGenerate.length });
@@ -477,7 +484,7 @@ export function StoryboardViewer({ content, savedImages, onImagesChange, savedPr
         const res = await fetch("/api/generate-image", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ prompt: displayScene.prompt, camera: displayScene.camera }),
+          body: JSON.stringify({ prompt: displayScene.prompt, camera: displayScene.camera, apiKey: keys.falKey }),
         });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const { url } = await res.json();
@@ -507,12 +514,14 @@ export function StoryboardViewer({ content, savedImages, onImagesChange, savedPr
   };
 
   const regenPrompt = async (scene: StoryboardScene) => {
+    const keys = await ensureKeys();
+    if (!keys) return;
     setRegenStates((prev) => ({ ...prev, [scene.number]: "loading" }));
     try {
       const res = await fetch("/api/regenerate-prompt", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: scene.prompt, slugLine: scene.slugLine }),
+        body: JSON.stringify({ prompt: scene.prompt, slugLine: scene.slugLine, apiKey: keys.apiKey }),
       });
       if (!res.ok) throw new Error("Failed");
       const { prompt } = await res.json();

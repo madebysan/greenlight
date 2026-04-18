@@ -7,11 +7,9 @@ import {
   GESTURE_DRAW_LORA_SCALE,
 } from "@/lib/image-prompts";
 
-fal.config({ credentials: process.env.FAL_KEY });
-
 export async function POST(request: NextRequest) {
   try {
-    const { prompt, camera, stylePrefix } = await request.json();
+    const { prompt, stylePrefix, apiKey: clientKey } = await request.json();
 
     if (!prompt) {
       return NextResponse.json(
@@ -19,6 +17,14 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+
+    const credentials = clientKey || process.env.FAL_KEY;
+    if (!credentials) {
+      return NextResponse.json({ error: "Missing fal.ai API key" }, { status: 400 });
+    }
+    // fal.config is module-global; for a portfolio demo with modest concurrency
+    // that's acceptable. Under heavy mixed-user traffic we'd want per-call creds.
+    fal.config({ credentials });
 
     const STYLE_PREFIX =
       typeof stylePrefix === "string" && stylePrefix.trim()
