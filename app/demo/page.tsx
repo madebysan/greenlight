@@ -1,7 +1,27 @@
-"use client";
-
+import type { Metadata } from "next";
 import { DEMO_PROJECT } from "@/lib/demo-project";
 import { DemoContent } from "@/components/demo/demo-content";
+
+export const metadata: Metadata = {
+  title: "Night of the Living Dead",
+  description:
+    "A vision deck for George A. Romero's Night of the Living Dead — mood, scenes, cast, and poster concepts, built with Greenlight.",
+  alternates: { canonical: "/demo" },
+  openGraph: {
+    title: "Night of the Living Dead — Greenlight vision deck",
+    description:
+      "Mood, scenes, cast, and poster concepts for George A. Romero's 1968 horror classic, built with Greenlight.",
+    url: "/demo",
+    type: "article",
+    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Night of the Living Dead — Greenlight vision deck",
+    description:
+      "Mood, scenes, cast, and poster concepts for Romero's 1968 horror classic.",
+  },
+};
 
 export default function DemoPage() {
   if (!DEMO_PROJECT) {
