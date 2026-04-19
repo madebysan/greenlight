@@ -5,6 +5,20 @@ Updated every session via `/save-session`.
 
 ---
 
+## 2026-04-18 (session 10 — desktop-only gate)
+
+Added a viewport gate so phones and small tablets see a branded "Desktop only" screen instead of a broken layout.
+
+### Features
+- **`<MobileGate>`** — `components/mobile-gate.tsx`. `matchMedia("(max-width: 1023px)")` listener with three states (checking/mobile/ok). Renders a branded lockout screen (logo + "Desktop only" + one-line explanation) when the viewport is under 1024px. Wraps the app in `layout.tsx` outside `PasswordGate`.
+
+### Infra
+- **Redeployed to production** — `greenlight-public.vercel.app`, HTTP 200, Agentation correctly dev-only.
+
+### Status: deployed
+
+---
+
 ## 2026-04-18 (session 9 — public-release prep + keys architecture + SEO + new deploy)
 
 Moved every paid API call onto user-provided keys, rearchitected image generation as a background task queue running in parallel with text generation, improved basic SEO, and redeployed to a fresh Vercel project so the site can go fully public on GitHub.

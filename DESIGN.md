@@ -130,6 +130,7 @@ All AI-generated images use the **Gesture Draw LoRA** on FLUX dev via `fal-ai/fl
 - **Bring-your-own-keys architecture** — all paid API routes accept `apiKey` in the body with `process.env.X` fallback. On the public deployment no server env vars are set; the `ApiKeysDialog` modal is the only path to fresh generation. Cached-project paths (EEAAO) skip the gate. (2026-04-18)
 - **Parallel Claude docs + background image queue** — `step-generating.tsx` fires all 5 doc routes concurrently via `Promise.all`; `wizard-shell.tsx` runs a single-worker image queue that auto-triggers portraits/props on JSON submit and storyboard/poster images when their parent docs land. 500ms stagger between task starts. (2026-04-18)
 - **PDF upload shown as `Soon`** — `/api/extract-screenplay` works locally but Vercel's timeout constraints break feature-length PDFs. Kept in-tree, disabled in UI. (2026-04-18)
+- **Desktop-only via `<MobileGate>`** — viewports under 1024px hit a branded "Desktop only" screen. Greenlight's canvas (wizard + multi-column viewers + image grids) doesn't collapse meaningfully on phones/small tablets, and the A24 demo surface is always desktop. `components/mobile-gate.tsx` uses a `matchMedia` listener so resizes re-evaluate. (2026-04-18)
 
 ## Anti-patterns
 - Light-mode color classes (bg-sky-50, text-amber-700) — always use `/15` opacity + `400` shade pattern for theme safety
