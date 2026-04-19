@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Space_Grotesk, Space_Mono } from "next/font/google";
 import { Agentation } from "agentation";
 import { PasswordGate } from "@/components/password-gate";
+import { MobileGate } from "@/components/mobile-gate";
 import { ApiKeysProvider } from "@/lib/api-keys-context";
 import { getSiteUrl } from "@/lib/site-url";
 import "./globals.css";
@@ -70,9 +71,11 @@ export default function RootLayout({
       <body
         className={`${spaceGrotesk.variable} ${spaceMono.variable} antialiased`}
       >
-        <PasswordGate>
-          <ApiKeysProvider>{children}</ApiKeysProvider>
-        </PasswordGate>
+        <MobileGate>
+          <PasswordGate>
+            <ApiKeysProvider>{children}</ApiKeysProvider>
+          </PasswordGate>
+        </MobileGate>
         {process.env.NODE_ENV === "development" && <Agentation />}
       </body>
     </html>
