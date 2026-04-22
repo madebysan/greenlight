@@ -2,6 +2,7 @@
 <p align="center">Script to vision deck in minutes.<br>
 A conversation starter for filmmakers, not a production tool.</p>
 <p align="center"><code>Next.js</code> <code>React 19</code> <code>Tailwind CSS 4</code> <code>Claude API</code> <code>FLUX + Gesture Draw LoRA</code></p>
+<p align="center"><a href="https://greenlight.santiagoalonso.com"><strong>Try it live →</strong></a></p>
 
 ![Greenlight demo — Night of the Living Dead](public/screenshot.png)
 
