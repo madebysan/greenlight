@@ -52,8 +52,24 @@ test-screenplay.json
 # Claude
 .claude/
 ralph-prompt.md
+.ralph-prompt.md
 plan.md
 backlog.md
 checkpoint.json
 presentation.md
 DESIGN-PEEC.md
+CLAUDE.md
+
+# Internal dev docs (kept local, not shared)
+how-it-works.md
+deep-refactor-report.md
+TIMELINE.md
+DESIGN.md
+CHANGELOG.md
+
+# Internal assets / tooling
+qa-console.mjs
+visual-qa.mjs
+wiki/
+archived/
+screenshots/
