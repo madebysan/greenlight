@@ -6,6 +6,8 @@ A conversation starter for filmmakers, not a production tool.</p>
 
 ![Greenlight demo — Night of the Living Dead](public/screenshot.png)
 
+https://github.com/user-attachments/assets/e5fbef69-2bd7-43b3-858a-e4ef32b0c419
+
 ---
 
 ## What This Is
