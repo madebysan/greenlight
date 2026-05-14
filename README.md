@@ -2,7 +2,6 @@
 <p align="center">Script to vision deck in about ten minutes.<br>
 For the space between finishing a script and figuring out what the film actually looks like.</p>
 <p align="center"><code>Next.js</code> <code>React 19</code> <code>Tailwind CSS 4</code> <code>Claude API</code> <code>FLUX + Gesture Draw LoRA</code></p>
-<p align="center"><a href="https://greenlight.santiagoalonso.com"><strong>Try it live →</strong></a></p>
 
 https://github.com/user-attachments/assets/e5fbef69-2bd7-43b3-858a-e4ef32b0c419
 
@@ -31,7 +30,7 @@ It's best for students, first-time filmmakers, or anyone who struggles with movi
 
 You'll need structured screenplay JSON to start. I use [Gemini Pro](https://gemini.google.com/app) for this: upload your script, paste the extraction prompt that Greenlight provides, Gemini hands back JSON that matches Greenlight's schema.
 
-Paste that JSON into Greenlight. On first use the app asks for your Claude API key and (optionally) your fal.ai and TMDB keys. They're stored in your browser's `localStorage`. No keys touch a Greenlight server.
+Paste that JSON into Greenlight. On first use the app asks for your Claude API key and (optionally) your fal.ai and TMDB keys. They're stored in your browser's `localStorage` and sent to Greenlight's Vercel functions only when the app needs to call the selected provider. Greenlight does not intentionally save those keys server-side.
 
 The deck generates automatically. Claude does the writing, fal.ai generates the images. Both run in parallel, so most of a deck is ready in a couple minutes. You can edit, regenerate, or swap out sections as you go.
 
@@ -52,7 +51,7 @@ npm install
 npm run dev
 ```
 
-Open [http://localhost:3001](http://localhost:3001). The app is a standalone Next.js project, no separate backend required. Serverless functions live in `app/api/` as Next.js route handlers.
+Open [http://localhost:3000](http://localhost:3000). The app is a standalone Next.js project, no separate backend required. Serverless functions live in `app/api/` as Next.js route handlers.
 
 ### Dependencies
 
@@ -62,13 +61,12 @@ All listed in `package.json`. The important ones:
 - `@anthropic-ai/sdk` (Claude client)
 - `@fal-ai/client` (fal.ai client for image generation)
 - `radix-ui`, `lucide-react`, `class-variance-authority` (shadcn/ui foundations)
-- `react-markdown` plus `remark-gfm` (rendering generated doc content)
 
 Node 20+ recommended.
 
 ### API keys
 
-Every API call is keyed by the end user. On first use the app pops a modal that stores your keys in `localStorage`. Nothing touches a Greenlight server.
+Every API call is keyed by the end user. On first use the app pops a modal that stores your keys in `localStorage`. When you generate a deck, the relevant key and screenplay data are sent to Greenlight's Vercel functions so they can call Claude, OpenAI, DeepSeek, Gemini, fal.ai, or TMDB. The server does not intentionally store those keys.
 
 | Key | Purpose | Required? | Get one at |
 |-----|---------|-----------|-----------|

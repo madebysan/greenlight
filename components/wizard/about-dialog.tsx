@@ -13,14 +13,14 @@ type AboutDialogProps = {
 };
 
 const TABS = [
-  { title: "Overview", desc: "Logline, synopsis, themes, comparables, and scope at a glance." },
-  { title: "Mood & Tone", desc: "Atmosphere, tonal descriptors, color palette, music direction, and similar moods." },
-  { title: "Scenes", desc: "Scene-by-scene map with inline storyboard frames." },
-  { title: "Locations", desc: "Unique locations grouped with scenes, time variations, and set requirements." },
-  { title: "Cast & Crew", desc: "Characters with AI portraits plus production insights." },
-  { title: "Production Design", desc: "Cross-referenced props and wardrobe with reference sketches." },
-  { title: "Title & Palette", desc: "Color palette and title treatment with the full Google Fonts catalog." },
-  { title: "Poster Concepts", desc: "Visual directions for how the film could present itself." },
+  { title: "Overview", desc: "Logline, synopsis, themes, shoot shape." },
+  { title: "Mood & Tone", desc: "Atmosphere, references, color, sound." },
+  { title: "Scenes", desc: "Scene map with storyboard frames." },
+  { title: "Locations", desc: "Places, moves, nights, scout notes." },
+  { title: "Cast & Crew", desc: "Performance load, chemistry, specialty hires." },
+  { title: "Production Design", desc: "Props, wardrobe, continuity." },
+  { title: "Title & Palette", desc: "Color and type." },
+  { title: "Poster Concepts", desc: "One-sheet directions." },
 ];
 
 export function AboutDialog({ open, onOpenChange }: AboutDialogProps) {
@@ -36,22 +36,21 @@ export function AboutDialog({ open, onOpenChange }: AboutDialogProps) {
             <div>
               <DialogTitle className="text-lg">Greenlight</DialogTitle>
               <p className="text-[12px] text-muted-foreground mt-0.5">
-                Script to vision deck in minutes.
+                Script to film deck.
               </p>
             </div>
           </div>
         </DialogHeader>
 
         <div className="space-y-6 py-3">
-          <p className="text-[13px] leading-[1.65] text-foreground/70 tracking-tight">
-            Paste a structured screenplay extraction and Greenlight generates a
-            full vision deck — mood, scenes, locations, cast, and visual
-            concepts. Everything you need to start the conversation.
+          <p className="text-[13px] leading-[1.65] text-foreground/70 tracking-normal">
+            Paste screenplay data and Greenlight builds the first pass: mood,
+            scenes, locations, cast, design, and posters.
           </p>
 
           <div>
             <div className="font-mono text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground mb-3">
-              What you get
+              Deck sections
             </div>
             <div className="space-y-px rounded-[10px] overflow-hidden border border-border/60">
               {TABS.map((tab, i) => (
@@ -63,10 +62,10 @@ export function AboutDialog({ open, onOpenChange }: AboutDialogProps) {
                     {(i + 1).toString().padStart(2, "0")}
                   </span>
                   <div>
-                    <div className="text-[13px] font-medium text-foreground tracking-tight">
+                    <div className="text-[13px] font-medium text-foreground tracking-normal">
                       {tab.title}
                     </div>
-                    <div className="text-[12px] text-muted-foreground tracking-tight mt-0.5">
+                    <div className="text-[12px] text-muted-foreground tracking-normal mt-0.5">
                       {tab.desc}
                     </div>
                   </div>
@@ -75,7 +74,7 @@ export function AboutDialog({ open, onOpenChange }: AboutDialogProps) {
             </div>
           </div>
 
-          <div className="flex items-center gap-4 pt-3 border-t border-border/60 text-[11px] text-muted-foreground tracking-tight">
+          <div className="flex items-center gap-4 pt-3 border-t border-border/60 text-[11px] text-muted-foreground tracking-normal">
             <span>Claude · FLUX + Gesture Draw LoRA · TMDB</span>
             <span className="flex-1" />
             <a

@@ -122,25 +122,25 @@ export function TitleTreatment({ title, tagline }: TitleTreatmentProps) {
   const secondaryLine = tagline || "A story you can't look away from";
 
   return (
-    <div className="rounded-xl border border-border/60 bg-card/20 overflow-hidden">
+    <div className="overflow-hidden rounded-[12px] border border-border bg-card/25">
       {/* Preview */}
-      <div className="px-8 py-12 md:py-16 flex flex-col items-center justify-center text-center border-b border-border/60 bg-gradient-to-b from-background/40 to-transparent">
+      <div className="flex flex-col items-center justify-center border-b border-border bg-white/[0.02] px-8 py-12 text-center md:py-16">
         <div
-          className="text-foreground leading-[0.95] tracking-tight"
+          className="max-w-full break-words leading-[0.95] tracking-normal text-foreground"
           style={{
             fontFamily: `"${displayFont.family}", serif`,
             fontWeight: 700,
-            fontSize: "clamp(2.5rem, 7vw, 5.5rem)",
+            fontSize: "clamp(2.25rem, 5vw, 4.5rem)",
           }}
         >
           {displayName}
         </div>
         <div
-          className="text-foreground/75 mt-5 max-w-[52ch]"
+          className="mt-5 max-w-[52ch] text-foreground/70"
           style={{
             fontFamily: `"${secondaryFont.family}", sans-serif`,
             fontWeight: 400,
-            fontSize: "20px",
+            fontSize: "clamp(1rem, 1.4vw, 1.25rem)",
             lineHeight: 1.4,
             letterSpacing: "0.005em",
           }}
@@ -150,7 +150,7 @@ export function TitleTreatment({ title, tagline }: TitleTreatmentProps) {
       </div>
 
       {/* Controls */}
-      <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-3 md:gap-5 p-4 items-center">
+      <div className="grid grid-cols-1 items-center gap-3 p-4 md:grid-cols-[1fr_auto_1fr] md:gap-5">
         <FontChip label="Display" font={displayFont} onShuffle={shuffleDisplay} />
         <button
           onClick={shuffleBoth}

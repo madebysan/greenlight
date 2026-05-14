@@ -1,0 +1,185 @@
+{
+  "url": "http://localhost:3000/demo",
+  "status": 200,
+  "logs": [],
+  "results": [
+    {
+      "label": "Overview",
+      "h1": "Greenlight · Demo",
+      "ctaCount": 1,
+      "ctas": [
+        {
+          "text": "After / 02CinematographerMood & ToneLight, texture, atmosphere",
+          "width": 840,
+          "height": 169,
+          "top": 1024,
+          "bottom": 1193
+        }
+      ],
+      "horizontalOverflow": false,
+      "bodyWidth": 1399,
+      "viewportWidth": 1399
+    },
+    {
+      "label": "Mood & Tone",
+      "h1": "Greenlight · Demo",
+      "ctaCount": 2,
+      "ctas": [
+        {
+          "text": "Before / 01Creative DirectorOverviewPitch, scope, pressure",
+          "width": 414,
+          "height": 169,
+          "top": 1024,
+          "bottom": 1193
+        },
+        {
+          "text": "After / 03Director / EditorScenesBeats, coverage, sequence",
+          "width": 414,
+          "height": 169,
+          "top": 1024,
+          "bottom": 1193
+        }
+      ],
+      "horizontalOverflow": false,
+      "bodyWidth": 1399,
+      "viewportWidth": 1399
+    },
+    {
+      "label": "Scenes",
+      "h1": "Greenlight · Demo",
+      "ctaCount": 2,
+      "ctas": [
+        {
+          "text": "Before / 02CinematographerMood & ToneLight, texture, atmosphere",
+          "width": 414,
+          "height": 169,
+          "top": 1024,
+          "bottom": 1193
+        },
+        {
+          "text": "After / 04Location ScoutLocationsPlace, moves, risk",
+          "width": 414,
+          "height": 169,
+          "top": 1024,
+          "bottom": 1193
+        }
+      ],
+      "horizontalOverflow": false,
+      "bodyWidth": 1399,
+      "viewportWidth": 1399
+    },
+    {
+      "label": "Locations",
+      "h1": "Greenlight · Demo",
+      "ctaCount": 2,
+      "ctas": [
+        {
+          "text": "Before / 03Director / EditorScenesBeats, coverage, sequence",
+          "width": 414,
+          "height": 169,
+          "top": 1025,
+          "bottom": 1193
+        },
+        {
+          "text": "After / 05Casting DirectorCast & CrewPerformance, chemistry, hires",
+          "width": 414,
+          "height": 169,
+          "top": 1025,
+          "bottom": 1193
+        }
+      ],
+      "horizontalOverflow": false,
+      "bodyWidth": 1399,
+      "viewportWidth": 1399
+    },
+    {
+      "label": "Cast & Crew",
+      "h1": "Greenlight · Demo",
+      "ctaCount": 2,
+      "ctas": [
+        {
+          "text": "Before / 04Location ScoutLocationsPlace, moves, risk",
+          "width": 414,
+          "height": 169,
+          "top": 1025,
+          "bottom": 1193
+        },
+        {
+          "text": "After / 06Production DesignerProduction DesignObjects, wardrobe, continuity",
+          "width": 414,
+          "height": 169,
+          "top": 1025,
+          "bottom": 1193
+        }
+      ],
+      "horizontalOverflow": false,
+      "bodyWidth": 1399,
+      "viewportWidth": 1399
+    },
+    {
+      "label": "Production Design",
+      "h1": "Greenlight · Demo",
+      "ctaCount": 2,
+      "ctas": [
+        {
+          "text": "Before / 05Casting DirectorCast & CrewPerformance, chemistry, hires",
+          "width": 414,
+          "height": 169,
+          "top": 1024,
+          "bottom": 1193
+        },
+        {
+          "text": "After / 07Graphic DesignerTitle & PaletteTypography, color, restraint",
+          "width": 414,
+          "height": 169,
+          "top": 1024,
+          "bottom": 1193
+        }
+      ],
+      "horizontalOverflow": false,
+      "bodyWidth": 1399,
+      "viewportWidth": 1399
+    },
+    {
+      "label": "Title & Palette",
+      "h1": "Greenlight · Demo",
+      "ctaCount": 2,
+      "ctas": [
+        {
+          "text": "Before / 06Production DesignerProduction DesignObjects, wardrobe, continuity",
+          "width": 414,
+          "height": 169,
+          "top": 1025,
+          "bottom": 1193
+        },
+        {
+          "text": "After / 08Key Art DesignerPoster ConceptsOne-sheet read, campaign",
+          "width": 414,
+          "height": 169,
+          "top": 1025,
+          "bottom": 1193
+        }
+      ],
+      "horizontalOverflow": false,
+      "bodyWidth": 1399,
+      "viewportWidth": 1399
+    },
+    {
+      "label": "Poster Concepts",
+      "h1": "Greenlight · Demo",
+      "ctaCount": 1,
+      "ctas": [
+        {
+          "text": "Before / 07Graphic DesignerTitle & PaletteTypography, color, restraint",
+          "width": 840,
+          "height": 169,
+          "top": 1024,
+          "bottom": 1193
+        }
+      ],
+      "horizontalOverflow": false,
+      "bodyWidth": 1399,
+      "viewportWidth": 1399
+    }
+  ]
+}

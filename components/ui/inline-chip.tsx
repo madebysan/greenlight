@@ -7,8 +7,7 @@ type InlineChipProps = {
 
 /**
  * Inline pill chip for baking key nouns into prose.
- * Peec.ai pattern: feature nouns sit inline with the subtitle text as pills,
- * not broken out into a separate feature list.
+ * Inline chip for baking key nouns into prose.
  *
  *   "Track, analyze, and improve brand performance through ◉ Visibility, ◇ Position, and ◡ Sentiment."
  *
@@ -19,11 +18,11 @@ type InlineChipProps = {
 export function InlineChip({ icon, children, tone = "default", className = "" }: InlineChipProps) {
   const toneClasses = {
     default:
-      "bg-white/[0.04] text-foreground/85 shadow-pill",
+      "border border-border bg-white/[0.03] text-foreground/80",
     accent:
-      "bg-white/[0.08] text-foreground shadow-pill",
+      "border border-border bg-white/[0.06] text-foreground",
     dark:
-      "bg-[#0C0A09] text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08),_0_4px_12px_rgba(0,0,0,0.5)]",
+      "border border-border bg-background text-white",
   }[tone];
 
   return (
@@ -37,8 +36,7 @@ export function InlineChip({ icon, children, tone = "default", className = "" }:
 }
 
 /**
- * Section-label pill — the floating eyebrow tag above section titles.
- * Small, neutral, icon-optional.
+ * Small uppercase section label, matching Cinemateca's detail-page rhythm.
  */
 export function SectionLabelPill({
   icon,
@@ -51,7 +49,7 @@ export function SectionLabelPill({
 }) {
   return (
     <div
-      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/[0.04] text-[10px] font-mono uppercase tracking-[0.14em] text-muted-foreground shadow-pill ${className}`}
+      className={`inline-flex items-center gap-1.5 font-mono text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground ${className}`}
     >
       {icon}
       {children}

@@ -2,7 +2,7 @@
 
 import { useState, useRef, useMemo } from "react";
 import { Loader2, Camera, RefreshCw, Images, X, EyeOff, Eye, Users, Lightbulb } from "lucide-react";
-import { SectionLabelPill } from "@/components/ui/inline-chip";
+import { DepartmentLens, EvidencePill, ReportPanel } from "@/components/ui/department-lens";
 import { EditableText } from "@/components/ui/editable-text";
 import { getStylePrefix } from "@/lib/image-prompts";
 import type { SavedImage } from "@/lib/reports";
@@ -36,6 +36,7 @@ type ScreenplayData = {
     props?: string[];
     int_ext?: string;
     time_of_day?: string;
+    characters_present?: string[];
   }>;
   locations?: unknown[];
   setting_period?: string;
@@ -84,7 +85,7 @@ function computeInsights(data: ScreenplayData): Insight[] {
       title: "Stunt work",
       signal: `${stuntHits.length} stunt cue${stuntHits.length > 1 ? "s" : ""} flagged`,
       recommendation:
-        "Bring on a Stunt Coordinator. Safety and choreography are non-negotiable — budget for rehearsal days and stunt performers who match your cast.",
+        "Bring on a Stunt Coordinator. Safety and choreography are non-negotiable. Budget for rehearsal days and stunt performers who match your cast.",
     });
   }
 
@@ -95,7 +96,7 @@ function computeInsights(data: ScreenplayData): Insight[] {
       title: "Visual effects",
       signal: `${vfxHits.length} scene${vfxHits.length > 1 ? "s" : ""} need digital or compositing work`,
       recommendation:
-        "Bring in a VFX Supervisor during prep — shots need to be planned on set, not fixed in post. Even a small vendor beats winging it.",
+        "Bring in a VFX Supervisor during prep. Shots need to be planned on set, not fixed in post. Even a small vendor beats winging it.",
     });
   }
 
@@ -106,7 +107,7 @@ function computeInsights(data: ScreenplayData): Insight[] {
       title: "Practical makeup",
       signal: `${sfxHits.length} cue${sfxHits.length > 1 ? "s" : ""} for prosthetics, blood, or wounds`,
       recommendation:
-        "Hire an SFX Makeup Artist. These are slow setups — budget extra chair time per shoot day and run a test well before principal photography.",
+        "Hire an SFX Makeup Artist. These are slow setups. Budget extra chair time per shoot day and run a test well before principal photography.",
     });
   }
 
@@ -121,7 +122,7 @@ function computeInsights(data: ScreenplayData): Insight[] {
       title: "Weapons on set",
       signal: `${weaponHits.length} reference${weaponHits.length > 1 ? "s" : ""} to firearms or blades`,
       recommendation:
-        "Hire a licensed Armorer. Post-Rust, insurance carriers and union cast expect this on any set with prop weapons — no exceptions.",
+        "Hire a licensed Armorer. Post-Rust, insurance carriers and union cast expect one on any set with prop weapons.",
     });
   }
 
@@ -132,7 +133,7 @@ function computeInsights(data: ScreenplayData): Insight[] {
       title: "Fire or pyrotechnics",
       signal: `${pyroHits.length} scene${pyroHits.length > 1 ? "s" : ""} with fire or explosive effects`,
       recommendation:
-        "Licensed Pyrotechnician required. That pulls in permits, a fire marshal on set, and safety rehearsals — it will shape your location list.",
+        "Bring in a licensed Pyrotechnician. That means permits, a fire marshal on set, and safety rehearsals. It will shape the location list.",
     });
   }
 
@@ -144,7 +145,7 @@ function computeInsights(data: ScreenplayData): Insight[] {
       title: "Water & weather",
       signal: "Water work or weather-dependent scenes",
       recommendation:
-        "Budget for a Marine Coordinator or Water Safety. These days eat the schedule — put them early in the shoot so you have room for reshoots.",
+        "Budget for a Marine Coordinator or Water Safety. These days eat the schedule, so put them early enough to leave room for reshoots.",
     });
   }
 
@@ -155,7 +156,7 @@ function computeInsights(data: ScreenplayData): Insight[] {
       title: "Intimate scenes",
       signal: `${intimacyHits.length} moment${intimacyHits.length > 1 ? "s" : ""} flagged as intimate`,
       recommendation:
-        "Hire an Intimacy Coordinator. Standard practice on every union set now — it protects the cast and produces cleaner performances.",
+        "Hire an Intimacy Coordinator. It protects the cast and makes the work cleaner on set.",
     });
   }
 
@@ -169,7 +170,7 @@ function computeInsights(data: ScreenplayData): Insight[] {
       title: "Animals on camera",
       signal: "Script references trained animals",
       recommendation:
-        "Hire an Animal Wrangler from an AHA-monitored service. Animals need rehearsal days and backup plans — never improvise on the day.",
+        "Hire an Animal Wrangler from an AHA-monitored service. Animals need rehearsal days and backup plans. Do not improvise this on the day.",
     });
   }
 
@@ -196,7 +197,7 @@ function computeInsights(data: ScreenplayData): Insight[] {
       title: "Night shoots",
       signal: `${nightScenes} night scene${nightScenes > 1 ? "s" : ""}`,
       recommendation:
-        "Upsize the Gaffer and lighting package. Night exteriors especially — condors, HMI balance, and longer turnaround days between wraps and calls.",
+        "Upsize the Gaffer and lighting package. Night exteriors need condors, HMI balance, and longer turnaround days between wraps and calls.",
     });
   }
 
@@ -217,7 +218,7 @@ function computeInsights(data: ScreenplayData): Insight[] {
       title: "Location density",
       signal: `${locations.length} unique locations`,
       recommendation:
-        "Consider a dedicated Line Producer. Every company move costs roughly half a shoot day — a heavy location list needs someone watching that math.",
+        "Consider a dedicated Line Producer. Every company move costs roughly half a shoot day, and a heavy location list needs someone watching that math.",
     });
   }
 
@@ -238,7 +239,7 @@ function computeInsights(data: ScreenplayData): Insight[] {
       title: "Minors on set",
       signal: "Child or teen characters",
       recommendation:
-        "Studio Teacher and Welfare Worker required. Shoot days are capped by law — it will affect your schedule before it affects anything else.",
+        "Plan for a Studio Teacher and Welfare Worker. Shoot days are capped by law, so this affects the schedule before anything else.",
     });
   }
 
@@ -312,6 +313,12 @@ export function CastAndCrewViewer({
   const { ensureKeys } = useApiKeys();
 
   const insights = useMemo(() => computeInsights(data), [data]);
+  const principalCharacters = [...characters]
+    .sort((a, b) => (b.scenes_present?.length || 0) - (a.scenes_present?.length || 0))
+    .slice(0, 4);
+  const totalSceneAppearances = characters.reduce((sum, char) => sum + (char.scenes_present?.length || 0), 0);
+  const wardrobeLoad = characters.reduce((sum, char) => sum + (char.wardrobe_changes || 0), 0);
+  const specialtyCharacterCount = characters.filter((char) => (char.special_requirements || []).length > 0).length;
 
   const mergedPortraits: Record<string, PortraitState> = useMemo(() => {
     const merged: Record<string, PortraitState> = {};
@@ -401,23 +408,54 @@ export function CastAndCrewViewer({
   };
 
   return (
-    <div className="max-w-4xl">
-      <div className="mb-8">
-        <SectionLabelPill icon={<Users size={10} />} className="mb-3">
-          Cast
-        </SectionLabelPill>
-        <h1 className="text-[32px] font-light tracking-[-0.025em] leading-[1.05] mb-2 text-foreground">
-          Cast & Crew
-        </h1>
-        <p className="text-[13px] text-foreground/60 tracking-tight max-w-[60ch]">
-          Characters in the film and situational insights — the specialty hires a line producer would flag on a first read.
-        </p>
+    <div className="max-w-5xl">
+      <DepartmentLens
+        eyebrow="Cast"
+        title="Cast & Crew"
+        subtitle="Performance load, chemistry, and specialty hires."
+        icon={Users}
+        primaryRole="Casting Director"
+        supportRole="1st AD / Line Producer"
+        focus="performance burden, chemistry, silhouette, specialty hires"
+        signals={[
+          { label: "Characters", value: characters.length },
+          { label: "Scene Appearances", value: totalSceneAppearances },
+          { label: "Crew Flags", value: insights.length },
+        ]}
+      />
+
+      <div className="mb-8 space-y-3">
+        <ReportPanel eyebrow="Casting Read" title="Roles That Need the Sharpest Read">
+          <div className="grid gap-3">
+            {principalCharacters.map((char) => (
+              <div key={char.name} className="rounded-[10px] border border-border bg-white/[0.02] p-4">
+                <div className="mb-2 flex items-center justify-between gap-3">
+                  <h2 className="truncate text-[13px] font-medium uppercase tracking-[0.04em] text-foreground">
+                    {char.name}
+                  </h2>
+                  <EvidencePill>{char.scenes_present?.length || 0} scenes</EvidencePill>
+                </div>
+                <p className="text-[13px] leading-[1.6] tracking-normal text-foreground/70">
+                  {char.arc_summary || char.description}
+                </p>
+              </div>
+            ))}
+          </div>
+        </ReportPanel>
+
+        <ReportPanel eyebrow="Production Read" title="Hidden Load">
+          <div className="grid gap-3 md:grid-cols-3">
+            <LoadLine label="Wardrobe changes" value={wardrobeLoad} />
+            <LoadLine label="Special requirements" value={specialtyCharacterCount} />
+            <LoadLine label="Specialty hires" value={insights.length} />
+          </div>
+        </ReportPanel>
       </div>
 
       <div className="flex items-center gap-0 border-b border-border/60 mb-6">
         <button
           onClick={() => setTab("cast")}
-          className={`relative px-3 py-3 text-[12px] font-medium tracking-tight transition-colors ${
+          className={`relative px-3 py-3 text-[12px] font-medium tracking-normal transition-colors ${
             tab === "cast"
               ? "text-foreground"
               : "text-muted-foreground hover:text-foreground"
@@ -430,7 +468,7 @@ export function CastAndCrewViewer({
         </button>
         <button
           onClick={() => setTab("insights")}
-          className={`relative px-3 py-3 text-[12px] font-medium tracking-tight transition-colors ${
+          className={`relative px-3 py-3 text-[12px] font-medium tracking-normal transition-colors ${
             tab === "insights"
               ? "text-foreground"
               : "text-muted-foreground hover:text-foreground"
@@ -476,7 +514,7 @@ export function CastAndCrewViewer({
         <div className="space-y-3">
           {characters.length === 0 ? (
             <p className="text-sm text-muted-foreground py-8 text-center">
-              No characters in the screenplay JSON.
+              No characters found in the screenplay data.
             </p>
           ) : (
             characters.map((char) => {
@@ -486,7 +524,7 @@ export function CastAndCrewViewer({
               return (
                 <div
                   key={char.name}
-                  className={`rounded-[12px] bg-card/40 shadow-paper hover:shadow-paper-hover p-5 flex gap-5 relative group/card transition-all ${
+                  className={`report-motion-card group/card relative flex gap-5 rounded-[12px] border border-border bg-card/35 p-5 hover:border-foreground/18 hover:bg-card/45 ${
                     isDisabled ? "opacity-40" : ""
                   }`}
                 >
@@ -497,7 +535,7 @@ export function CastAndCrewViewer({
                   >
                     {isDisabled ? <Eye size={13} /> : <EyeOff size={13} />}
                   </button>
-                  <div className="w-24 h-24 rounded-md shrink-0 bg-muted/40 border border-border/60 overflow-hidden flex items-center justify-center relative group">
+                  <div className="group relative flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-md border border-border/70 bg-white/[0.03]">
                     {portrait?.status === "done" && portrait.url ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
@@ -506,7 +544,7 @@ export function CastAndCrewViewer({
                         className="w-full h-full object-cover"
                       />
                     ) : portrait?.status === "generating" ? (
-                      <Loader2 size={20} className="text-muted-foreground animate-spin" />
+                      <Loader2 size={20} className="text-muted-foreground animate-spin motion-reduce:animate-none" />
                     ) : portrait?.status === "error" ? (
                       <button
                         onClick={() => generateSingle(char)}
@@ -519,7 +557,7 @@ export function CastAndCrewViewer({
                       <button
                         onClick={() => generateSingle(char)}
                         disabled={generatingAll}
-                        className="flex flex-col items-center justify-center gap-1 text-[10px] text-muted-foreground/70 hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        className="report-motion-status flex flex-col items-center justify-center gap-1 text-[10px] text-muted-foreground/70 transition-colors hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed"
                         title="Generate portrait"
                       >
                         <Camera size={16} />
@@ -531,7 +569,7 @@ export function CastAndCrewViewer({
                     {portrait?.status === "done" && !generatingAll && (
                       <button
                         onClick={() => generateSingle(char)}
-                        className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 transition-opacity duration-150 ease-out group-hover:opacity-100"
                         title="Regenerate portrait"
                       >
                         <RefreshCw size={16} className="text-white" />
@@ -591,6 +629,13 @@ export function CastAndCrewViewer({
                         </>
                       )}
                     </div>
+                    {(char.special_requirements || []).length > 0 && (
+                      <div className="mt-3 flex flex-wrap gap-1.5">
+                        {(char.special_requirements || []).map((requirement) => (
+                          <EvidencePill key={requirement}>{requirement}</EvidencePill>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
               );
@@ -602,13 +647,15 @@ export function CastAndCrewViewer({
       {tab === "insights" && (
         <div>
           <p className="text-[12px] text-muted-foreground mb-4 max-w-[60ch]">
-            Baseline roles — director, DP, producer, production designer — are assumed. This is the non-obvious stuff: the specialty hires a line producer would flag on a first read of the script.
+            Director, DP, producer, and production designer are assumed. This is
+            the stuff a line producer would flag on a first script read.
           </p>
           {insights.length === 0 ? (
-            <div className="rounded-[12px] bg-card/40 shadow-paper px-5 py-8 text-center">
+            <div className="rounded-[12px] border border-border bg-card/35 px-5 py-8 text-center">
               <Lightbulb size={18} className="mx-auto text-muted-foreground/60 mb-2" />
               <p className="text-[13px] text-muted-foreground max-w-[48ch] mx-auto leading-[1.6]">
-                No specialty situations detected. Your standard above-the-line team should carry this film without extra hires.
+                No specialty situations detected. The standard core team should
+                be enough for this script.
               </p>
             </div>
           ) : (
@@ -619,16 +666,16 @@ export function CastAndCrewViewer({
                 return (
                   <div
                     key={i.key}
-                    className={`rounded-[12px] bg-card/40 shadow-paper hover:shadow-paper-hover px-5 py-4 flex items-start gap-4 relative group/card transition-all ${
+                    className={`report-motion-card group/card relative flex items-start gap-4 rounded-[12px] border border-border bg-card/35 px-5 py-4 hover:border-foreground/18 hover:bg-card/45 ${
                       isDisabled ? "opacity-40" : ""
                     }`}
                   >
-                    <div className="shrink-0 mt-0.5 w-7 h-7 rounded-[6px] bg-muted/60 flex items-center justify-center text-muted-foreground">
+                    <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-[6px] border border-border bg-white/[0.03] text-muted-foreground">
                       <Lightbulb size={13} />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-baseline gap-3 flex-wrap mb-1">
-                        <h3 className="text-[14px] font-medium text-foreground tracking-tight">{i.title}</h3>
+                        <h3 className="text-[14px] font-medium text-foreground tracking-normal">{i.title}</h3>
                         <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
                           {i.signal}
                         </span>
@@ -649,6 +696,17 @@ export function CastAndCrewViewer({
           )}
         </div>
       )}
+    </div>
+  );
+}
+
+function LoadLine({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="flex items-center justify-between gap-4 rounded-[10px] border border-border bg-white/[0.02] px-3 py-2">
+      <span className="text-[12px] tracking-normal text-foreground/72">{label}</span>
+      <span className="font-mono text-[10px] uppercase tracking-[0.11em] text-muted-foreground tabular-nums">
+        {value}
+      </span>
     </div>
   );
 }

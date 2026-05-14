@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { generateDocument } from "@/lib/claude";
+import { resolveTextGenerationConfig } from "@/lib/text-generation";
 import { SCENE_BREAKDOWN_PROMPT } from "@/lib/prompts/scene-breakdown";
 import { trimForSceneBreakdown } from "@/lib/json-trimmer";
 import { getCached, setCache } from "@/lib/response-cache";
@@ -8,25 +9,30 @@ const SLUG = "scene-breakdown";
 
 export async function POST(request: NextRequest) {
   try {
-    const { jsonData, apiKey: clientKey } = await request.json();
-    const apiKey = clientKey || process.env.ANTHROPIC_API_KEY;
+    const body = (await request.json()) as {
+      jsonData?: unknown;
+      apiKey?: unknown;
+      apiProvider?: unknown;
+    };
+    const jsonData = typeof body.jsonData === "string" ? body.jsonData : "";
+    const { apiKey, provider } = resolveTextGenerationConfig(body);
 
     if (!jsonData || !apiKey) {
       return NextResponse.json(
-        { error: "Missing jsonData or apiKey" },
+        { error: "Missing jsonData or selected provider API key" },
         { status: 400 }
       );
     }
 
     // Return cached response if available (keyed by slug + input hash)
-    const cached = getCached(SLUG, jsonData);
+    const cached = getCached(SLUG, jsonData, provider);
     if (cached) {
       return NextResponse.json({ content: cached });
     }
 
     const trimmed = trimForSceneBreakdown(jsonData);
-    const markdown = await generateDocument(SCENE_BREAKDOWN_PROMPT, trimmed, apiKey);
-    setCache(SLUG, jsonData, markdown);
+    const markdown = await generateDocument(SCENE_BREAKDOWN_PROMPT, trimmed, { apiKey, provider });
+    setCache(SLUG, jsonData, markdown, provider);
 
     return NextResponse.json({ content: markdown });
   } catch (error) {

@@ -28,7 +28,6 @@ export function parseStoryboardPrompts(md: string): { title: string; intro: stri
   let promptBuffer = "";
   let introBuffer = "";
   let pastIntro = false;
-  let sceneIndex = 0;
 
   for (const line of lines) {
     if (/^# /.test(line) && !title) {
@@ -62,7 +61,6 @@ export function parseStoryboardPrompts(md: string): { title: string; intro: stri
       if (current) {
         if (collectingPrompt) current.prompt = promptBuffer.trim();
         allScenes.push(current);
-        sceneIndex++;
       }
       current = {
         number: parseInt(sceneMatch[1]),
@@ -163,9 +161,9 @@ export function parseStoryboardPrompts(md: string): { title: string; intro: stri
     const act1End = Math.ceil(total * 0.25);
     const act2End = Math.ceil(total * 0.75);
     acts = [
-      { label: "First Act — Setup", scenes: allScenes.slice(0, act1End) },
-      { label: "Second Act — Confrontation", scenes: allScenes.slice(act1End, act2End) },
-      { label: "Third Act — Resolution", scenes: allScenes.slice(act2End) },
+      { label: "First Act: Setup", scenes: allScenes.slice(0, act1End) },
+      { label: "Second Act: Confrontation", scenes: allScenes.slice(act1End, act2End) },
+      { label: "Third Act: Resolution", scenes: allScenes.slice(act2End) },
     ];
   } else {
     acts = [];
@@ -233,7 +231,7 @@ function SceneCard({ scene, copiedScene, onCopy, imageState, onGenerate, regenSt
           ) : imageState.status === "done" ? (
             <>
               <ImageIcon size={12} />
-              Regenerate
+              Regenerate image
             </>
           ) : (
             <>
@@ -521,7 +519,12 @@ export function StoryboardViewer({ content, savedImages, onImagesChange, savedPr
       const res = await fetch("/api/regenerate-prompt", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: scene.prompt, slugLine: scene.slugLine, apiKey: keys.apiKey }),
+        body: JSON.stringify({
+          prompt: scene.prompt,
+          slugLine: scene.slugLine,
+          apiProvider: keys.apiProvider,
+          apiKey: keys.apiKey,
+        }),
       });
       if (!res.ok) throw new Error("Failed");
       const { prompt } = await res.json();
@@ -553,7 +556,7 @@ export function StoryboardViewer({ content, savedImages, onImagesChange, savedPr
             className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-md border border-destructive/30 text-destructive hover:bg-destructive/5 transition-colors"
           >
             <Loader2 size={13} className="animate-spin" />
-            {genAllProgress.done}/{genAllProgress.total} — Cancel
+            {genAllProgress.done}/{genAllProgress.total} · Cancel
           </button>
         ) : (
           <button
@@ -561,7 +564,7 @@ export function StoryboardViewer({ content, savedImages, onImagesChange, savedPr
             className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-md border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors"
           >
             <Images size={13} />
-            Generate all images
+            Generate all frames
           </button>
         )}
       </div>

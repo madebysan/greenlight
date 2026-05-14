@@ -12,9 +12,17 @@ export async function POST(request: NextRequest) {
     const formData = await request.formData();
     const file = formData.get("file") as File | null;
     const clientKey = formData.get("apiKey") as string | null;
+    const apiProvider = formData.get("apiProvider") as string | null;
 
     if (!file) {
       return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
+    }
+
+    if (apiProvider && apiProvider !== "anthropic") {
+      return NextResponse.json(
+        { error: "PDF extraction currently uses Claude. Select Claude or use Paste JSON." },
+        { status: 400 },
+      );
     }
 
     const apiKey = clientKey || process.env.ANTHROPIC_API_KEY;

@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { fal } from "@fal-ai/client";
 import {
   DEFAULT_IMAGE_PROMPTS,
   IMAGE_NEGATIVE_PROMPT,
   GESTURE_DRAW_LORA_URL,
   GESTURE_DRAW_LORA_SCALE,
 } from "@/lib/image-prompts";
+import { createFalClientForRequest } from "@/lib/fal-client";
 
 export async function POST(request: NextRequest) {
   try {
@@ -18,13 +18,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const credentials = clientKey || process.env.FAL_KEY;
-    if (!credentials) {
+    const falClient = createFalClientForRequest(clientKey);
+    if (!falClient) {
       return NextResponse.json({ error: "Missing fal.ai API key" }, { status: 400 });
     }
-    // fal.config is module-global; for a portfolio demo with modest concurrency
-    // that's acceptable. Under heavy mixed-user traffic we'd want per-call creds.
-    fal.config({ credentials });
 
     const STYLE_PREFIX =
       typeof stylePrefix === "string" && stylePrefix.trim()
@@ -33,7 +30,7 @@ export async function POST(request: NextRequest) {
 
     const storyboardPrompt = [STYLE_PREFIX, prompt].join(". ");
 
-    const result = await fal.subscribe("fal-ai/flux-lora", {
+    const result = await falClient.subscribe("fal-ai/flux-lora", {
       input: {
         prompt: storyboardPrompt,
         negative_prompt: IMAGE_NEGATIVE_PROMPT,

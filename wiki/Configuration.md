@@ -10,7 +10,7 @@ Server-side env vars act as fallbacks when the user hasn't provided a key via th
 | `FAL_KEY` | Optional fallback | fal.ai API key — fallback for all 4 image routes |
 | `TMDB_API_KEY` | Optional fallback | TMDB v3 key — fallback for `/api/tmdb-search` (poster lookups on Mood & Tone tab) |
 | `ACCESS_PASSWORD` | Optional | Password gate. Unset = gate disabled (public). Set = `<PasswordGate>` wraps the app. |
-| `NEXT_PUBLIC_SITE_URL` | Optional | Canonical base URL for SEO (metadataBase, robots, sitemap). Falls back to `VERCEL_PROJECT_PRODUCTION_URL` → `localhost:3001`. Set to `https://greenlight.santiagoalonso.com` once DNS is live. |
+| `NEXT_PUBLIC_SITE_URL` | Optional | Canonical base URL for SEO (metadataBase, robots, sitemap). Falls back to `VERCEL_PROJECT_PRODUCTION_URL` → `localhost:3000`. Set it in Vercel when using a private hosted deployment. |
 
 Local dev: `.env.local` with the three API keys skips the modal entirely.
 

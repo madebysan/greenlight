@@ -39,7 +39,7 @@ TMDB_API_KEY=...
 npm run dev
 ```
 
-Opens at [http://localhost:3001](http://localhost:3001).
+Opens at [http://localhost:3000](http://localhost:3000).
 
 ## First Use
 
@@ -56,10 +56,10 @@ Opens at [http://localhost:3001](http://localhost:3001).
 
 Two demos available, both work without any keys:
 
-- [http://localhost:3001/demo](http://localhost:3001/demo) — Night of the Living Dead (George A. Romero, 1968)
-- [http://localhost:3001/demo/red-balloon](http://localhost:3001/demo/red-balloon) — The Red Balloon (Albert Lamorisse, 1956)
+- [http://localhost:3000/demo](http://localhost:3000/demo) — Night of the Living Dead (George A. Romero, 1968)
+- [http://localhost:3000/demo/red-balloon](http://localhost:3000/demo/red-balloon) — The Red Balloon (Albert Lamorisse, 1956)
 
-Public deployment: [greenlight-public.vercel.app](https://greenlight-public.vercel.app) (custom domain `greenlight.santiagoalonso.com` pending DNS setup).
+The hosted deployment is intentionally not linked from the public docs.
 
 ## Costs Per Bible
 

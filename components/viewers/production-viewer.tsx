@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useMemo, useRef } from "react";
+import type { ReactNode } from "react";
 import { Star, Camera, Loader2, RefreshCw, Images, X, Package } from "lucide-react";
-import { SectionLabelPill } from "@/components/ui/inline-chip";
+import { DepartmentLens, EvidencePill, ReportPanel } from "@/components/ui/department-lens";
 import { getStylePrefix } from "@/lib/image-prompts";
 import type { SavedImage } from "@/lib/reports";
 import { useApiKeys } from "@/lib/api-keys-context";
@@ -39,6 +40,10 @@ type ScreenplayData = {
   props_master?: PropMaster[];
 };
 
+const EMPTY_SCENES: SceneData[] = [];
+const EMPTY_CHARACTERS: CharacterData[] = [];
+const EMPTY_PROPS: PropMaster[] = [];
+
 type ProductionViewerProps = {
   jsonData: string;
   propImages: Record<string, SavedImage>;
@@ -61,9 +66,9 @@ export function ProductionViewer({
   onPropImagesChange,
 }: ProductionViewerProps) {
   const data = parseData(jsonData);
-  const scenes = data.scenes || [];
-  const characters = data.characters || [];
-  const propsMaster = data.props_master || [];
+  const scenes = data.scenes ?? EMPTY_SCENES;
+  const characters = data.characters ?? EMPTY_CHARACTERS;
+  const propsMaster = data.props_master ?? EMPTY_PROPS;
 
   const [tab, setTab] = useState<SubTab>("props");
   const [localPropImages, setLocalPropImages] = useState<Record<string, PropImageState>>({});
@@ -210,25 +215,60 @@ export function ProductionViewer({
   const heroPropsCount = propsMaster.filter((p) => p.hero_prop).length;
   const totalWardrobeChanges = characters.reduce((sum, c) => sum + (c.wardrobe_changes || 0), 0);
   const uniqueSceneLocations = new Set(scenes.map((s) => s.slug_line)).size;
+  const heroProps = propsMaster.filter((p) => p.hero_prop).slice(0, 4);
+  const vfxCueCount = scenes.reduce((sum, scene) => sum + (scene.vfx_stunts?.length || 0), 0);
+  const wardrobeNoteCount = scenes.reduce((sum, scene) => sum + (scene.wardrobe_notes?.length || 0), 0);
 
   return (
-    <div className="max-w-4xl">
-      <div className="mb-8">
-        <SectionLabelPill icon={<Package size={10} />} className="mb-3">
-          Art Department
-        </SectionLabelPill>
-        <h1 className="text-[32px] font-light tracking-[-0.025em] leading-[1.05] mb-2 text-foreground">
-          Production Design
-        </h1>
-        <p className="text-[13px] text-foreground/60 tracking-tight max-w-[60ch]">
-          Cross-referenced props and wardrobe pulled from every scene. What your art department will source, build, or dress.
-        </p>
-      </div>
+    <div className="max-w-5xl">
+      <DepartmentLens
+        eyebrow="Art Department"
+        title="Production Design"
+        subtitle="Props, wardrobe, and continuity."
+        icon={Package}
+        primaryRole="Production Designer"
+        supportRole="Costume Designer / Prop Master"
+        focus="material world, set dressing rules, hero objects, wardrobe logic"
+        signals={[
+          { label: "Hero Props", value: heroPropsCount },
+          { label: "Wardrobe Notes", value: wardrobeNoteCount },
+          { label: "VFX / Stunt Cues", value: vfxCueCount },
+        ]}
+      />
 
-      <div className="inline-grid grid-cols-2 md:grid-cols-[repeat(3,160px)] gap-px bg-border/50 rounded-[12px] overflow-hidden mb-8 shadow-paper">
-        <StatCard label="Hero Props" value={heroPropsCount} sub={`of ${propsMaster.length} tracked`} />
-        <StatCard label="Wardrobe Changes" value={totalWardrobeChanges} sub="across the cast" />
-        <StatCard label="Scene Setups" value={uniqueSceneLocations} sub={`across ${scenes.length} scenes`} />
+      <div className="mb-8 grid gap-3 md:grid-cols-[1fr_280px]">
+        <ReportPanel eyebrow="Material World" title="Objects the Film Keeps Tracking">
+          {heroProps.length > 0 ? (
+            <div className="grid gap-3 md:grid-cols-2">
+              {heroProps.map((prop) => (
+                <div key={prop.item} className="rounded-[10px] border border-border bg-white/[0.02] p-4">
+                  <div className="mb-2 flex items-center justify-between gap-3">
+                    <h2 className="truncate text-[13px] font-medium capitalize tracking-normal text-foreground">
+                      {prop.item}
+                    </h2>
+                    <EvidencePill>{prop.scenes.length} scenes</EvidencePill>
+                  </div>
+                  <p className="line-clamp-3 text-[12px] leading-[1.55] tracking-normal text-foreground/66">
+                    {prop.notes || "Hero prop without notes. Keep continuity photos tight across appearances."}
+                  </p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-[13px] leading-[1.6] text-foreground/68">
+              No hero props are flagged yet. The prop list can still add texture,
+              but nothing reads as an object the audience must track.
+            </p>
+          )}
+        </ReportPanel>
+
+        <ReportPanel eyebrow="Continuity" title="Design Load">
+          <div className="space-y-3">
+            <DesignLoadLine label="Tracked props" value={propsMaster.length} />
+            <DesignLoadLine label="Wardrobe changes" value={totalWardrobeChanges} />
+            <DesignLoadLine label="Scene setups" value={uniqueSceneLocations} />
+          </div>
+        </ReportPanel>
       </div>
 
       <div className="flex items-center gap-0 border-b border-border/60 mb-6">
@@ -272,7 +312,7 @@ export function ProductionViewer({
       {tab === "props" && (
         <div className="space-y-3">
           {propsMaster.length === 0 ? (
-            <Empty message="No props_master entries in the screenplay JSON." />
+            <Empty message="No prop list found in the screenplay data." />
           ) : (
             propsMaster.map((p) => (
               <PropCard
@@ -294,7 +334,7 @@ export function ProductionViewer({
           ) : (
             <>
               {wardrobeByCharacter.byCharacter.map((c) => (
-                <div key={c.name} className="rounded-[12px] bg-card/40 shadow-paper hover:shadow-paper-hover p-5 transition-all">
+                <div key={c.name} className="rounded-[12px] border border-border bg-card/35 p-5 transition-all hover:border-foreground/18 hover:bg-card/45">
                   <div className="flex items-baseline justify-between gap-2 mb-3">
                     <span className="text-[14px] font-medium uppercase tracking-[0.04em] text-foreground">
                       {c.name}
@@ -327,7 +367,7 @@ export function ProductionViewer({
                     {wardrobeByCharacter.general.map((w, i) => (
                       <div
                         key={`gen-${w.scene}-${i}`}
-                        className="rounded-[12px] bg-card/40 shadow-paper hover:shadow-paper-hover px-4 py-3 flex items-start gap-3 transition-all"
+                        className="flex items-start gap-3 rounded-[12px] border border-border bg-card/35 px-4 py-3 transition-all hover:border-foreground/18 hover:bg-card/45"
                       >
                         <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.08em] px-2 py-[3px] rounded-[4px] bg-muted text-muted-foreground shrink-0">
                           S{w.scene}
@@ -347,21 +387,7 @@ export function ProductionViewer({
   );
 }
 
-function StatCard({ label, value, sub }: { label: string; value: number; sub: string }) {
-  return (
-    <div className="bg-card/40 px-5 py-6 flex flex-col gap-2 min-w-0">
-      <div className="font-mono text-[9px] font-medium uppercase tracking-[0.15em] text-muted-foreground leading-[1.35] max-w-[11ch]">
-        {label}
-      </div>
-      <div className="text-[34px] font-light tabular-nums text-foreground leading-none tracking-[-0.03em]">
-        {value}
-      </div>
-      <div className="text-[11px] text-foreground/60 tracking-tight">{sub}</div>
-    </div>
-  );
-}
-
-function SectionLabel({ children }: { children: React.ReactNode }) {
+function SectionLabel({ children }: { children: ReactNode }) {
   return (
     <h3 className="text-[11px] font-semibold uppercase tracking-[0.15em] text-muted-foreground mb-3">
       {children}
@@ -376,12 +402,12 @@ function SubTabButton({
 }: {
   active: boolean;
   onClick: () => void;
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   return (
     <button
       onClick={onClick}
-      className={`relative px-3 py-3 text-[12px] font-medium tracking-tight transition-colors ${
+      className={`relative px-3 py-3 text-[12px] font-medium tracking-normal transition-colors ${
         active
           ? "text-foreground"
           : "text-muted-foreground hover:text-foreground"
@@ -399,6 +425,17 @@ function Empty({ message }: { message: string }) {
   return <p className="text-sm text-muted-foreground py-8 text-center">{message}</p>;
 }
 
+function DesignLoadLine({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="flex items-center justify-between gap-4 rounded-[10px] border border-border bg-white/[0.02] px-3 py-2">
+      <span className="text-[12px] tracking-normal text-foreground/72">{label}</span>
+      <span className="font-mono text-[10px] uppercase tracking-[0.11em] text-muted-foreground tabular-nums">
+        {value}
+      </span>
+    </div>
+  );
+}
+
 function PropCard({
   prop,
   imageState,
@@ -411,13 +448,13 @@ function PropCard({
   generatingAll: boolean;
 }) {
   return (
-    <div className="rounded-[12px] bg-card/40 shadow-paper hover:shadow-paper-hover p-5 flex gap-5 transition-all">
-      <div className="w-24 h-24 rounded-md shrink-0 bg-muted/40 border border-border/60 overflow-hidden flex items-center justify-center relative group">
+    <div className="report-motion-card flex gap-5 rounded-[12px] border border-border bg-card/35 p-5 hover:border-foreground/18 hover:bg-card/45">
+      <div className="group relative flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-md border border-border/70 bg-white/[0.03]">
         {imageState.status === "done" && imageState.url ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={imageState.url} alt={prop.item} className="w-full h-full object-cover" />
         ) : imageState.status === "generating" ? (
-          <Loader2 size={20} className="text-muted-foreground animate-spin" />
+          <Loader2 size={20} className="text-muted-foreground animate-spin motion-reduce:animate-none" />
         ) : imageState.status === "error" ? (
           <button
             onClick={onGenerate}
@@ -430,7 +467,7 @@ function PropCard({
           <button
             onClick={onGenerate}
             disabled={generatingAll}
-            className="flex flex-col items-center justify-center gap-1 text-[10px] text-muted-foreground/70 hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="report-motion-status flex flex-col items-center justify-center gap-1 text-[10px] text-muted-foreground/70 transition-colors hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed"
             title="Generate prop reference"
           >
             <Camera size={16} />
@@ -441,7 +478,7 @@ function PropCard({
         {imageState.status === "done" && !generatingAll && (
           <button
             onClick={onGenerate}
-            className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity"
+            className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 transition-opacity duration-150 ease-out group-hover:opacity-100"
             title="Regenerate prop reference"
           >
             <RefreshCw size={16} className="text-white" />
@@ -452,9 +489,9 @@ function PropCard({
       <div className="flex-1 min-w-0">
         <div className="flex items-start justify-between gap-4 mb-1.5">
           <div className="flex items-center gap-2">
-            <h2 className="text-[15px] font-semibold capitalize text-foreground tracking-tight">{prop.item}</h2>
+            <h2 className="text-[15px] font-semibold capitalize text-foreground tracking-normal">{prop.item}</h2>
             {prop.hero_prop && (
-              <span className="inline-flex items-center gap-1 font-mono text-[10px] font-semibold uppercase tracking-[0.08em] px-2 py-[3px] rounded-[4px] bg-amber-500/15 text-amber-400">
+              <span className="inline-flex items-center gap-1 rounded-[5px] border border-border bg-white/[0.03] px-2 py-[3px] font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
                 <Star size={10} className="fill-current" />
                 Hero
               </span>

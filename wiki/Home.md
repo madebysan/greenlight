@@ -27,7 +27,7 @@ Built as a portfolio piece targeting A24's creative team. See [presentation.md](
 
 ## Status
 
-Active development. Two portfolio demos live at `/demo` (Night of the Living Dead, 1968) and `/demo/red-balloon` (The Red Balloon, 1956). Deployed at **greenlight-public.vercel.app** — public, no password gate, zero server-side keys. Visitors bring their own Claude + fal.ai + TMDB keys via the onboarding modal; demos work key-free.
+Active development. Two portfolio demos live at `/demo` (Night of the Living Dead, 1968) and `/demo/red-balloon` (The Red Balloon, 1956). Hosted deployments are intentionally not linked from these docs because they may use personal provider keys.
 
 ---
 

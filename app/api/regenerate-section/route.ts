@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { generateDocument } from "@/lib/claude";
+import { resolveTextGenerationConfig } from "@/lib/text-generation";
 
 // Focused prompts for regenerating individual sections within a document.
 // Each returns JUST the section markdown (including the ## heading) so callers
@@ -146,12 +147,19 @@ No commentary, no extra text.`,
 
 export async function POST(request: NextRequest) {
   try {
-    const { sectionKey, jsonData, apiKey: clientKey } = await request.json();
-    const apiKey = clientKey || process.env.ANTHROPIC_API_KEY;
+    const body = (await request.json()) as {
+      sectionKey?: unknown;
+      jsonData?: unknown;
+      apiKey?: unknown;
+      apiProvider?: unknown;
+    };
+    const sectionKey = typeof body.sectionKey === "string" ? body.sectionKey : "";
+    const jsonData = typeof body.jsonData === "string" ? body.jsonData : "";
+    const { apiKey, provider } = resolveTextGenerationConfig(body);
 
     if (!sectionKey || !jsonData || !apiKey) {
       return NextResponse.json(
-        { error: "Missing sectionKey, jsonData, or apiKey" },
+        { error: "Missing sectionKey, jsonData, or selected provider API key" },
         { status: 400 },
       );
     }
@@ -164,7 +172,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const content = await generateDocument(prompt, jsonData, apiKey);
+    const content = await generateDocument(prompt, jsonData, { apiKey, provider });
     return NextResponse.json({ content: content.trim() });
   } catch (error) {
     console.error("Section regeneration error:", error);

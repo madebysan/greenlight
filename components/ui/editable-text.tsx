@@ -100,7 +100,7 @@ export function EditableText({
             onBlur={commit}
             placeholder={placeholder}
             rows={3}
-            className={`flex-1 rounded-[6px] bg-background/60 border border-border px-2 py-1.5 text-inherit tracking-tight focus:outline-none focus:border-foreground/40 resize-y ${inputClassName}`}
+            className={`flex-1 rounded-[6px] bg-background/60 border border-border px-2 py-1.5 text-inherit tracking-normal focus:outline-none focus:border-foreground/40 resize-y ${inputClassName}`}
           />
         ) : (
           <input
@@ -111,7 +111,7 @@ export function EditableText({
             onKeyDown={onKey}
             onBlur={commit}
             placeholder={placeholder}
-            className={`flex-1 rounded-[6px] bg-background/60 border border-border px-2 py-0.5 text-inherit tracking-tight focus:outline-none focus:border-foreground/40 ${inputClassName}`}
+            className={`flex-1 rounded-[6px] bg-background/60 border border-border px-2 py-0.5 text-inherit tracking-normal focus:outline-none focus:border-foreground/40 ${inputClassName}`}
           />
         )}
         <button

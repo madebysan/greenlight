@@ -3,9 +3,11 @@
 import { useEffect, useRef, useState } from "react";
 import { Film } from "lucide-react";
 import { SectionLabelPill } from "@/components/ui/inline-chip";
+import type { TextProvider } from "@/lib/ai-providers";
 import type { DocumentResult } from "./wizard-shell";
 
 type StepGeneratingProps = {
+  apiProvider: TextProvider;
   apiKey: string;
   jsonData: string;
   documents: DocumentResult[];
@@ -25,6 +27,7 @@ type StepGeneratingProps = {
 async function generateOne(
   doc: DocumentResult,
   jsonData: string,
+  apiProvider: TextProvider,
   apiKey: string,
   setDocuments: React.Dispatch<React.SetStateAction<DocumentResult[]>>,
   onDocReady?: (slug: string, content: string) => void,
@@ -39,7 +42,7 @@ async function generateOne(
     const res = await fetch(`/api/generate/${doc.slug}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ jsonData, apiKey }),
+      body: JSON.stringify({ jsonData, apiProvider, apiKey }),
     });
 
     if (!res.ok) {
@@ -57,11 +60,13 @@ async function generateOne(
       )
     );
 
-    fetch("/api/save-local", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ filename: `${doc.slug}.md`, content: data.content }),
-    }).catch(() => {});
+    if (process.env.NODE_ENV === "development") {
+      void fetch("/api/save-local", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ filename: `${doc.slug}.md`, content: data.content }),
+      }).catch(() => {});
+    }
 
     // Fire the hook synchronously so the wizard can schedule dependent work
     // (image generation) the instant this doc's content is available, while
@@ -92,6 +97,7 @@ function formatSeconds(ms: number): string {
 }
 
 export function StepGenerating({
+  apiProvider,
   apiKey,
   jsonData,
   documents,
@@ -103,37 +109,47 @@ export function StepGenerating({
 }: StepGeneratingProps) {
   const hasStarted = useRef(false);
   const cancelRef = useRef(false);
-  const sessionStartRef = useRef<number>(Date.now());
-  // Per-document start and end times so we can show per-row elapsed.
-  const docTimesRef = useRef<Record<string, { start?: number; end?: number }>>({});
-  const [tick, setTick] = useState(0);
+  const [sessionStart, setSessionStart] = useState(0);
+  const [docTimes, setDocTimes] = useState<Record<string, { start?: number; end?: number }>>({});
+  const [now, setNow] = useState(0);
 
   // Re-render every 200ms so elapsed counters update in real time.
   useEffect(() => {
-    const interval = setInterval(() => setTick((t) => t + 1), 200);
+    const interval = setInterval(() => setNow(Date.now()), 200);
     return () => clearInterval(interval);
   }, []);
 
   // Track start/end of each document's generation as its status changes.
   useEffect(() => {
-    const now = Date.now();
-    for (const doc of documents) {
-      const entry = docTimesRef.current[doc.slug] || {};
-      if (doc.status === "generating" && !entry.start) {
-        entry.start = now;
-      }
-      if ((doc.status === "done" || doc.status === "error") && !entry.end) {
-        if (!entry.start) entry.start = now;
-        entry.end = now;
-      }
-      docTimesRef.current[doc.slug] = entry;
-    }
+    const timestamp = Date.now();
+    setTimeout(() => {
+      setDocTimes((prev) => {
+        let changed = false;
+        const next = { ...prev };
+        for (const doc of documents) {
+          const entry = next[doc.slug] || {};
+          const updated = { ...entry };
+          if (doc.status === "generating" && !updated.start) {
+            updated.start = timestamp;
+            changed = true;
+          }
+          if ((doc.status === "done" || doc.status === "error") && !updated.end) {
+            if (!updated.start) updated.start = timestamp;
+            updated.end = timestamp;
+            changed = true;
+          }
+          next[doc.slug] = updated;
+        }
+        return changed ? next : prev;
+      });
+    }, 0);
   }, [documents]);
 
   useEffect(() => {
     if (hasStarted.current) return;
     hasStarted.current = true;
-    sessionStartRef.current = Date.now();
+    const startedAt = Date.now();
+    setTimeout(() => setSessionStart(startedAt), 0);
 
     async function fakeProgression() {
       // Vary timing per document to feel more realistic.
@@ -187,7 +203,7 @@ export function StepGenerating({
                 content: null,
                 error: "Cancelled",
               })
-            : generateOne(doc, jsonData, apiKey, setDocuments, onDocReady),
+            : generateOne(doc, jsonData, apiProvider, apiKey, setDocuments, onDocReady),
         ),
       );
 
@@ -218,28 +234,25 @@ export function StepGenerating({
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Use `tick` so the linter is happy (referenced) — it's our render trigger.
-  void tick;
-
   const doneCount = documents.filter((d) => d.status === "done").length;
   const errorCount = documents.filter((d) => d.status === "error").length;
   const completed = doneCount + errorCount;
   const total = documents.length;
   const progress = total > 0 ? completed / total : 0;
-  const sessionElapsed = Date.now() - sessionStartRef.current;
+  const currentNow = now || sessionStart;
+  const sessionElapsed = currentNow && sessionStart ? currentNow - sessionStart : 0;
 
   return (
     <div className="max-w-3xl space-y-12">
       <header>
         <SectionLabelPill icon={<Film size={10} />} className="mb-4">
-          Vision Deck
+          Film deck
         </SectionLabelPill>
-        <h1 className="text-[44px] font-light tracking-[-0.03em] leading-[1.02] mb-3 text-foreground">
-          Building your vision deck
+        <h1 className="text-[44px] font-light tracking-normal leading-[1.02] mb-3 text-foreground">
+          Building the deck
         </h1>
-        <p className="text-[14px] text-foreground/70 max-w-[58ch] tracking-tight leading-[1.55]">
-          Each section is generated from your screenplay data and ready to
-          review the moment it lands.
+        <p className="text-[14px] text-foreground/70 max-w-[58ch] tracking-normal leading-[1.55]">
+          Sections appear as they finish.
         </p>
       </header>
 
@@ -250,16 +263,16 @@ export function StepGenerating({
             <span className="font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
               Progress
             </span>
-            <span className="font-mono text-[11px] text-foreground/90 tabular-nums tracking-tight">
+            <span className="font-mono text-[11px] text-foreground/90 tabular-nums tracking-normal">
               <span className="text-foreground">{completed.toString().padStart(2, "0")}</span>
               <span className="text-muted-foreground"> / {total.toString().padStart(2, "0")}</span>
             </span>
           </div>
           <div className="flex items-center gap-4">
-            <span className="font-mono text-[11px] text-muted-foreground tabular-nums tracking-tight">
+            <span className="font-mono text-[11px] text-muted-foreground tabular-nums tracking-normal">
               {formatSeconds(sessionElapsed)}
             </span>
-            <span className="font-mono text-[11px] text-foreground tabular-nums tracking-tight">
+            <span className="font-mono text-[11px] text-foreground tabular-nums tracking-normal">
               {Math.round(progress * 100)}%
             </span>
             {progress < 1 && !prefilledDocs && (
@@ -307,12 +320,12 @@ export function StepGenerating({
       {/* Call-sheet list of documents */}
       <section>
         <div className="font-mono text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground mb-4 flex items-baseline justify-between">
-          <span>Call Sheet</span>
+          <span>Generation list</span>
           <span className="text-[9px] tracking-[0.14em]">Document · Status · Elapsed</span>
         </div>
         <ol className="space-y-px">
           {documents.map((doc, i) => {
-            const times = docTimesRef.current[doc.slug] || {};
+            const times = docTimes[doc.slug] || {};
             const isGenerating = doc.status === "generating";
             const isDone = doc.status === "done";
             const isError = doc.status === "error";
@@ -320,11 +333,11 @@ export function StepGenerating({
 
             let elapsedLabel = "—";
             if (isDone || isError) {
-              const elapsed = (times.end || Date.now()) - (times.start || Date.now());
+              const elapsed = (times.end || currentNow) - (times.start || currentNow);
               const s = (elapsed / 1000).toFixed(1);
               elapsedLabel = `${s}s`;
             } else if (isGenerating && times.start) {
-              const elapsed = Date.now() - times.start;
+              const elapsed = currentNow - times.start;
               const s = (elapsed / 1000).toFixed(1);
               elapsedLabel = `${s}s`;
             }
@@ -332,7 +345,7 @@ export function StepGenerating({
             return (
               <li
                 key={doc.slug}
-                className={`relative grid grid-cols-[auto_1fr_auto_auto] items-center gap-4 px-4 py-3.5 rounded-[8px] transition-all ${
+                className={`report-motion-card relative grid grid-cols-[auto_1fr_auto_auto] items-center gap-4 px-4 py-3.5 rounded-[8px] ${
                   isGenerating
                     ? "bg-card/60 shadow-paper-hover"
                     : isDone
@@ -371,7 +384,7 @@ export function StepGenerating({
                   )}
                   {isGenerating && (
                     <>
-                      <span className="h-1.5 w-1.5 rounded-full bg-foreground animate-pulse" />
+                      <span className="report-loading-dot h-1.5 w-1.5 rounded-full bg-foreground" />
                       <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-foreground">
                         Rolling
                       </span>
@@ -396,7 +409,7 @@ export function StepGenerating({
                 </div>
 
                 {/* Elapsed */}
-                <span className="font-mono text-[11px] text-muted-foreground tabular-nums tracking-tight w-12 text-right">
+                <span className="font-mono text-[11px] text-muted-foreground tabular-nums tracking-normal w-12 text-right">
                   {elapsedLabel}
                 </span>
 
@@ -448,6 +461,13 @@ export function StepGenerating({
             rgba(23, 23, 23, 0.05) 50%,
             transparent 100%
           );
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .shimmer-sweep,
+          .shimmer-row {
+            animation: none;
+            transform: none;
+          }
         }
       `}</style>
     </div>

@@ -36,6 +36,6 @@
 ## Security Considerations
 
 - **API keys in browser** — keys entered in Settings are stored in plain localStorage. Acceptable for a portfolio demo but not for a production deployment.
-- **No input sanitization on markdown** — Claude output is rendered via `react-markdown` with `remark-gfm`, which handles XSS. But prompt injection through screenplay JSON is theoretically possible.
+- **Generated content is parsed into specialized viewers** — Claude markdown is parsed into structured report sections instead of being rendered through a generic markdown viewer. Prompt injection through screenplay JSON is still theoretically possible.
 - **Image filenames sanitized** — `serve-image` route validates filename against `/^[\w-]+\.jpg$/` to prevent path traversal.
 - **No rate limiting on API routes** — any caller can hit the image/doc generation endpoints. Acceptable for local dev; would need middleware for public deployment.

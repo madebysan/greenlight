@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown, MapPin } from "lucide-react";
-import { SectionLabelPill } from "@/components/ui/inline-chip";
+import type { ReactNode } from "react";
+import { ChevronDown, MapPin, Route, Moon, SunMedium } from "lucide-react";
+import { DepartmentLens, EvidencePill, ReportPanel } from "@/components/ui/department-lens";
 
 type LocationData = {
   name: string;
@@ -53,40 +54,84 @@ export function LocationsViewer({ jsonData }: LocationsViewerProps) {
     setExpanded(next);
   };
 
+  const nightSceneCount = scenes.filter((scene) => scene.time_of_day === "NIGHT").length;
+  const exteriorSceneCount = scenes.filter((scene) => scene.int_ext === "EXT" || scene.int_ext === "BOTH").length;
+  const companyMoveCount = Math.max(0, locations.length - 1);
+  const priorityLocations = [...locations]
+    .sort((a, b) => (b.scenes?.length || 0) - (a.scenes?.length || 0))
+    .slice(0, 3);
+
   if (locations.length === 0) {
     return (
       <div className="text-sm text-muted-foreground py-12 text-center">
-        No location data found in the screenplay JSON.
+        No locations found in the screenplay data.
       </div>
     );
   }
 
   return (
-    <div className="max-w-4xl">
-      <div className="mb-8 flex items-start justify-between gap-4">
-        <div>
-          <SectionLabelPill icon={<MapPin size={10} />} className="mb-3">
-            Geography
-          </SectionLabelPill>
-          <h1 className="text-[32px] font-light tracking-[-0.025em] leading-[1.05] mb-2 text-foreground">
-            Locations
-          </h1>
-          <p className="text-[13px] text-foreground/60 tracking-tight">
-            <span className="tabular-nums">{locations.length}</span> unique {locations.length === 1 ? "location" : "locations"} across{" "}
-            <span className="tabular-nums">{scenes.length}</span> {scenes.length === 1 ? "scene" : "scenes"}.
-          </p>
-        </div>
-        <div className="flex items-center gap-1 shrink-0 mt-10">
-          <button
-            onClick={expanded.size === locations.length ? collapseAll : expandAll}
-            className="text-[10px] font-mono uppercase tracking-[0.1em] text-muted-foreground hover:text-foreground px-2 py-1 rounded transition-colors"
-          >
-            {expanded.size === locations.length ? "Collapse all" : "Expand all"}
-          </button>
-        </div>
+    <div className="max-w-5xl">
+      <DepartmentLens
+        eyebrow="Geography"
+        title="Locations"
+        subtitle="Places, moves, nights, and exteriors."
+        icon={MapPin}
+        primaryRole="Location Scout"
+        supportRole="Line Producer"
+        focus="location personality, company moves, exterior/night risk"
+        signals={[
+          { label: "Locations", value: locations.length },
+          { label: "Company Moves", value: companyMoveCount },
+          { label: "Night Scenes", value: nightSceneCount },
+        ]}
+      />
+
+      <div className="mb-8 space-y-3">
+        <ReportPanel eyebrow="Scout Read" title="Places With the Most Story Weight">
+          <div className="space-y-3">
+            {priorityLocations.map((loc) => (
+              <div
+                key={loc.name}
+                className="grid gap-3 border-t border-border/70 py-4 first:border-t-0 first:pt-0 last:pb-0 md:grid-cols-[minmax(150px,220px)_1fr_auto] md:items-start"
+              >
+                <div className="min-w-0">
+                  <h2 className="text-[14px] font-medium capitalize tracking-normal text-foreground">
+                    {loc.name}
+                  </h2>
+                </div>
+                <p className="text-[13px] leading-[1.6] tracking-normal text-foreground/70">
+                  {loc.description}
+                </p>
+                <div className="md:justify-self-end">
+                  <EvidencePill>{loc.scenes.length} scenes</EvidencePill>
+                </div>
+              </div>
+            ))}
+          </div>
+        </ReportPanel>
+
+        <ReportPanel eyebrow="Risk" title="Schedule Pressure">
+          <div className="grid gap-3 md:grid-cols-3">
+            <RiskLine icon={<Route size={13} />} label="Moves" value={`${companyMoveCount} estimated`} />
+            <RiskLine icon={<Moon size={13} />} label="Night" value={`${nightSceneCount} scenes`} />
+            <RiskLine icon={<SunMedium size={13} />} label="Exterior" value={`${exteriorSceneCount} scenes`} />
+          </div>
+        </ReportPanel>
       </div>
 
-      <div className="space-y-2">
+      <div className="mb-4 flex items-center justify-between gap-4">
+        <h2 className="font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+          Location Cards
+        </h2>
+        <button
+          onClick={expanded.size === locations.length ? collapseAll : expandAll}
+          className="rounded px-2 py-1 font-mono text-[10px] uppercase tracking-[0.1em] text-muted-foreground transition-colors hover:text-foreground"
+        >
+          {expanded.size === locations.length ? "Collapse all" : "Expand all"}
+        </button>
+      </div>
+
+      <div className="space-y-3">
         {locations.map((loc) => {
           const sceneCount = loc.scenes?.length || 0;
           const locScenes = scenes.filter((s) => loc.scenes?.includes(s.scene_number));
@@ -95,10 +140,10 @@ export function LocationsViewer({ jsonData }: LocationsViewerProps) {
           return (
             <div
               key={loc.name}
-              className={`rounded-[12px] transition-all ${
+              className={`report-motion-card rounded-[12px] border ${
                 isExpanded
-                  ? "bg-card/60 shadow-paper-hover"
-                  : "bg-card/30 shadow-paper hover:shadow-paper-hover"
+                  ? "border-foreground/18 bg-card/45"
+                  : "border-border bg-card/25 hover:border-foreground/18 hover:bg-card/40"
               }`}
             >
               <button
@@ -106,23 +151,23 @@ export function LocationsViewer({ jsonData }: LocationsViewerProps) {
                 className="w-full text-left p-5 flex items-start justify-between gap-4"
               >
                 <div className="flex-1 min-w-0">
-                  <h2 className="text-[15px] font-medium capitalize text-foreground flex items-center gap-2 tracking-tight">
+                  <h2 className="text-[15px] font-medium capitalize text-foreground flex items-center gap-2 tracking-normal">
                     <ChevronDown
                       size={14}
-                      className={`text-muted-foreground transition-transform ${
+                      className={`report-expand-icon text-muted-foreground ${
                         isExpanded ? "" : "-rotate-90"
                       }`}
                     />
                     {loc.name}
                   </h2>
                   {!isExpanded && (
-                    <p className="text-[12px] text-foreground/65 mt-1 line-clamp-1 pl-5">
+                    <p className="report-motion-content text-[12px] text-foreground/65 mt-1 line-clamp-1 pl-5">
                       {loc.description}
                     </p>
                   )}
                 </div>
                 <div className="flex flex-col items-end gap-1.5 shrink-0">
-                  <span className="font-mono text-[10px] font-medium uppercase tracking-[0.1em] px-2 py-[3px] rounded-full bg-white/[0.04] text-muted-foreground shadow-pill">
+                  <span className="rounded-full border border-border bg-white/[0.03] px-2 py-[3px] font-mono text-[10px] font-medium uppercase tracking-[0.1em] text-muted-foreground">
                     {loc.int_ext}
                   </span>
                   <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground tabular-nums">
@@ -132,7 +177,7 @@ export function LocationsViewer({ jsonData }: LocationsViewerProps) {
               </button>
 
               {isExpanded && (
-                <div className="px-5 pb-5 pl-[2.75rem] space-y-4">
+                <div className="report-motion-content px-5 pb-5 pl-[2.75rem] space-y-4">
                   <p className="text-[13px] leading-[1.6] text-foreground/70">
                     {loc.description}
                   </p>
@@ -142,7 +187,7 @@ export function LocationsViewer({ jsonData }: LocationsViewerProps) {
                       {loc.time_variations.map((time) => (
                         <span
                           key={time}
-                          className="font-mono text-[10px] font-semibold uppercase tracking-[0.08em] px-2 py-[3px] rounded-[4px] bg-violet-500/15 text-violet-300"
+                          className="rounded-[5px] border border-border bg-white/[0.03] px-2 py-[3px] font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground"
                         >
                           {time}
                         </span>
@@ -169,7 +214,7 @@ export function LocationsViewer({ jsonData }: LocationsViewerProps) {
                   {locScenes.length > 0 && (
                     <div className="pt-4 border-t border-border/60">
                       <h3 className="font-mono text-[10px] uppercase tracking-[0.15em] text-muted-foreground mb-2.5">
-                        Key Visual Moments
+                        Scoutable Visual Moments
                       </h3>
                       <ul className="text-[13px] space-y-2 text-foreground/80">
                         {locScenes.map((s) => (
@@ -189,6 +234,20 @@ export function LocationsViewer({ jsonData }: LocationsViewerProps) {
           );
         })}
       </div>
+    </div>
+  );
+}
+
+function RiskLine({ icon, label, value }: { icon: ReactNode; label: string; value: string }) {
+  return (
+    <div className="flex items-center justify-between gap-4 rounded-[10px] border border-border bg-white/[0.02] px-3 py-2">
+      <span className="inline-flex items-center gap-2 text-[12px] tracking-normal text-foreground/72">
+        <span className="text-muted-foreground">{icon}</span>
+        {label}
+      </span>
+      <span className="font-mono text-[10px] uppercase tracking-[0.11em] text-muted-foreground">
+        {value}
+      </span>
     </div>
   );
 }

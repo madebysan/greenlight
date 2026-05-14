@@ -146,7 +146,7 @@ function CollapsibleProse({ text, sentenceCount = 3 }: { text: string; sentenceC
 
   return (
     <div className="max-w-[65ch]">
-      <p className="text-[15px] leading-[1.75] text-foreground/80 tracking-tight">
+      <p className="text-[16px] leading-[1.75] text-foreground/76">
         {expanded ? text : lead}
       </p>
       {hasMore && (
@@ -228,7 +228,12 @@ export function MoodAndToneViewer({ content, jsonData, onContentUpdate }: MoodAn
       const res = await fetch("/api/regenerate-section", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sectionKey, jsonData, apiKey: keys.apiKey }),
+        body: JSON.stringify({
+          sectionKey,
+          jsonData,
+          apiProvider: keys.apiProvider,
+          apiKey: keys.apiKey,
+        }),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const { content: newSection } = await res.json();
@@ -244,16 +249,16 @@ export function MoodAndToneViewer({ content, jsonData, onContentUpdate }: MoodAn
   }
 
   return (
-    <div className="max-w-4xl space-y-16">
+    <div className="max-w-5xl space-y-16">
       <header>
-        <SectionLabelPill icon={<Sparkles size={10} />} className="mb-3">
+        <SectionLabelPill icon={<Sparkles size={11} />} className="mb-4">
           Atmosphere
         </SectionLabelPill>
-        <h1 className="text-[32px] font-light tracking-[-0.025em] leading-[1.05] mb-2 text-foreground">
+        <h1 className="font-display text-[40px] font-normal leading-[1.04] tracking-normal text-foreground md:text-[48px]">
           Mood & Tone
         </h1>
-        <p className="text-[13px] text-foreground/60 tracking-tight max-w-[60ch]">
-          The film&apos;s atmospheric identity — mood, references, and sonic direction.
+        <p className="mt-4 max-w-[60ch] text-[16px] leading-[1.6] text-foreground/62">
+          Mood, references, and sound.
         </p>
       </header>
 
@@ -293,7 +298,7 @@ export function MoodAndToneViewer({ content, jsonData, onContentUpdate }: MoodAn
             {parsed.descriptors.map((d, i) => (
               <span
                 key={`${i}-${d}`}
-                className="inline-flex items-center px-3 py-1.5 rounded-full bg-white/[0.04] text-[11px] font-mono tracking-tight text-foreground/80 shadow-pill"
+                className="inline-flex items-center rounded-full border border-border bg-white/[0.03] px-3 py-1.5 font-mono text-[12px] text-foreground/78"
               >
                 {d}
               </span>
@@ -327,19 +332,19 @@ export function MoodAndToneViewer({ content, jsonData, onContentUpdate }: MoodAn
             Reference Points
           </SectionHead>
           <div
-            className={`grid grid-cols-1 md:grid-cols-2 gap-3 transition-opacity duration-200 ${
+            className={`grid grid-cols-1 gap-3 transition-opacity duration-200 ${
               referencesShuffle.state === "loading" ? "opacity-40" : "opacity-100"
             }`}
           >
             {parsed.references.map((r) => (
               <div
                 key={r.title}
-                className="rounded-[12px] bg-card/40 shadow-paper hover:shadow-paper-hover p-4 transition-all"
+                className="rounded-[12px] border border-border bg-card/35 p-4 transition-colors hover:border-foreground/20 hover:bg-card/50"
               >
-                <div className="text-[13px] font-medium text-foreground leading-snug tracking-tight">
+                <div className="text-[13px] font-medium text-foreground leading-snug tracking-normal">
                   {r.title}
                 </div>
-                <p className="text-[12px] text-foreground/70 leading-[1.6] mt-1.5 tracking-tight">
+                <p className="mt-1.5 text-[13px] leading-[1.6] text-foreground/68">
                   {r.description}
                 </p>
               </div>
@@ -433,7 +438,6 @@ function SimilarMoodsGrid({ films }: { films: SimilarMoodEntry[] }) {
 
   useEffect(() => {
     let cancelled = false;
-    setLoading(true);
     fetch("/api/tmdb-search", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -460,15 +464,15 @@ function SimilarMoodsGrid({ films }: { films: SimilarMoodEntry[] }) {
   }, [queryKey, films, tmdbKey]);
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+    <div className="space-y-3">
       {films.map((f) => {
         const r = resolved[f.title];
         return (
           <div
             key={`${f.title}-${f.year || ""}`}
-            className="flex gap-3 rounded-[12px] bg-card/40 shadow-paper hover:shadow-paper-hover p-3 transition-all"
+            className="grid grid-cols-[64px_minmax(0,1fr)] gap-4 rounded-[12px] border border-border bg-card/35 p-3 transition-colors hover:border-foreground/20 hover:bg-card/50"
           >
-            <div className="w-14 aspect-[2/3] rounded-md overflow-hidden bg-muted/40 border border-border/60 shrink-0 relative">
+            <div className="relative aspect-[2/3] w-16 overflow-hidden rounded-md border border-border bg-muted/40">
               {loading ? (
                 <div className="absolute inset-0 animate-pulse bg-muted/40" />
               ) : r?.poster_url ? (
@@ -476,7 +480,7 @@ function SimilarMoodsGrid({ films }: { films: SimilarMoodEntry[] }) {
                 <img
                   src={r.poster_url}
                   alt={f.title}
-                  className="w-full h-full object-cover"
+                  className="h-full w-full object-cover"
                 />
               ) : null}
             </div>
@@ -487,7 +491,7 @@ function SimilarMoodsGrid({ films }: { films: SimilarMoodEntry[] }) {
                   <span className="text-muted-foreground font-normal font-mono text-[11px] ml-1">· {f.year}</span>
                 )}
               </div>
-              <p className="text-[12px] text-foreground/70 leading-[1.55] mt-1.5">
+              <p className="mt-1.5 text-[13px] leading-[1.55] text-foreground/68">
                 {f.description}
               </p>
             </div>
@@ -510,7 +514,6 @@ function SoundtrackGrid({ tracks }: { tracks: SoundtrackEntry[] }) {
 
   useEffect(() => {
     let cancelled = false;
-    setLoading(true);
     fetch("/api/tmdb-search", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -537,15 +540,15 @@ function SoundtrackGrid({ tracks }: { tracks: SoundtrackEntry[] }) {
   }, [queryKey, tracks, tmdbKey]);
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+    <div className="space-y-3">
       {tracks.map((t) => {
         const r = resolved[t.title];
         return (
           <div
             key={`${t.title}-${t.year || ""}`}
-            className="flex gap-3 rounded-[12px] bg-card/40 shadow-paper hover:shadow-paper-hover p-3 transition-all"
+            className="grid grid-cols-[64px_minmax(0,1fr)] gap-4 rounded-[12px] border border-border bg-card/35 p-3 transition-colors hover:border-foreground/20 hover:bg-card/50"
           >
-            <div className="w-14 aspect-[2/3] rounded-md overflow-hidden bg-muted/40 border border-border/60 shrink-0 relative">
+            <div className="relative aspect-[2/3] w-16 overflow-hidden rounded-md border border-border bg-muted/40">
               {loading ? (
                 <div className="absolute inset-0 animate-pulse bg-muted/40" />
               ) : r?.poster_url ? (
@@ -553,7 +556,7 @@ function SoundtrackGrid({ tracks }: { tracks: SoundtrackEntry[] }) {
                 <img
                   src={r.poster_url}
                   alt={t.title}
-                  className="w-full h-full object-cover"
+                  className="h-full w-full object-cover"
                 />
               ) : null}
             </div>
@@ -564,10 +567,10 @@ function SoundtrackGrid({ tracks }: { tracks: SoundtrackEntry[] }) {
                   <span className="text-muted-foreground font-normal font-mono text-[11px] ml-1">· {t.year}</span>
                 )}
               </div>
-              <div className="font-mono text-[9px] text-muted-foreground mt-1 uppercase tracking-[0.15em]">
+              <div className="mt-1 font-mono text-[10px] uppercase tracking-[0.1em] text-muted-foreground">
                 {t.composer}
               </div>
-              <p className="text-[12px] text-foreground/70 leading-[1.55] mt-1.5">
+              <p className="mt-1.5 text-[13px] leading-[1.55] text-foreground/68">
                 {t.description}
               </p>
             </div>
@@ -577,4 +580,3 @@ function SoundtrackGrid({ tracks }: { tracks: SoundtrackEntry[] }) {
     </div>
   );
 }
-

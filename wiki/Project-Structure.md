@@ -53,7 +53,6 @@ All API routes accept `apiKey` in the request body with `process.env.X` as fallb
 
 ```
 components/
-  document-viewer.tsx     # Markdown renderer with color swatch support
   viewers/                # 11 specialized document/data viewers
     overview-viewer.tsx           # Parses Overview markdown → structured hero
     mood-and-tone-viewer.tsx      # Atmosphere, palette, TMDB posters, soundtracks
@@ -70,7 +69,6 @@ components/
   wizard/                 # 4-step wizard flow
     wizard-shell.tsx              # Root state manager + background image task queue
     step-instructions.tsx         # Step 1: PDF (disabled, "Soon") + Paste JSON + cached lookup
-    step-json-input.tsx           # (legacy) JSON paste + validation
     step-generating.tsx           # Step 2: parallel Claude docs + onDocReady hook
     step-results.tsx              # Step 3: tabbed viewer container
     header-menu.tsx               # Settings, About, Share, Theme toggle

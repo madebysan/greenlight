@@ -6,7 +6,7 @@
 // to the committed snapshot.
 
 import { useEffect, useState } from "react";
-import { RotateCcw, Sun, Moon, Info, Share2 } from "lucide-react";
+import { RotateCcw, Info, Share2 } from "lucide-react";
 import { StepResults } from "@/components/wizard/step-results";
 import { HeaderButton, MoreMenu } from "@/components/wizard/header-menu";
 import { AboutDialog } from "@/components/wizard/about-dialog";
@@ -44,25 +44,11 @@ export function DemoContent({ project, shareSlug = "demo" }: DemoContentProps) {
   const [disabledItems, setDisabledItems] = useState<Record<string, boolean>>(
     () => project.disabledItems || {},
   );
-  const [theme, setTheme] = useState<"dark" | "light">("dark");
   const [showAbout, setShowAbout] = useState(false);
 
   useEffect(() => {
-    /* eslint-disable react-hooks/set-state-in-effect */
-    setTheme(localStorage.getItem("greenlight-theme") === "light" ? "light" : "dark");
-    /* eslint-enable react-hooks/set-state-in-effect */
+    document.documentElement.classList.add("dark");
   }, []);
-
-  const toggleTheme = () => {
-    const next = theme === "dark" ? "light" : "dark";
-    setTheme(next);
-    localStorage.setItem("greenlight-theme", next);
-    if (next === "dark") {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-  };
 
   const handleDocumentUpdate = (slug: string, newContent: string) => {
     setDocuments((prev) =>
@@ -72,21 +58,21 @@ export function DemoContent({ project, shareSlug = "demo" }: DemoContentProps) {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="relative z-50 border-b border-border/60 bg-background/80 backdrop-blur-md">
-        <div className="mx-auto px-6 py-4 max-w-6xl">
+      <header className="relative z-50 border-b border-border/80 bg-background/90 backdrop-blur-md">
+        <div className="mx-auto max-w-[1180px] px-6 py-3.5">
           <div className="flex items-center gap-3">
-            <div className="h-9 w-9 shrink-0 rounded-[8px] bg-white flex items-center justify-center shadow-pill text-black">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[7px] bg-white text-black">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/logo.png" alt="Greenlight" className="w-[70%] h-[70%]" />
             </div>
             <div>
-              <h1 className="text-[17px] font-medium tracking-[-0.02em]">
+              <h1 className="text-[15px] font-semibold tracking-normal text-foreground">
                 Greenlight{" "}
-                <span className="text-[10px] font-mono uppercase tracking-[0.14em] text-muted-foreground ml-1 align-middle">
+                <span className="ml-1 align-middle font-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
                   · Demo
                 </span>
               </h1>
-              <p className="text-[12px] text-foreground/70 tracking-tight">Script to vision deck in minutes.</p>
+              <p className="text-[12px] text-foreground/58">Script to film deck.</p>
             </div>
 
             <div className="flex items-center gap-2 ml-auto">
@@ -96,21 +82,18 @@ export function DemoContent({ project, shareSlug = "demo" }: DemoContentProps) {
                 onClick={() => {
                   window.location.href = "/";
                 }}
-                title="Exit the demo"
+                title="Leave the demo"
               />
               <MoreMenu
                 items={[
                   {
                     icon: <Share2 size={14} />,
                     label: "Share",
-                    onClick: () => window.open(`/share?source=${shareSlug}`, "_blank"),
+                    onClick: () => {
+                      window.location.href = `/share?source=${shareSlug}`;
+                    },
                   },
                   "divider",
-                  {
-                    icon: theme === "dark" ? <Sun size={14} /> : <Moon size={14} />,
-                    label: theme === "dark" ? "Switch to light mode" : "Switch to dark mode",
-                    onClick: toggleTheme,
-                  },
                   {
                     icon: <Info size={14} />,
                     label: "About Greenlight",
@@ -122,7 +105,7 @@ export function DemoContent({ project, shareSlug = "demo" }: DemoContentProps) {
           </div>
         </div>
       </header>
-      <main className="mx-auto px-6 py-6 max-w-6xl">
+      <main className="mx-auto max-w-[1180px] px-6 py-6">
         <StepResults
           documents={documents}
           jsonData={project.jsonData}

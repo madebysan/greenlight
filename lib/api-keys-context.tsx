@@ -9,15 +9,26 @@ import {
   useState,
 } from "react";
 import { ApiKeysDialog } from "@/components/wizard/api-keys-dialog";
-import { API_KEY_STORAGE, FAL_KEY_STORAGE, TMDB_KEY_STORAGE } from "@/lib/reports";
+import {
+  DEFAULT_TEXT_PROVIDER,
+  normalizeTextProvider,
+  type TextProvider,
+} from "@/lib/ai-providers";
+import {
+  API_KEY_STORAGE,
+  API_PROVIDER_STORAGE,
+  FAL_KEY_STORAGE,
+  TMDB_KEY_STORAGE,
+} from "@/lib/reports";
 
 export type EnsureKeysOptions = {
   // When true, the fal.ai key is also required (image-only actions).
-  // When false (default), only the Claude key is required and fal is optional.
+  // When false (default), only the selected text provider key is required and fal is optional.
   requireFal?: boolean;
 };
 
 export type EnsuredKeys = {
+  apiProvider: TextProvider;
   apiKey: string;
   falKey: string;
 };
@@ -28,9 +39,11 @@ type PendingRequest = {
 };
 
 type ApiKeysContextValue = {
+  apiProvider: TextProvider;
   apiKey: string;
   falKey: string;
   tmdbKey: string;
+  setApiProvider: (provider: TextProvider) => void;
   setApiKey: (k: string) => void;
   setFalKey: (k: string) => void;
   setTmdbKey: (k: string) => void;
@@ -41,26 +54,38 @@ type ApiKeysContextValue = {
 const ApiKeysContext = createContext<ApiKeysContextValue | null>(null);
 
 export function ApiKeysProvider({ children }: { children: React.ReactNode }) {
+  const [apiProvider, setApiProviderState] =
+    useState<TextProvider>(DEFAULT_TEXT_PROVIDER);
   const [apiKey, setApiKeyState] = useState<string>("");
   const [falKey, setFalKeyState] = useState<string>("");
   const [tmdbKey, setTmdbKeyState] = useState<string>("");
   const [pending, setPending] = useState<PendingRequest | null>(null);
 
   // Track latest values without forcing ensureKeys to re-create its closure.
+  const apiProviderRef = useRef<TextProvider>(DEFAULT_TEXT_PROVIDER);
   const apiKeyRef = useRef("");
   const falKeyRef = useRef("");
 
   useEffect(() => {
     /* eslint-disable react-hooks/set-state-in-effect */
+    const storedProvider = normalizeTextProvider(localStorage.getItem(API_PROVIDER_STORAGE));
     const storedApi = localStorage.getItem(API_KEY_STORAGE) || "";
     const storedFal = localStorage.getItem(FAL_KEY_STORAGE) || "";
     const storedTmdb = localStorage.getItem(TMDB_KEY_STORAGE) || "";
+    apiProviderRef.current = storedProvider;
     apiKeyRef.current = storedApi;
     falKeyRef.current = storedFal;
+    setApiProviderState(storedProvider);
     setApiKeyState(storedApi);
     setFalKeyState(storedFal);
     setTmdbKeyState(storedTmdb);
     /* eslint-enable react-hooks/set-state-in-effect */
+  }, []);
+
+  const setApiProvider = useCallback((provider: TextProvider) => {
+    apiProviderRef.current = provider;
+    setApiProviderState(provider);
+    if (typeof window !== "undefined") localStorage.setItem(API_PROVIDER_STORAGE, provider);
   }, []);
 
   const setApiKey = useCallback((k: string) => {
@@ -88,6 +113,7 @@ export function ApiKeysProvider({ children }: { children: React.ReactNode }) {
       if (satisfied) {
         return Promise.resolve({
           apiKey: apiKeyRef.current,
+          apiProvider: apiProviderRef.current,
           falKey: falKeyRef.current,
         });
       }
@@ -98,13 +124,19 @@ export function ApiKeysProvider({ children }: { children: React.ReactNode }) {
     [],
   );
 
-  const handleConfirm = (nextApi: string, nextFal: string, nextTmdb: string) => {
+  const handleConfirm = (
+    nextProvider: TextProvider,
+    nextApi: string,
+    nextFal: string,
+    nextTmdb: string,
+  ) => {
+    setApiProvider(nextProvider);
     setApiKey(nextApi);
     setFalKey(nextFal);
     setTmdbKey(nextTmdb);
     const req = pending;
     setPending(null);
-    req?.resolve({ apiKey: nextApi, falKey: nextFal });
+    req?.resolve({ apiProvider: nextProvider, apiKey: nextApi, falKey: nextFal });
   };
 
   const handleCancel = () => {
@@ -115,12 +147,23 @@ export function ApiKeysProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <ApiKeysContext.Provider
-      value={{ apiKey, falKey, tmdbKey, setApiKey, setFalKey, setTmdbKey, ensureKeys }}
+      value={{
+        apiProvider,
+        apiKey,
+        falKey,
+        tmdbKey,
+        setApiProvider,
+        setApiKey,
+        setFalKey,
+        setTmdbKey,
+        ensureKeys,
+      }}
     >
       {children}
       <ApiKeysDialog
         open={pending !== null}
         requireFal={pending?.opts.requireFal ?? false}
+        initialApiProvider={apiProvider}
         initialApiKey={apiKey}
         initialFalKey={falKey}
         initialTmdbKey={tmdbKey}

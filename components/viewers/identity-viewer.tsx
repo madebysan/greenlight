@@ -70,7 +70,12 @@ export function IdentityViewer({
       const res = await fetch("/api/regenerate-section", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sectionKey: "mood-and-tone/color-palette", jsonData, apiKey: keys.apiKey }),
+        body: JSON.stringify({
+          sectionKey: "mood-and-tone/color-palette",
+          jsonData,
+          apiProvider: keys.apiProvider,
+          apiKey: keys.apiKey,
+        }),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const { content: newSection } = await res.json();
@@ -95,17 +100,16 @@ export function IdentityViewer({
   }
 
   return (
-    <div className="max-w-4xl">
+    <div className="max-w-5xl">
       <div className="mb-8">
         <SectionLabelPill icon={<Palette size={10} />} className="mb-3">
           Visual Identity
         </SectionLabelPill>
-        <h1 className="text-[32px] font-light tracking-[-0.025em] leading-[1.05] mb-2 text-foreground">
+        <h1 className="mb-3 font-display text-[38px] font-normal leading-[1.05] tracking-normal text-foreground md:text-[46px]">
           Identity
         </h1>
-        <p className="text-[13px] text-foreground/60 tracking-tight max-w-[58ch]">
-          The film&apos;s brand language — color palette and title treatment. The
-          foundation every other design decision builds on.
+        <p className="max-w-[62ch] text-[16px] leading-[1.65] text-foreground/62">
+          Color and type for the first visual pass.
         </p>
       </div>
 
@@ -129,22 +133,22 @@ export function IdentityViewer({
           </SectionHead>
 
           {palette.length === 0 ? (
-            <p className="text-[13px] text-muted-foreground py-4 tracking-tight">
-              No palette generated yet. Check the Mood & Tone document.
+            <p className="text-[13px] text-muted-foreground py-4 tracking-normal">
+              No palette yet. Check Mood & Tone.
             </p>
           ) : (
             <div
-              className={`grid grid-cols-1 md:grid-cols-2 gap-2 transition-opacity duration-200 ${
+              className={`grid grid-cols-1 gap-3 transition-opacity duration-200 ${
                 paletteShuffle.state === "loading" ? "opacity-40" : "opacity-100"
               }`}
             >
               {palette.map((c) => (
                 <div
                   key={c.hex}
-                  className="flex items-start gap-3 rounded-[12px] bg-card/40 shadow-paper hover:shadow-paper-hover px-3 py-3 transition-all"
+                  className="flex min-h-[82px] items-center gap-4 rounded-[12px] border border-border bg-card/35 px-3 py-3 transition-all hover:border-foreground/18 hover:bg-card/45"
                 >
                   <div
-                    className="w-10 h-10 rounded-[6px] shrink-0 shadow-pill"
+                    className="h-11 w-11 shrink-0 rounded-[6px] border border-white/10"
                     style={{ backgroundColor: c.hex }}
                   />
                   <div className="flex-1 min-w-0">
@@ -157,7 +161,7 @@ export function IdentityViewer({
                           title="Edit color name"
                           pencilSize={10}
                           renderDisplay={(v) => (
-                            <span className="text-[13px] font-medium text-foreground leading-tight tracking-tight">
+                            <span className="text-[13px] font-medium text-foreground leading-tight tracking-normal">
                               {v}
                             </span>
                           )}
@@ -177,7 +181,7 @@ export function IdentityViewer({
                         title="Edit color description"
                         pencilSize={10}
                         renderDisplay={(v) => (
-                          <p className="text-[12px] text-foreground/70 leading-[1.55] tracking-tight">
+                          <p className="text-[12px] text-foreground/70 leading-[1.55] tracking-normal">
                             {v}
                           </p>
                         )}

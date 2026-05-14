@@ -130,7 +130,12 @@ export function OverviewViewer({
       const res = await fetch("/api/regenerate-section", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sectionKey, jsonData, apiKey: keys.apiKey }),
+        body: JSON.stringify({
+          sectionKey,
+          jsonData,
+          apiProvider: keys.apiProvider,
+          apiKey: keys.apiKey,
+        }),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const { content: newSection } = await res.json();
@@ -165,11 +170,11 @@ export function OverviewViewer({
     <div className="max-w-5xl space-y-16">
       <header className="grid grid-cols-1 md:grid-cols-[1fr_240px] gap-10 items-start">
         <div>
-          <SectionLabelPill icon={<Compass size={10} />} className="mb-3">
+          <SectionLabelPill icon={<Compass size={11} />} className="mb-4">
             Overview
           </SectionLabelPill>
           {parsed.title && (
-            <h1 className="text-[32px] font-light tracking-[-0.025em] leading-[1.05] mb-2 text-foreground">
+            <h1 className="font-display text-[40px] font-normal leading-[1.04] tracking-normal text-foreground md:text-[48px]">
               {parsed.title}
             </h1>
           )}
@@ -182,22 +187,22 @@ export function OverviewViewer({
                 multiline
                 title="Edit the logline"
                 renderDisplay={(v) => (
-                  <p className="text-[15px] leading-[1.6] text-foreground/75 tracking-tight">
+                  <p className="mt-4 text-[17px] leading-[1.6] text-foreground/68">
                     {v}
                   </p>
                 )}
-                inputClassName="text-[15px] leading-[1.6] text-foreground/85"
+                inputClassName="text-[16px] leading-[1.6] text-foreground/85"
               />
             </div>
           )}
 
           {parsed.taglines.length > 0 && (
-            <div className="mt-8 rounded-[12px] bg-card/40 shadow-paper p-5 max-w-[60ch]">
+            <div className="mt-8 max-w-[60ch] border-t border-border/80 pt-6">
               <div className="flex items-center gap-3 mb-3">
-                <h3 className="font-mono text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                <h3 className="font-mono text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
                   Taglines
                 </h3>
-                <div className="flex-1 h-px bg-border/60" />
+                <div className="h-px flex-1 bg-border/80" />
                 {onContentUpdate && jsonData && (
                   <ShuffleButton
                     onClick={() => shuffleSection(taglinesShuffle, "overview/taglines", "Taglines")}
@@ -214,7 +219,7 @@ export function OverviewViewer({
                 {parsed.taglines.map((t, i) => (
                   <li
                     key={`${i}-${t}`}
-                    className="text-[14px] leading-[1.55] text-foreground/80 italic tracking-tight"
+                    className="text-[15px] leading-[1.55] text-foreground/76 italic"
                   >
                     “{t.replace(/^["“]|["”]$/g, "")}”
                   </li>
@@ -224,11 +229,11 @@ export function OverviewViewer({
           )}
 
           {parsed.identity.length > 0 && (
-            <div className="mt-8 pt-8 border-t border-border/60 max-w-[60ch]">
-              <h3 className="font-mono text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground mb-4">
+            <div className="mt-8 max-w-[60ch] border-t border-border/80 pt-8">
+              <h3 className="mb-4 font-mono text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
                 Film Identity
               </h3>
-              <dl className="grid grid-cols-2 gap-x-6 gap-y-3">
+              <dl className="grid grid-cols-2 overflow-hidden rounded-[12px] border border-border">
                 {parsed.identity.map((item) => (
                   <IdentityField
                     key={item.label}
@@ -273,7 +278,7 @@ export function OverviewViewer({
             )}
           </div>
           <p
-            className={`text-[15px] leading-[1.75] text-foreground/80 whitespace-pre-line max-w-[65ch] tracking-tight transition-opacity duration-200 ${
+            className={`max-w-[68ch] whitespace-pre-line text-[16px] leading-[1.75] text-foreground/76 transition-opacity duration-200 ${
               synopsisShuffle.state === "loading" ? "opacity-40" : "opacity-100"
             }`}
           >
@@ -299,16 +304,16 @@ export function OverviewViewer({
             )}
           </div>
           <div
-            className={`space-y-6 max-w-[65ch] transition-opacity duration-200 ${
+            className={`max-w-[68ch] space-y-6 transition-opacity duration-200 ${
               themesShuffle.state === "loading" ? "opacity-40" : "opacity-100"
             }`}
           >
             {parsed.themes.map((t) => (
               <div key={t.title}>
-                <h3 className="text-[14px] font-medium text-foreground mb-2 tracking-tight">
+                <h3 className="mb-2 text-[15px] font-semibold text-foreground">
                   {t.title}
                 </h3>
-                <p className="text-[13px] leading-[1.7] text-foreground/70 tracking-tight">
+                <p className="text-[14px] leading-[1.7] text-foreground/68">
                   {t.body}
                 </p>
               </div>
@@ -323,19 +328,19 @@ export function OverviewViewer({
             Production footprint
           </SectionHead>
           {parsed.stats.length > 0 && (
-            <div className="inline-grid grid-cols-2 md:grid-cols-[repeat(6,120px)] gap-px bg-border/50 rounded-[12px] overflow-hidden mb-6 shadow-paper">
+            <div className="mb-6 grid max-w-[760px] grid-cols-2 overflow-hidden rounded-[12px] border border-border md:grid-cols-3 xl:grid-cols-6">
               {parsed.stats.map((s) => {
                 const leadingNum = s.value.match(/^(\d[\d.,]*)/);
                 const shortValue = leadingNum ? leadingNum[1] : s.value;
                 return (
                   <div
                     key={s.label}
-                    className="bg-card/40 px-4 py-5 flex flex-col gap-2 min-w-0"
+                    className="min-w-0 border-b border-r border-border bg-card/35 px-4 py-5 last:border-r-0"
                   >
-                    <div className="text-[32px] font-light text-foreground tabular-nums leading-none tracking-[-0.03em]">
+                    <div className="text-[28px] font-semibold leading-none text-foreground tabular-nums">
                       {shortValue}
                     </div>
-                    <div className="font-mono text-[9px] font-medium uppercase tracking-[0.15em] text-muted-foreground leading-[1.35] min-h-[1.8em]">
+                    <div className="mt-2 min-h-[1.8em] font-mono text-[10px] font-semibold uppercase leading-[1.35] tracking-[0.1em] text-muted-foreground">
                       {s.label}
                     </div>
                   </div>
@@ -344,11 +349,11 @@ export function OverviewViewer({
             </div>
           )}
           {parsed.complexity && (
-            <div className="rounded-[12px] bg-card/40 shadow-paper p-6 max-w-[65ch]">
-              <div className="font-mono text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground mb-3">
+            <div className="max-w-[68ch] rounded-[12px] border border-border bg-card/35 p-6">
+              <div className="mb-3 font-mono text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
                 Complexity Read
               </div>
-              <p className="text-[15px] leading-[1.75] text-foreground/80 tracking-tight">
+              <p className="text-[16px] leading-[1.75] text-foreground/76">
                 {parsed.complexity}
               </p>
             </div>
@@ -399,8 +404,8 @@ function IdentityField({
   }
 
   return (
-    <div className="space-y-1 min-w-0 group">
-      <dt className="font-mono text-[9px] font-medium uppercase tracking-[0.18em] text-muted-foreground flex items-center gap-1.5">
+    <div className="group min-w-0 border-b border-r border-border p-4">
+      <dt className="flex items-center gap-1.5 font-mono text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
         {label}
         {editable && !editing && (
           <button
@@ -412,7 +417,7 @@ function IdentityField({
           </button>
         )}
       </dt>
-      <dd className="text-[13px] text-foreground/85 truncate tracking-tight">
+      <dd className="mt-2 truncate text-[14px] text-foreground/82">
         {editing ? (
           <div className="flex items-center gap-1">
             <input
@@ -425,7 +430,7 @@ function IdentityField({
                 if (e.key === "Escape") cancel();
               }}
               onBlur={commit}
-              className="w-full rounded-[6px] bg-background/60 border border-border px-2 py-0.5 text-[13px] tracking-tight focus:outline-none focus:border-foreground/40"
+              className="w-full rounded-[6px] bg-background/60 border border-border px-2 py-0.5 text-[13px] tracking-normal focus:outline-none focus:border-foreground/40"
             />
             <button
               onClick={commit}

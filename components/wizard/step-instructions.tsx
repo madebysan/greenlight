@@ -9,11 +9,10 @@ import { findCachedProject } from "@/lib/cached-projects";
 import { useApiKeys } from "@/lib/api-keys-context";
 
 type StepInstructionsProps = {
-  onNext: () => void;
   onSubmitJson?: (json: string) => void;
 };
 
-export function StepInstructions({ onNext, onSubmitJson }: StepInstructionsProps) {
+export function StepInstructions({ onSubmitJson }: StepInstructionsProps) {
   // PDF upload is temporarily disabled — Vercel's serverless function
   // timeouts can't reliably accommodate Claude's PDF extraction for
   // feature-length scripts. Defaulting to the Gemini + Paste JSON flow
@@ -25,11 +24,11 @@ export function StepInstructions({ onNext, onSubmitJson }: StepInstructionsProps
     <div className="max-w-2xl space-y-10">
       {/* Hero */}
       <div>
-        <h2 className="text-[2rem] font-semibold tracking-tight mb-3 leading-[1.05]">
-          How it works
+        <h2 className="text-[2rem] font-semibold tracking-normal mb-3 leading-[1.05]">
+          Paste screenplay JSON
         </h2>
         <p className="text-[15px] leading-[1.6] text-muted-foreground max-w-[52ch]">
-          Give Greenlight your screenplay as structured JSON and it builds your vision deck.
+          Paste a structured extraction and Greenlight builds the deck.
         </p>
       </div>
 
@@ -39,7 +38,7 @@ export function StepInstructions({ onNext, onSubmitJson }: StepInstructionsProps
           type="button"
           disabled
           aria-disabled="true"
-          title="PDF extraction is in testing — use Paste JSON for now"
+          title="PDF extraction is still in testing. Use Paste JSON for now."
           className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md text-[13px] font-medium text-muted-foreground/60 cursor-not-allowed"
         >
           <Upload size={14} />
@@ -57,13 +56,13 @@ export function StepInstructions({ onNext, onSubmitJson }: StepInstructionsProps
         </button>
       </div>
 
-      <ManualMode onNext={onNext} onSubmitJson={onSubmitJson} />
+      <ManualMode onSubmitJson={onSubmitJson} />
 
       {/* Divider + Demo cards */}
       <div className="space-y-4 -mt-4">
         <div className="flex items-center gap-4">
           <div className="flex-1 h-px bg-border/60" />
-          <span className="text-[11px] font-mono uppercase tracking-[0.15em] text-muted-foreground">or explore a finished deck</span>
+          <span className="text-[11px] font-mono uppercase tracking-[0.15em] text-muted-foreground">or open a finished deck</span>
           <div className="flex-1 h-px bg-border/60" />
         </div>
 
@@ -85,7 +84,7 @@ export function StepInstructions({ onNext, onSubmitJson }: StepInstructionsProps
               <div className="text-[10px] font-mono uppercase tracking-[0.15em] text-muted-foreground mb-1">
                 Feature · 1968
               </div>
-              <h3 className="text-[15px] font-medium tracking-tight group-hover:text-foreground transition-colors">
+              <h3 className="text-[15px] font-medium tracking-normal group-hover:text-foreground transition-colors">
                 Night of the Living Dead
               </h3>
               <p className="text-[12px] text-muted-foreground mt-0.5">
@@ -116,7 +115,7 @@ export function StepInstructions({ onNext, onSubmitJson }: StepInstructionsProps
               <div className="text-[10px] font-mono uppercase tracking-[0.15em] text-muted-foreground mb-1">
                 Short film · 1956
               </div>
-              <h3 className="text-[15px] font-medium tracking-tight group-hover:text-foreground transition-colors">
+              <h3 className="text-[15px] font-medium tracking-normal group-hover:text-foreground transition-colors">
                 The Red Balloon
               </h3>
               <p className="text-[12px] text-muted-foreground mt-0.5">
@@ -135,7 +134,7 @@ export function StepInstructions({ onNext, onSubmitJson }: StepInstructionsProps
 
 // ---- Upload Mode ----
 
-function UploadMode({ onSubmitJson }: { onSubmitJson?: (json: string) => void }) {
+export function UploadMode({ onSubmitJson }: { onSubmitJson?: (json: string) => void }) {
   const [status, setStatus] = useState<"idle" | "uploading" | "extracting" | "done" | "error">("idle");
   const [error, setError] = useState("");
   const [fileName, setFileName] = useState("");
@@ -175,12 +174,17 @@ function UploadMode({ onSubmitJson }: { onSubmitJson?: (json: string) => void })
       }
     }
 
-    // Real-extraction path needs a Claude key. Prompt if missing; bail cleanly
+    // Real-extraction path still uses Claude for PDF parsing. Prompt if missing; bail cleanly
     // if the user cancels so the drop zone stays in its idle state.
     const keys = await ensureKeys();
     if (!keys) {
       setStatus("idle");
       setFileName("");
+      return;
+    }
+    if (keys.apiProvider !== "anthropic") {
+      setError("PDF extraction currently uses Claude. Select Claude or use Paste JSON.");
+      setStatus("error");
       return;
     }
 
@@ -190,6 +194,7 @@ function UploadMode({ onSubmitJson }: { onSubmitJson?: (json: string) => void })
       const formData = new FormData();
       formData.append("file", file);
       formData.append("apiKey", keys.apiKey);
+      formData.append("apiProvider", keys.apiProvider);
 
       const res = await fetch("/api/extract-screenplay", {
         method: "POST",
@@ -291,7 +296,7 @@ function UploadMode({ onSubmitJson }: { onSubmitJson?: (json: string) => void })
 
 // ---- Manual Mode ----
 
-function ManualMode({ onNext, onSubmitJson }: { onNext: () => void; onSubmitJson?: (json: string) => void }) {
+function ManualMode({ onSubmitJson }: { onSubmitJson?: (json: string) => void }) {
   const [copied, setCopied] = useState(false);
   const [showPrompt, setShowPrompt] = useState(false);
   const [jsonInput, setJsonInput] = useState("");
@@ -329,8 +334,8 @@ function ManualMode({ onNext, onSubmitJson }: { onNext: () => void; onSubmitJson
             1
           </span>
           <div className="flex-1 min-w-0">
-            <h3 className="text-[15px] font-medium tracking-tight mb-1.5">
-              Upload your screenplay to Gemini and paste the extraction prompt
+            <h3 className="text-[15px] font-medium tracking-normal mb-1.5">
+              Get the extraction from Gemini
             </h3>
             <p className="text-[13px] leading-[1.6] text-muted-foreground mb-3">
               Open{" "}
@@ -342,9 +347,9 @@ function ManualMode({ onNext, onSubmitJson }: { onNext: () => void; onSubmitJson
               >
                 Gemini
               </a>
-              , select the{" "}
+              , choose the{" "}
               <span className="text-foreground">Pro</span>{" "}
-              model, upload your screenplay, copy the prompt below, and paste it alongside.
+              model, upload the screenplay, and paste this prompt.
             </p>
             <div className="flex items-center gap-3">
               <button
@@ -356,7 +361,7 @@ function ManualMode({ onNext, onSubmitJson }: { onNext: () => void; onSubmitJson
                 }`}
               >
                 {copied ? <Check size={14} /> : <Copy size={14} />}
-                {copied ? "Copied!" : "Copy Prompt"}
+                {copied ? "Copied" : "Copy prompt"}
               </button>
               <button
                 onClick={() => setShowPrompt(!showPrompt)}
@@ -385,11 +390,11 @@ function ManualMode({ onNext, onSubmitJson }: { onNext: () => void; onSubmitJson
             2
           </span>
           <div>
-            <h3 className="text-[15px] font-medium tracking-tight mb-1.5">
-              Copy the JSON answer from Gemini
+            <h3 className="text-[15px] font-medium tracking-normal mb-1.5">
+              Copy the JSON
             </h3>
             <p className="text-[13px] leading-[1.6] text-muted-foreground">
-              Gemini will return structured JSON with your screenplay data. Select all and copy it.
+              Select Gemini&apos;s structured answer and copy it.
             </p>
           </div>
         </div>
@@ -402,11 +407,11 @@ function ManualMode({ onNext, onSubmitJson }: { onNext: () => void; onSubmitJson
             3
           </span>
           <div className="flex-1 min-w-0">
-            <h3 className="text-[15px] font-medium tracking-tight mb-1.5">
+            <h3 className="text-[15px] font-medium tracking-normal mb-1.5">
               Paste it here
             </h3>
             <p className="text-[13px] leading-[1.6] text-muted-foreground mb-3">
-              Greenlight takes it from there — mood, scenes, locations, cast, and visual concepts.
+              Greenlight builds the deck from there.
             </p>
 
             <textarea
@@ -415,7 +420,7 @@ function ManualMode({ onNext, onSubmitJson }: { onNext: () => void; onSubmitJson
                 setJsonInput(e.target.value);
                 if (errors.length > 0) setErrors([]);
               }}
-              placeholder='Paste JSON here — it should start with { "title": ...'
+              placeholder='Paste JSON here. It should start with { "title": ...'
               rows={4}
               className="w-full rounded-lg border border-border/60 bg-background/60 px-4 py-3 text-[12px] font-mono leading-[1.7] text-foreground/85 resize-none focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary placeholder:text-muted-foreground/40"
             />
@@ -454,7 +459,7 @@ function ManualMode({ onNext, onSubmitJson }: { onNext: () => void; onSubmitJson
               disabled={!hasContent}
               className="mt-4 inline-flex items-center justify-center gap-2 rounded-lg bg-foreground text-background px-5 py-2.5 text-[13px] font-medium hover:bg-foreground/90 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
             >
-              Generate &rarr;
+              Build deck &rarr;
             </button>
           </div>
         </div>

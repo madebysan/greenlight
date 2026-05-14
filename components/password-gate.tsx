@@ -5,22 +5,26 @@ import { useState, useEffect } from "react";
 const STORAGE_KEY = "greenlight-access";
 
 export function PasswordGate({ children }: { children: React.ReactNode }) {
-  const [state, setState] = useState<"checking" | "gate" | "authorized">("checking");
+  const [state, setState] = useState<"checking" | "gate" | "authorized">(() => {
+    if (typeof window !== "undefined" && sessionStorage.getItem(STORAGE_KEY) === "1") {
+      return "authorized";
+    }
+    return "checking";
+  });
   const [password, setPassword] = useState("");
   const [error, setError] = useState(false);
 
   useEffect(() => {
-    // Already authenticated this session
-    if (sessionStorage.getItem(STORAGE_KEY) === "1") {
-      setState("authorized");
-      return;
-    }
+    if (state !== "checking") return;
+    let cancelled = false;
+
     // Check if gate is enabled (ACCESS_PASSWORD is set on server)
     fetch("/api/verify-access", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ password: "" }),
     }).then((res) => {
+      if (cancelled) return;
       if (res.ok) {
         // No password configured — skip gate
         sessionStorage.setItem(STORAGE_KEY, "1");
@@ -29,7 +33,10 @@ export function PasswordGate({ children }: { children: React.ReactNode }) {
         setState("gate");
       }
     });
-  }, []);
+    return () => {
+      cancelled = true;
+    };
+  }, [state]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,7 +66,7 @@ export function PasswordGate({ children }: { children: React.ReactNode }) {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/logo.png" alt="Greenlight" className="w-[70%] h-[70%]" />
           </div>
-          <span className="text-[17px] font-medium tracking-[-0.02em]">Greenlight</span>
+          <span className="text-[17px] font-medium tracking-normal">Greenlight</span>
         </div>
         <input
           type="password"
@@ -67,7 +74,7 @@ export function PasswordGate({ children }: { children: React.ReactNode }) {
           onChange={(e) => setPassword(e.target.value)}
           placeholder="Password"
           autoFocus
-          className={`w-full rounded-lg border bg-card/40 px-4 py-3 text-sm tracking-tight focus:outline-none focus:ring-2 focus:ring-primary/20 transition-colors ${
+          className={`w-full rounded-lg border bg-card/40 px-4 py-3 text-sm tracking-normal focus:outline-none focus:ring-2 focus:ring-primary/20 transition-colors ${
             error ? "border-destructive/60" : "border-border"
           }`}
         />
@@ -75,7 +82,7 @@ export function PasswordGate({ children }: { children: React.ReactNode }) {
           type="submit"
           className="w-full rounded-lg bg-white text-black py-3 text-sm font-medium hover:bg-white/90 transition-colors"
         >
-          Enter
+          Open Greenlight
         </button>
       </form>
     </div>

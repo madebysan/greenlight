@@ -9,8 +9,7 @@ export default function Home() {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
     name: "Greenlight",
-    description:
-      "Turn a script into something tangible, fast. A vision deck generator for indie filmmakers.",
+    description: "Turn a screenplay into a film deck.",
     applicationCategory: "DesignApplication",
     operatingSystem: "Web",
     url: getSiteUrl(),

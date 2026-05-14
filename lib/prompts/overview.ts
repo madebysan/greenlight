@@ -31,13 +31,15 @@ Always render in this exact order. Include **Written by** whenever the \`writer\
 Render each theme from the JSON as a concise heading + 1-2 sentence explanation of how it threads through the story. Be specific — reference actual scenes or character arcs where helpful.
 
 ## Scope at a Glance
-A quick read on the size of the project. Use concrete numbers pulled from the JSON:
+A quick read on the size of the project. Use concrete numbers pulled from the JSON. Keep estimates conservative and label them as estimates when the JSON does not make an exact answer possible:
 - **Total scenes:** [count]
 - **Unique locations:** [count]
 - **Principal cast:** [count of characters]
 - **Exterior scenes:** [count]
 - **Night shoots:** [count with time_of_day = NIGHT]
 - **VFX/FX scenes:** [count of scenes with non-empty vfx_stunts]
-- **Complexity read:** [one sentence qualitative judgment — "contained single-location thriller with a small cast" / "ambitious period piece with extensive night shoots" etc.]
+- **Company moves:** [estimated count of meaningful location moves implied by the scene order and unique locations; say "approx. X" if not exact]
+- **Estimated shoot days:** [rough range based only on page count, scene count, repeated locations, night shoots, exterior work, and VFX/stunts; format like "8-11 days" or "needs schedule pass"]
+- **Complexity read:** [one concrete sentence naming the real pressure points — for example night exteriors, child performers, practical effects, crowds, vehicles, animals, water, company moves, or contained single-location efficiency. Do not mention budget, unions, permits, or external production assumptions unless the JSON explicitly supports them.]
 
 Output ONLY the markdown document. No commentary outside the document. Do not include any introductory text before the # heading.`;

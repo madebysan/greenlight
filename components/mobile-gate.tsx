@@ -26,14 +26,14 @@ export function MobileGate({ children }: { children: React.ReactNode }) {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/logo.png" alt="Greenlight" className="w-[70%] h-[70%]" />
           </div>
-          <span className="text-[17px] font-medium tracking-[-0.02em]">Greenlight</span>
+          <span className="text-[17px] font-medium tracking-normal">Greenlight</span>
         </div>
-        <h1 className="text-[22px] font-medium tracking-[-0.02em] mb-3">
+        <h1 className="text-[22px] font-medium tracking-normal mb-3">
           Desktop only
         </h1>
         <p className="text-[14px] text-muted-foreground leading-relaxed">
-          Greenlight is a production tool built for a larger canvas. Open it on
-          a desktop or laptop to continue.
+          Greenlight needs room for the report rail, long notes, and image work.
+          Open it on a desktop or laptop.
         </p>
       </div>
     </div>

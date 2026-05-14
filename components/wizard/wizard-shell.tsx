@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { Settings, Info, RotateCcw, FileText, Download, Share2, Sun, Moon, Bookmark, Check, Images, Loader2 } from "lucide-react";
+import { Settings, Info, RotateCcw, FileText, Download, Share2, Bookmark, Check, Images, Loader2 } from "lucide-react";
 import { parseStoryboardPrompts } from "@/components/viewers/storyboard-viewer";
 import { parsePosterConcepts } from "@/components/viewers/poster-concepts-viewer";
 import { HeaderButton, MoreMenu } from "./header-menu";
@@ -10,6 +10,7 @@ import { findCachedProject } from "@/lib/cached-projects";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -25,9 +26,9 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { StepInstructions } from "./step-instructions";
-import { StepJsonInput } from "./step-json-input";
 import { StepGenerating } from "./step-generating";
 import { StepResults } from "./step-results";
+import { TextProviderFields } from "./text-provider-fields";
 import {
   type SavedImage,
   type SavedProject,
@@ -38,6 +39,7 @@ import {
   extractTitle,
 } from "@/lib/reports";
 import { useApiKeys } from "@/lib/api-keys-context";
+import type { TextProvider } from "@/lib/ai-providers";
 import {
   type ImagePromptKind,
   DEFAULT_IMAGE_PROMPTS,
@@ -70,7 +72,17 @@ const INITIAL_DOCS: DocumentResult[] = [
 ];
 
 export function WizardShell() {
-  const { apiKey, falKey, tmdbKey, setApiKey, setFalKey, setTmdbKey, ensureKeys } = useApiKeys();
+  const {
+    apiProvider,
+    apiKey,
+    falKey,
+    tmdbKey,
+    setApiProvider,
+    setApiKey,
+    setFalKey,
+    setTmdbKey,
+    ensureKeys,
+  } = useApiKeys();
   const [hydrated, setHydrated] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const [jsonData, setJsonData] = useState<string>("");
@@ -92,14 +104,12 @@ export function WizardShell() {
   // Holds cached documents when the submitted JSON's title matches a
   // pre-cached project. Triggers fake-progression mode in StepGenerating.
   const [prefilledDocs, setPrefilledDocs] = useState<DocumentResult[] | null>(null);
-  const [theme, setTheme] = useState<"dark" | "light">("dark");
 
   // Hydrate from localStorage on mount.
   // setState in an effect is intentional here: we need SSR to render a neutral
   // "Loading..." state and only read localStorage after client hydration to
   // avoid hydration mismatch. React 18+ auto-batches these updates.
   useEffect(() => {
-    /* eslint-disable react-hooks/set-state-in-effect */
     const project = loadProject();
     if (project) {
       setJsonData(project.jsonData || "");
@@ -117,7 +127,7 @@ export function WizardShell() {
       setDisabledItems(project.disabledItems || {});
       setCurrentStep(3);
     }
-    setTheme(localStorage.getItem("greenlight-theme") === "light" ? "light" : "dark");
+    document.documentElement.classList.add("dark");
     // Merge stored overrides into defaults so blank fields fall back cleanly.
     const stored = loadImagePrompts();
     setImagePrompts({
@@ -127,7 +137,6 @@ export function WizardShell() {
       poster: stored.poster ?? DEFAULT_IMAGE_PROMPTS.poster,
     });
     setHydrated(true);
-    /* eslint-enable react-hooks/set-state-in-effect */
   }, []);
 
   const handleImagePromptChange = (kind: ImagePromptKind, value: string) => {
@@ -141,6 +150,12 @@ export function WizardShell() {
       }
     }
     saveImagePrompts(overrides);
+  };
+
+  const handleTextProviderChange = (provider: TextProvider) => {
+    if (provider === apiProvider) return;
+    setApiProvider(provider);
+    setApiKey("");
   };
 
   const handleResetImagePrompt = (kind: ImagePromptKind) => {
@@ -170,7 +185,7 @@ export function WizardShell() {
       /* parse failed — treat as non-cached */
     }
 
-    // Non-cached path needs a Claude key. fal is optional but if supplied
+    // Non-cached path needs a text provider key. fal is optional but if supplied
     // the auto-enqueue effect will kick off images in parallel.
     if (!isCached) {
       const keys = await ensureKeys();
@@ -212,11 +227,6 @@ export function WizardShell() {
     if (jsonData) {
       downloadBlob(jsonData, "screenplay-data.json", "application/json");
     }
-  };
-
-  const handleDownloadJson = () => {
-    if (!jsonData) return;
-    downloadBlob(jsonData, "screenplay-data.json", "application/json");
   };
 
   const handleStartOver = () => {
@@ -552,7 +562,6 @@ export function WizardShell() {
         : { ...p, total: p.total + novel.length, running: true },
     );
     if (workerWasIdle) runImageWorker();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const runImageWorker = () => {
@@ -659,7 +668,7 @@ export function WizardShell() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jsonData, falKey]);
 
-  // Called by StepGenerating the moment each Claude doc lands. Lets us fire
+  // Called by StepGenerating the moment each text doc lands. Lets us fire
   // storyboard / poster image tasks as soon as their source markdown exists
   // instead of waiting for the whole Claude batch to finish.
   const handleDocReady = useCallback(
@@ -759,17 +768,6 @@ export function WizardShell() {
     }
   };
 
-  const toggleTheme = () => {
-    const next = theme === "dark" ? "light" : "dark";
-    setTheme(next);
-    localStorage.setItem("greenlight-theme", next);
-    if (next === "dark") {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-  };
-
   const handleDocumentUpdate = (slug: string, newContent: string) => {
     const updated = documents.map((d) =>
       d.slug === slug ? { ...d, content: newContent } : d
@@ -791,7 +789,7 @@ export function WizardShell() {
     const res = await fetch(`/api/generate/${slug}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ jsonData, apiKey }),
+      body: JSON.stringify({ jsonData, apiProvider, apiKey }),
     });
     if (!res.ok) throw new Error("Rewrite failed");
     const data = await res.json();
@@ -801,7 +799,7 @@ export function WizardShell() {
   if (!hydrated) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <p className="text-sm text-muted-foreground">Loading...</p>
+        <p className="text-sm text-muted-foreground">Loading Greenlight...</p>
       </div>
     );
   }
@@ -818,9 +816,9 @@ export function WizardShell() {
               <img src="/logo.png" alt="Greenlight" className="w-[70%] h-[70%]" />
             </div>
             <div>
-              <h1 className="text-lg font-bold tracking-tight">Greenlight</h1>
+              <h1 className="text-lg font-bold tracking-normal">Greenlight</h1>
               <p className="text-[13px] text-muted-foreground">
-                Script to vision deck in minutes.
+                Script to film deck.
               </p>
             </div>
 
@@ -842,15 +840,12 @@ export function WizardShell() {
                 <HeaderButton
                   icon={<Share2 size={14} />}
                   label="Share"
-                  onClick={() => window.open("/share", "_blank")}
-                  title="Open shareable view"
+                  onClick={() => {
+                    window.location.href = "/share";
+                  }}
+                  title="Open share view"
                 />
               )}
-              <HeaderButton
-                icon={theme === "dark" ? <Sun size={14} /> : <Moon size={14} />}
-                onClick={toggleTheme}
-                title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-              />
               {hasActiveProject && (
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
@@ -858,14 +853,14 @@ export function WizardShell() {
                       icon={<RotateCcw size={14} />}
                       label="Start Over"
                       onClick={() => {}}
-                      title="Start a new project"
+                      title="Clear this project"
                     />
                   </AlertDialogTrigger>
                   <AlertDialogContent>
                     <AlertDialogHeader>
                       <AlertDialogTitle>Start over?</AlertDialogTitle>
                       <AlertDialogDescription>
-                        This will discard all generated documents, images, and edits. This action cannot be undone.
+                        This clears the report, images, and edits from this browser.
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
@@ -874,7 +869,7 @@ export function WizardShell() {
                         onClick={handleStartOver}
                         className="bg-destructive text-white hover:bg-destructive/90"
                       >
-                        Start Over
+                        Start over
                       </AlertDialogAction>
                     </AlertDialogFooter>
                   </AlertDialogContent>
@@ -891,7 +886,7 @@ export function WizardShell() {
                         ),
                         label: imageGen.running
                           ? `Generating ${imageGen.done}/${imageGen.total}… (click to cancel)`
-                          : "Generate all images",
+                          : "Generate missing images",
                         onClick: handleGenerateAllImages,
                       }
                     : null,
@@ -930,7 +925,7 @@ export function WizardShell() {
                   hasActiveProject && documents.some((d) => d.status === "done")
                     ? {
                         icon: <Download size={14} />,
-                        label: "Download all documents",
+                        label: "Download documents",
                         onClick: handleDownloadAll,
                       }
                     : null,
@@ -965,7 +960,7 @@ export function WizardShell() {
                             ? "Saving snapshot..."
                             : savingDemo === "saved"
                             ? "Saved to /demo"
-                            : "Save as demo (dev)",
+                            : "Save demo snapshot (dev)",
                         onClick: handleSaveDemo,
                       }
                     : null,
@@ -1048,7 +1043,6 @@ export function WizardShell() {
       >
         {currentStep === 1 && (
           <StepInstructions
-            onNext={() => setCurrentStep(2)}
             onSubmitJson={(json) => {
               handleJsonSubmit(json);
             }}
@@ -1056,6 +1050,7 @@ export function WizardShell() {
         )}
         {currentStep === 2 && (
           <StepGenerating
+            apiProvider={apiProvider}
             apiKey={apiKey}
             jsonData={jsonData}
             documents={documents}
@@ -1093,7 +1088,10 @@ export function WizardShell() {
       <Dialog open={showSettings} onOpenChange={setShowSettings}>
         <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="tracking-tight">Settings</DialogTitle>
+            <DialogTitle className="tracking-normal">Settings</DialogTitle>
+            <DialogDescription className="sr-only">
+              Choose the active text provider, API keys, and image style settings.
+            </DialogDescription>
           </DialogHeader>
 
           {/* API keys section */}
@@ -1101,29 +1099,19 @@ export function WizardShell() {
             <div className="font-mono text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground pb-3 border-b border-border/60">
               API Keys
             </div>
+            <TextProviderFields
+              provider={apiProvider}
+              apiKey={apiKey}
+              onProviderChange={handleTextProviderChange}
+              onApiKeyChange={setApiKey}
+            />
             <div className="space-y-2">
-              <label className="text-[13px] font-medium tracking-tight">Claude API Key</label>
-              <p className="text-[12px] text-foreground/60 tracking-tight">
-                Used to generate documents from your screenplay data.{" "}
-                <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-foreground">
-                  Get a key
-                </a>
-              </p>
-              <input
-                type="password"
-                placeholder="sk-ant-api03-..."
-                value={apiKey}
-                onChange={(e) => setApiKey(e.target.value)}
-                className="w-full rounded-[8px] bg-card/60 shadow-pill px-3 py-2.5 text-[13px] font-mono placeholder:text-muted-foreground/50 focus:outline-none focus:shadow-paper-hover"
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-[13px] font-medium tracking-tight">
-                fal.ai API Key{" "}
+              <label className="text-[13px] font-medium tracking-normal">
+                fal.ai API key{" "}
                 <span className="text-muted-foreground font-normal">· optional</span>
               </label>
-              <p className="text-[12px] text-foreground/60 tracking-tight">
-                Enables storyboard, portrait, prop, and poster image generation. Leave blank for a text-only deck.{" "}
+              <p className="text-[12px] text-foreground/60 tracking-normal">
+                Generates images. Leave blank for text only.{" "}
                 <a href="https://fal.ai/dashboard/keys" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-foreground">
                   Get a key
                 </a>
@@ -1137,12 +1125,12 @@ export function WizardShell() {
               />
             </div>
             <div className="space-y-2">
-              <label className="text-[13px] font-medium tracking-tight">
-                TMDB API Key{" "}
+              <label className="text-[13px] font-medium tracking-normal">
+                TMDB API key{" "}
                 <span className="text-muted-foreground font-normal">· optional</span>
               </label>
-              <p className="text-[12px] text-foreground/60 tracking-tight">
-                Resolves poster thumbnails for Similar Moods and Soundtrack References on the Mood &amp; Tone tab. Free to get.{" "}
+              <p className="text-[12px] text-foreground/60 tracking-normal">
+                Adds poster thumbnails. Optional.{" "}
                 <a href="https://www.themoviedb.org/settings/api" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-foreground">
                   Get a key
                 </a>
@@ -1155,8 +1143,8 @@ export function WizardShell() {
                 className="w-full rounded-[8px] bg-card/60 shadow-pill px-3 py-2.5 text-[13px] font-mono placeholder:text-muted-foreground/50 focus:outline-none focus:shadow-paper-hover"
               />
             </div>
-            <p className="text-[11px] text-foreground/50 tracking-tight">
-              Keys are stored in your browser only. They are never sent to our servers.
+            <p className="text-[11px] text-foreground/50 tracking-normal">
+              Keys stay in this browser and are only sent when you generate.
             </p>
           </section>
 
@@ -1165,13 +1153,9 @@ export function WizardShell() {
             <div className="font-mono text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground pb-3 border-b border-border/60">
               Image Styles
             </div>
-            <p className="text-[12px] text-foreground/60 tracking-tight leading-[1.55]">
-              The style prefix prepended to every image-generation prompt. Defaults
-              are hand-drawn black &amp; white sketches (Ridley Scott-style
-              storyboards) so the whole bible reads as a single artist&apos;s hand.
-              Override any of them to render in a different aesthetic —
-              watercolor, painted concept art, 3D blockout, photographic
-              reference, whatever fits the project.
+            <p className="text-[12px] text-foreground/60 tracking-normal leading-[1.55]">
+              Choose the look for new generated images. The default is a
+              black-and-white gesture sketch.
             </p>
 
             {(["storyboard", "portrait", "prop", "poster"] as ImagePromptKind[]).map(
@@ -1179,19 +1163,19 @@ export function WizardShell() {
                 const labels: Record<ImagePromptKind, { title: string; sub: string }> = {
                   storyboard: {
                     title: "Storyboard frames",
-                    sub: "Scene-by-scene shot illustrations — landscape 16:9.",
+                    sub: "Scene-by-scene shot illustrations, 16:9.",
                   },
                   portrait: {
                     title: "Character portraits",
-                    sub: "Cast member head-and-shoulders references — square.",
+                    sub: "Head-and-shoulders cast references, square.",
                   },
                   prop: {
                     title: "Prop references",
-                    sub: "Isolated prop sketches for the art department — square.",
+                    sub: "Isolated art-department sketches, square.",
                   },
                   poster: {
                     title: "Poster concepts",
-                    sub: "Tall poster compositions from the Key Art tab — 5:7.",
+                    sub: "Tall poster compositions from Posters, 5:7.",
                   },
                 };
                 const isModified =
@@ -1200,10 +1184,10 @@ export function WizardShell() {
                   <div key={kind} className="space-y-2">
                     <div className="flex items-baseline justify-between gap-3">
                       <div className="min-w-0">
-                        <label className="text-[13px] font-medium tracking-tight">
+                        <label className="text-[13px] font-medium tracking-normal">
                           {labels[kind].title}
                         </label>
-                        <p className="text-[11px] text-foreground/55 tracking-tight mt-0.5">
+                        <p className="text-[11px] text-foreground/55 tracking-normal mt-0.5">
                           {labels[kind].sub}
                         </p>
                       </div>
@@ -1229,10 +1213,8 @@ export function WizardShell() {
               },
             )}
 
-            <p className="text-[11px] text-foreground/50 tracking-tight">
-              Applies to all new image generations. Already-generated images are
-              not retroactively re-rendered. Clear a field and hit Reset to
-              restore the default.
+            <p className="text-[11px] text-foreground/50 tracking-normal">
+              Only new images use these settings. Existing images stay as they are.
             </p>
           </section>
         </DialogContent>

@@ -32,16 +32,19 @@ export function ShuffleButton({
       onClick={onClick}
       disabled={disabled || state === "loading"}
       title={title}
-      className={`inline-flex items-center gap-1 text-[10px] font-mono uppercase tracking-[0.1em] text-muted-foreground hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed transition-colors ${className}`}
+      className={`inline-flex items-center gap-1 text-[10px] font-mono uppercase tracking-[0.1em] text-muted-foreground hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-150 ease-out ${className}`}
+      aria-busy={state === "loading"}
     >
       {state === "loading" ? (
-        <Loader2 size={11} className="animate-spin" />
+        <Loader2 size={11} className="animate-spin motion-reduce:animate-none" />
       ) : state === "succeeded" ? (
-        <Check size={11} className="text-foreground" />
+        <Check size={11} className="report-motion-status text-foreground" />
       ) : (
         <RefreshCw size={11} />
       )}
-      {state === "succeeded" ? "Updated" : label}
+      <span className="report-motion-status" key={state}>
+        {state === "succeeded" ? "Updated" : label}
+      </span>
     </button>
   );
 }

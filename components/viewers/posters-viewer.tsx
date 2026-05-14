@@ -17,17 +17,16 @@ export function PostersViewer({
   onPosterImagesChange,
 }: PostersViewerProps) {
   return (
-    <div className="max-w-4xl">
+    <div className="max-w-5xl">
       <div className="mb-8">
         <SectionLabelPill icon={<Frame size={10} />} className="mb-3">
           Key Art
         </SectionLabelPill>
-        <h1 className="text-[32px] font-light tracking-[-0.025em] leading-[1.05] mb-2 text-foreground">
+        <h1 className="mb-3 font-display text-[38px] font-normal leading-[1.05] tracking-normal text-foreground md:text-[46px]">
           Posters
         </h1>
-        <p className="text-[13px] text-foreground/60 tracking-tight">
-          Visual directions for how the film could present itself.
-          Conversation starters, not final art.
+        <p className="max-w-[62ch] text-[16px] leading-[1.65] text-foreground/62">
+          Key-art directions for briefs or image prompts.
         </p>
       </div>
 
@@ -38,8 +37,8 @@ export function PostersViewer({
           onImagesChange={onPosterImagesChange}
         />
       ) : (
-        <p className="text-sm text-muted-foreground py-12 text-center tracking-tight">
-          Poster concepts haven&apos;t been generated yet.
+        <p className="text-sm text-muted-foreground py-12 text-center tracking-normal">
+          Poster concepts are still waiting on generation.
         </p>
       )}
     </div>

@@ -2,7 +2,7 @@
 
 All routes are Next.js App Router route handlers in `app/api/`.
 
-**Bring-your-own-keys:** Every paid route accepts `apiKey` in the body with `process.env.X` as fallback. On the public deployment (`greenlight-public.vercel.app`) no server env vars are set, so visitors must provide their own Claude + fal.ai + TMDB keys via the onboarding modal. The `apiKey` field is required in production and optional in local dev (where `.env.local` fills the gap).
+**Bring-your-own-keys:** Every paid route accepts `apiKey` in the body with `process.env.X` as fallback. On hosted deployments, keep server env vars unset unless you intend the deployment to use your own provider keys. The `apiKey` field is required when no server fallback is configured and optional in local dev where `.env.local` fills the gap.
 
 ## Document Generation
 

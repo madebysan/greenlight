@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { Printer, Star } from "lucide-react";
 import type { SavedImage, SavedProject } from "@/lib/reports";
 import { parseOverview } from "@/components/viewers/overview-viewer";
@@ -221,12 +222,12 @@ export function ShareableView({ project }: ShareableViewProps) {
       {/* Controls bar — hidden when printing */}
       <div className="no-print sticky top-0 z-50 bg-background/80 backdrop-blur border-b border-border/60">
         <div className="max-w-5xl mx-auto px-6 py-3 flex items-center justify-between">
-          <a
+          <Link
             href="/"
             className="text-[13px] text-muted-foreground hover:text-foreground transition-colors"
           >
             ← Back to Greenlight
-          </a>
+          </Link>
           <button
             onClick={() => window.print()}
             className="inline-flex items-center gap-1.5 text-xs font-medium text-foreground px-3 py-1.5 rounded-md border border-border hover:border-foreground/30 transition-colors"
@@ -243,7 +244,7 @@ export function ShareableView({ project }: ShareableViewProps) {
           <div className="text-[10px] font-mono uppercase tracking-[0.25em] text-muted-foreground mb-4">
             First-Pass Breakdown
           </div>
-          <h1 className="text-5xl md:text-6xl font-semibold tracking-tight leading-[1.02] text-foreground">
+          <h1 className="text-5xl md:text-6xl font-semibold tracking-normal leading-[1.02] text-foreground">
             {title}
           </h1>
           {parsedJson.writer && (
@@ -404,7 +405,7 @@ export function ShareableView({ project }: ShareableViewProps) {
               {mood.descriptors.map((d, i) => (
                 <span
                   key={`${i}-${d}`}
-                  className="inline-flex items-center px-3 py-1.5 rounded-full border border-border/80 bg-card/40 text-[12px] font-mono tracking-tight text-foreground/80"
+                  className="inline-flex items-center px-3 py-1.5 rounded-full border border-border/80 bg-card/40 text-[12px] font-mono tracking-normal text-foreground/80"
                 >
                   {d}
                 </span>
@@ -1035,7 +1036,72 @@ function SceneFull({
 function PrintStyles() {
   return (
     <style jsx global>{`
+      .share-light {
+        color-scheme: light;
+        --t-bg: #f8f6ef;
+        --t-bg-elevated: #ffffff;
+        --t-bg-card: rgba(255, 255, 255, 0.78);
+        --t-bg-card-hover: rgba(255, 255, 255, 0.92);
+        --t-bg-subtle: rgba(20, 20, 20, 0.055);
+        --t-bg-active: rgba(20, 20, 20, 0.085);
+        --t-bg-overlay: rgba(255, 255, 255, 0.72);
+        --t-bg-input: #ffffff;
+        --t-text: #151515;
+        --t-text-2: rgba(21, 21, 21, 0.76);
+        --t-text-3: rgba(21, 21, 21, 0.68);
+        --t-text-4: rgba(21, 21, 21, 0.58);
+        --t-text-5: rgba(21, 21, 21, 0.5);
+        --t-text-6: rgba(21, 21, 21, 0.55);
+        --t-border: rgba(21, 21, 21, 0.12);
+        --t-border-medium: rgba(21, 21, 21, 0.16);
+        --t-border-strong: rgba(21, 21, 21, 0.24);
+        --background: var(--t-bg);
+        --foreground: var(--t-text);
+        --card: var(--t-bg-card);
+        --card-foreground: var(--t-text);
+        --popover: var(--t-bg-elevated);
+        --popover-foreground: var(--t-text);
+        --primary: var(--t-text);
+        --primary-foreground: var(--t-bg);
+        --secondary: var(--t-bg-subtle);
+        --secondary-foreground: var(--t-text);
+        --muted: var(--t-bg-subtle);
+        --muted-foreground: var(--t-text-5);
+        --accent: var(--t-bg-active);
+        --accent-foreground: var(--t-text);
+        --border: var(--t-border);
+        --input: var(--t-border-strong);
+        --ring: var(--t-text-4);
+        --color-background: var(--background);
+        --color-foreground: var(--foreground);
+        --color-card: var(--card);
+        --color-card-foreground: var(--card-foreground);
+        --color-popover: var(--popover);
+        --color-popover-foreground: var(--popover-foreground);
+        --color-primary: var(--primary);
+        --color-primary-foreground: var(--primary-foreground);
+        --color-secondary: var(--secondary);
+        --color-secondary-foreground: var(--secondary-foreground);
+        --color-muted: var(--muted);
+        --color-muted-foreground: var(--muted-foreground);
+        --color-accent: var(--accent);
+        --color-accent-foreground: var(--accent-foreground);
+        --color-border: var(--border);
+        --color-input: var(--input);
+        --color-ring: var(--ring);
+      }
+
       @media print {
+        .share-light {
+          --background: #ffffff;
+          --foreground: #111111;
+          --card: #ffffff;
+          --muted: rgba(17, 17, 17, 0.06);
+          --muted-foreground: rgba(17, 17, 17, 0.55);
+          --border: rgba(17, 17, 17, 0.14);
+          background: white !important;
+          color: #111111 !important;
+        }
         .no-print {
           display: none !important;
         }

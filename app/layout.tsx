@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Space_Grotesk, Space_Mono } from "next/font/google";
+import { DM_Sans, Instrument_Serif, Space_Mono } from "next/font/google";
 import { Agentation } from "agentation";
 import { PasswordGate } from "@/components/password-gate";
 import { MobileGate } from "@/components/mobile-gate";
@@ -7,9 +7,18 @@ import { ApiKeysProvider } from "@/lib/api-keys-context";
 import { getSiteUrl } from "@/lib/site-url";
 import "./globals.css";
 
-const spaceGrotesk = Space_Grotesk({
-  variable: "--font-space-grotesk",
+const dmSans = DM_Sans({
+  variable: "--font-dm-sans",
   subsets: ["latin"],
+  display: "swap",
+});
+
+const instrumentSerif = Instrument_Serif({
+  variable: "--font-display-serif",
+  subsets: ["latin"],
+  style: ["normal", "italic"],
+  weight: "400",
+  display: "swap",
 });
 
 const spaceMono = Space_Mono({
@@ -25,11 +34,11 @@ export const metadata: Metadata = {
     // Per-page titles become "Title — Greenlight" automatically.
     template: "%s — Greenlight",
   },
-  description: "Turn a script into something tangible, fast. A vision deck generator for indie filmmakers.",
+  description: "Turn a screenplay into a film deck.",
   alternates: { canonical: "/" },
   openGraph: {
     title: "Greenlight",
-    description: "Turn a script into something tangible, fast. A vision deck generator for indie filmmakers.",
+    description: "Turn a screenplay into a film deck.",
     type: "website",
     url: "/",
     siteName: "Greenlight",
@@ -38,22 +47,17 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Greenlight",
-    description: "Turn a script into something tangible, fast.",
+    description: "Turn a screenplay into a film deck.",
     images: ["/og-image.png"],
   },
 };
 
-// Inline script reads theme from localStorage before first paint so we
-// never flash the wrong theme on reload. Runs synchronously in <head>.
+// Greenlight is dark-only in the Cinemateca sister-product direction.
 const themeInitScript = `
 (function() {
   try {
-    var t = localStorage.getItem('greenlight-theme');
-    if (t === 'light') {
-      document.documentElement.classList.remove('dark');
-    } else {
-      document.documentElement.classList.add('dark');
-    }
+    localStorage.removeItem('greenlight-theme');
+    document.documentElement.classList.add('dark');
   } catch (e) {}
 })();
 `;
@@ -69,7 +73,7 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
       </head>
       <body
-        className={`${spaceGrotesk.variable} ${spaceMono.variable} antialiased`}
+        className={`${dmSans.variable} ${instrumentSerif.variable} ${spaceMono.variable} antialiased`}
       >
         <MobileGate>
           <PasswordGate>

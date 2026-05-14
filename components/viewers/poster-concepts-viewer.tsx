@@ -114,8 +114,9 @@ type PosterConceptsViewerProps = {
 };
 
 export function PosterConceptsViewer({ content, savedImages, onImagesChange }: PosterConceptsViewerProps) {
-  const { title, intro, concepts } = useMemo(() => parsePosterConcepts(content), [content]);
+  const { intro, concepts } = useMemo(() => parsePosterConcepts(content), [content]);
   const [copiedId, setCopiedId] = useState<number | null>(null);
+  const [copiedColorKey, setCopiedColorKey] = useState<string | null>(null);
   const [expandedConcepts, setExpandedConcepts] = useState<Set<number>>(() => new Set([1]));
   const [showPrompt, setShowPrompt] = useState<number | null>(null);
   const [editingPrompt, setEditingPrompt] = useState<number | null>(null);
@@ -151,6 +152,13 @@ export function PosterConceptsViewer({ content, savedImages, onImagesChange }: P
     setTimeout(() => setCopiedId(null), 2000);
   };
 
+  const copyColorValue = async (conceptNumber: number, hex: string, index: number) => {
+    const colorKey = `${conceptNumber}-${index}`;
+    await navigator.clipboard.writeText(hex);
+    setCopiedColorKey(colorKey);
+    setTimeout(() => setCopiedColorKey(null), 1400);
+  };
+
   const startEditPrompt = (concept: PosterConcept) => {
     setEditText(getPrompt(concept));
     setEditingPrompt(concept.number);
@@ -173,6 +181,7 @@ export function PosterConceptsViewer({ content, savedImages, onImagesChange }: P
         body: JSON.stringify({
           prompt: getPrompt(concept),
           slugLine: concept.name,
+          apiProvider: keys.apiProvider,
           apiKey: keys.apiKey,
         }),
       });
@@ -273,7 +282,7 @@ export function PosterConceptsViewer({ content, savedImages, onImagesChange }: P
   return (
     <div>
       {intro && (
-        <p className="text-[13px] text-muted-foreground leading-relaxed mb-6">
+        <p className="mb-6 max-w-[68ch] text-[15px] leading-[1.65] text-foreground/66">
           {intro}
         </p>
       )}
@@ -294,7 +303,7 @@ export function PosterConceptsViewer({ content, savedImages, onImagesChange }: P
             className="ml-2 inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-md border border-destructive/30 text-destructive hover:bg-destructive/5 transition-colors"
           >
             <Loader2 size={13} className="animate-spin" />
-            {genAllProgress.done}/{genAllProgress.total} — Cancel
+            {genAllProgress.done}/{genAllProgress.total} · Cancel
           </button>
         ) : (
           missingCount > 0 && (
@@ -327,48 +336,84 @@ export function PosterConceptsViewer({ content, savedImages, onImagesChange }: P
                 const isCopied = copiedId === concept.number;
 
                 return (
-                  <div key={concept.number} className="rounded-[12px] shadow-paper bg-card/40 overflow-hidden">
+                  <div key={concept.number} className="report-motion-card overflow-hidden rounded-[12px] border border-border bg-card/35 hover:border-foreground/18 hover:bg-card/45">
                     {/* Header */}
-                    <button
-                      onClick={() => toggleConcept(concept.number)}
-                      className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-white/[0.02] transition-colors"
-                    >
-                      <span className="flex h-7 w-7 items-center justify-center rounded-[6px] bg-white/[0.04] shadow-pill text-[11px] font-mono font-medium tabular-nums shrink-0 text-foreground/90">
-                        {concept.number.toString().padStart(2, "0")}
-                      </span>
-                      <div className="flex-1 min-w-0">
-                        <span className="text-[13px] font-medium tracking-tight">{concept.name}</span>
-                        {concept.mood && (
-                          <span className="text-[11px] text-muted-foreground ml-2">
-                            {concept.mood}
-                          </span>
-                        )}
-                      </div>
-                      {/* Color strip mini */}
+                    <div className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-white/[0.02]">
+                      <button
+                        type="button"
+                        onClick={() => toggleConcept(concept.number)}
+                        className="flex min-w-0 flex-1 items-center gap-3 text-left"
+                      >
+                        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[6px] border border-border bg-white/[0.03] font-mono text-[11px] font-medium tabular-nums text-foreground/90">
+                          {concept.number.toString().padStart(2, "0")}
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <span className="text-[13px] font-medium tracking-normal">{concept.name}</span>
+                          {concept.mood && (
+                            <span className="ml-2 text-[11px] text-muted-foreground">
+                              {concept.mood}
+                            </span>
+                          )}
+                        </div>
+                      </button>
+
                       {concept.colors.length > 0 && (
-                        <div className="flex rounded overflow-hidden h-5 w-20 shrink-0">
-                          {concept.colors.map((c, i) => (
-                            <div key={i} className="flex-1" style={{ backgroundColor: c.hex }} />
-                          ))}
+                        <div
+                          className="flex h-5 w-20 shrink-0 overflow-hidden rounded border border-white/10"
+                          aria-label={`${concept.name} color palette`}
+                        >
+                          {concept.colors.map((c, i) => {
+                            const colorKey = `${concept.number}-${i}`;
+                            const isColorCopied = copiedColorKey === colorKey;
+
+                            return (
+                              <button
+                                key={`${c.hex}-${i}`}
+                                type="button"
+                                onClick={() => copyColorValue(concept.number, c.hex, i)}
+                                className="relative flex-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                                style={{ backgroundColor: c.hex }}
+                                title={`Copy ${c.name ? `${c.name} ` : ""}${c.hex}`}
+                                aria-label={`Copy ${c.name ? `${c.name} ` : ""}${c.hex}`}
+                              >
+                                {isColorCopied && (
+                                  <span className="absolute inset-0 flex items-center justify-center bg-black/25 text-white">
+                                    <Check size={9} strokeWidth={2.2} />
+                                  </span>
+                                )}
+                                <span className="sr-only">
+                                  {isColorCopied ? "Copied" : "Copy"} {c.hex}
+                                </span>
+                              </button>
+                            );
+                          })}
                         </div>
                       )}
-                      <svg
-                        width="16" height="16" viewBox="0 0 16 16" fill="none"
-                        className={`shrink-0 text-muted-foreground transition-transform ${isExpanded ? "rotate-180" : ""}`}
+
+                      <button
+                        type="button"
+                        onClick={() => toggleConcept(concept.number)}
+                        className="shrink-0 rounded p-1 text-muted-foreground transition-colors hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                        aria-label={isExpanded ? `Collapse ${concept.name}` : `Expand ${concept.name}`}
                       >
-                        <path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                    </button>
+                        <svg
+                          width="16" height="16" viewBox="0 0 16 16" fill="none"
+                          className={`report-expand-icon ${isExpanded ? "rotate-180" : ""}`}
+                        >
+                          <path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      </button>
+                    </div>
 
                     {isExpanded && (
-                      <div className="px-4 pb-4 space-y-4">
+                      <div className="report-motion-content px-4 pb-4 space-y-4">
                         {/* Generated poster sketch + details side by side */}
-                        <div className="flex gap-4 mt-3">
+                        <div className="mt-3 grid gap-5 lg:grid-cols-[160px_1fr]">
                           {/* Poster image or generate button */}
-                          <div className="shrink-0 w-[140px]">
+                          <div className="w-full max-w-[180px]">
                             {posterImages[concept.number]?.status === "done" && posterImages[concept.number]?.url ? (
                               <div className="relative group">
-                                <div className="rounded-lg overflow-hidden border bg-muted/30" style={{ aspectRatio: "5/7" }}>
+                                <div className="overflow-hidden rounded-lg border border-border bg-muted/30" style={{ aspectRatio: "5/7" }}>
                                   <img
                                     src={posterImages[concept.number].url}
                                     alt={`Poster sketch — ${concept.name}`}
@@ -391,12 +436,12 @@ export function PosterConceptsViewer({ content, savedImages, onImagesChange }: P
                               <button
                                 onClick={(e) => { e.stopPropagation(); generatePosterImage(concept); }}
                                 disabled={posterImages[concept.number]?.status === "generating"}
-                                className="w-full rounded-lg border-2 border-dashed border-border hover:border-foreground/30 transition-colors flex flex-col items-center justify-center gap-2 text-muted-foreground hover:text-foreground"
+                                className="report-motion-card flex w-full flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-border text-muted-foreground hover:border-foreground/30 hover:text-foreground"
                                 style={{ aspectRatio: "5/7" }}
                               >
                                 {posterImages[concept.number]?.status === "generating" ? (
                                   <>
-                                    <Loader2 size={20} className="animate-spin" />
+                                    <Loader2 size={20} className="animate-spin motion-reduce:animate-none" />
                                     <span className="text-[10px] font-medium">Generating...</span>
                                   </>
                                 ) : (
@@ -413,7 +458,7 @@ export function PosterConceptsViewer({ content, savedImages, onImagesChange }: P
                           {/* Details column */}
                           <div className="flex-1 min-w-0 space-y-3">
                             {concept.tagline && (
-                              <blockquote className="text-[15px] font-medium italic border-l-2 border-primary/30 pl-3 text-foreground/85">
+                              <blockquote className="border-l border-border pl-3 text-[15px] font-medium italic text-foreground/85">
                                 &ldquo;{concept.tagline}&rdquo;
                               </blockquote>
                             )}
@@ -435,14 +480,14 @@ export function PosterConceptsViewer({ content, savedImages, onImagesChange }: P
                               {posterImages[concept.number]?.status === "done" && (
                                 <PosterLink
                                   icon={<RefreshCw size={11} />}
-                                  label="Regenerate image"
+                                  label="Regenerate sketch"
                                   onClick={() => generatePosterImage(concept)}
                                 />
                               )}
                               <PosterLink
                                 icon={
                                   regenPromptStates[concept.number] === "loading"
-                                    ? <Loader2 size={11} className="animate-spin" />
+                                    ? <Loader2 size={11} className="animate-spin motion-reduce:animate-none" />
                                     : <RefreshCw size={11} />
                                 }
                                 label={regenPromptStates[concept.number] === "loading" ? "Rewriting…" : "Rewrite prompt"}
@@ -508,22 +553,6 @@ export function PosterConceptsViewer({ content, savedImages, onImagesChange }: P
                             )}
                           </div>
                         </div>
-
-                        {/* Color palette strip */}
-                        {concept.colors.length > 0 && (
-                          <div className="flex rounded-lg overflow-hidden h-10 mt-3">
-                            {concept.colors.map((c, i) => (
-                              <div
-                                key={i}
-                                className="flex-1 relative group cursor-default flex items-center justify-center"
-                                style={{ backgroundColor: c.hex }}
-                                title={`${c.name || ""} ${c.hex}`}
-                              >
-                                <span className="text-white text-[10px] font-mono font-semibold drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]">{c.hex}</span>
-                              </div>
-                            ))}
-                          </div>
-                        )}
 
                         {/* Typography */}
                         {concept.typography && (

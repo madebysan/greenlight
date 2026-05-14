@@ -1,10 +1,9 @@
 "use client";
 
-import { useState, useMemo, useRef } from "react";
+import { useMemo, useRef, useState } from "react";
 import {
   Pencil,
   Trash2,
-  Plus,
   Check,
   X,
   ImageIcon,
@@ -101,19 +100,19 @@ function scenesToMarkdown(title: string, overview: Overview, scenes: Scene[]): s
 }
 
 const INT_EXT_STYLES = {
-  INT: "bg-amber-500/15 text-amber-600 dark:text-amber-400",
-  EXT: "bg-sky-500/15 text-sky-600 dark:text-sky-400",
-  "": "bg-muted text-muted-foreground",
+  INT: "border border-border bg-white/[0.03] text-muted-foreground",
+  EXT: "border border-border bg-white/[0.03] text-muted-foreground",
+  "": "border border-border bg-white/[0.03] text-muted-foreground",
 };
 
 const TIME_STYLES: Record<string, string> = {
-  NIGHT: "bg-indigo-500/15 text-indigo-400 dark:text-indigo-300",
-  DAY: "bg-yellow-500/15 text-yellow-600 dark:text-yellow-300",
-  MORNING: "bg-orange-500/15 text-orange-500 dark:text-orange-300",
-  AFTERNOON: "bg-amber-500/15 text-amber-600 dark:text-amber-300",
-  EVENING: "bg-purple-500/15 text-purple-500 dark:text-purple-300",
-  DAWN: "bg-pink-500/15 text-pink-500 dark:text-pink-300",
-  DUSK: "bg-violet-500/15 text-violet-500 dark:text-violet-300",
+  NIGHT: "border border-border bg-white/[0.03] text-muted-foreground",
+  DAY: "border border-border bg-white/[0.03] text-muted-foreground",
+  MORNING: "border border-border bg-white/[0.03] text-muted-foreground",
+  AFTERNOON: "border border-border bg-white/[0.03] text-muted-foreground",
+  EVENING: "border border-border bg-white/[0.03] text-muted-foreground",
+  DAWN: "border border-border bg-white/[0.03] text-muted-foreground",
+  DUSK: "border border-border bg-white/[0.03] text-muted-foreground",
 };
 
 const EMPHASIS_FIELDS = new Set(["Key Visual Moment", "Emotional Beat"]);
@@ -357,7 +356,12 @@ export function SceneBreakdownViewer({
       const res = await fetch("/api/regenerate-prompt", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: sb.prompt, slugLine: sb.slugLine, apiKey: keys.apiKey }),
+        body: JSON.stringify({
+          prompt: sb.prompt,
+          slugLine: sb.slugLine,
+          apiProvider: keys.apiProvider,
+          apiKey: keys.apiKey,
+        }),
       });
       if (!res.ok) throw new Error("Failed");
       const { prompt } = await res.json();
@@ -429,43 +433,17 @@ export function SceneBreakdownViewer({
     }));
   }, [scenes]);
 
-  const handleAddScene = () => {
-    if (!onContentChange) return;
-    const maxNum = scenes.length > 0 ? Math.max(...scenes.map((s) => s.number)) : 0;
-    const newScene: Scene = {
-      number: maxNum + 1,
-      slugLine: "INT. NEW LOCATION - DAY",
-      intExt: "INT",
-      timeOfDay: "DAY",
-      fields: [
-        { label: "Location", value: "" },
-        { label: "Characters", value: "" },
-        { label: "Pages", value: "" },
-        { label: "Key Visual Moment", value: "" },
-        { label: "Emotional Beat", value: "" },
-        { label: "Props", value: "" },
-        { label: "Wardrobe", value: "" },
-        { label: "VFX/Stunts", value: "" },
-        { label: "Notes", value: "" },
-      ],
-    };
-    const newScenes = [...scenes, newScene];
-    onContentChange(scenesToMarkdown(title, overview, newScenes));
-    setExpandedScenes((prev) => new Set([...prev, newScene.number]));
-    setEditingScene(newScene.number);
-  };
-
   return (
-    <div className="max-w-4xl space-y-12">
+    <div className="max-w-5xl space-y-12">
       <header>
         <SectionLabelPill icon={<Film size={10} />} className="mb-3">
           Scene Breakdown
         </SectionLabelPill>
-        <h1 className="text-[32px] font-light tracking-[-0.025em] leading-[1.05] mb-2 text-foreground">
+        <h1 className="mb-3 font-display text-[38px] font-normal leading-[1.05] tracking-normal text-foreground md:text-[46px]">
           Scene-by-scene map of the film
         </h1>
-        <p className="text-[13px] text-foreground/60 tracking-tight max-w-[60ch]">
-          Expand any scene for its key moment, characters, and notes.
+        <p className="max-w-[62ch] text-[16px] leading-[1.65] text-foreground/62">
+          Open a scene for notes and storyboard frame.
         </p>
       </header>
 
@@ -474,7 +452,7 @@ export function SceneBreakdownViewer({
           <SectionHead index={1} label="Breakdown" labelIcon={<BarChart3 size={10} />}>
             At a Glance
           </SectionHead>
-          <div className="inline-grid grid-cols-2 md:grid-cols-[repeat(3,140px)] gap-px bg-border/50 rounded-[12px] overflow-hidden shadow-paper">
+          <div className="grid grid-cols-2 overflow-hidden rounded-[12px] border border-border md:grid-cols-3">
             {overview.map((item) => {
               // Stats may come in as "5 unique locations" — strip to leading number
               // so the big display numeral doesn't overflow.
@@ -483,9 +461,9 @@ export function SceneBreakdownViewer({
               return (
                 <div
                   key={item.label}
-                  className="bg-card/40 px-5 py-6 flex flex-col gap-2 min-w-0"
+                  className="flex min-w-0 flex-col gap-2 border-b border-r border-border bg-card/40 px-5 py-6 last:border-r-0 md:border-b-0"
                 >
-                  <div className="text-[34px] font-light text-foreground tabular-nums leading-none tracking-[-0.03em]">
+                  <div className="text-[34px] font-light text-foreground tabular-nums leading-none tracking-normal">
                     {shortValue}
                   </div>
                   <div className="font-mono text-[9px] font-medium uppercase tracking-[0.15em] text-muted-foreground leading-[1.35] max-w-[11ch]">
@@ -570,10 +548,10 @@ export function SceneBreakdownViewer({
             return (
               <div
                 key={scene.number}
-                className={`rounded-[12px] transition-all ${
+                className={`report-motion-card rounded-[12px] border ${
                   isExpanded
-                    ? "bg-card/60 shadow-paper-hover"
-                    : "bg-card/30 shadow-paper hover:shadow-paper-hover"
+                    ? "border-foreground/18 bg-card/45"
+                    : "border-border bg-card/25 hover:border-foreground/18 hover:bg-card/40"
                 }`}
               >
                 <div className="px-4 py-3">
@@ -582,24 +560,24 @@ export function SceneBreakdownViewer({
                       onClick={() => toggleScene(scene.number)}
                       className="flex items-center gap-3 flex-1 min-w-0 text-left"
                     >
-                      <span className="flex h-[26px] w-[26px] items-center justify-center rounded-[6px] bg-white/[0.04] font-mono text-[11px] font-medium shrink-0 tabular-nums shadow-pill text-foreground/90">
+                      <span className="flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-[6px] border border-border bg-white/[0.03] font-mono text-[11px] font-medium tabular-nums text-foreground/90">
                         {scene.number.toString().padStart(2, "0")}
                       </span>
                       {scene.intExt && (
-                        <span className={`font-mono text-[10px] font-medium tracking-[0.1em] px-2 py-[3px] rounded-full ${INT_EXT_STYLES[scene.intExt]}`}>
+                        <span className={`rounded-full px-2 py-[3px] font-mono text-[10px] font-medium tracking-[0.1em] ${INT_EXT_STYLES[scene.intExt]}`}>
                           {scene.intExt}
                         </span>
                       )}
-                      <span className="text-[13px] font-medium tracking-[-0.01em] uppercase flex-1 truncate text-foreground/90">
+                      <span className="text-[13px] font-medium tracking-normal uppercase flex-1 truncate text-foreground/90">
                         {scene.slugLine.replace(/^(INT|EXT)\.\s*/, "").replace(/\s*-\s*(NIGHT|DAY|MORNING|AFTERNOON|EVENING|DAWN|DUSK|CONTINUOUS)\s*$/i, "")}
                       </span>
                       {scene.timeOfDay && (
-                        <span className={`font-mono text-[10px] font-medium tracking-[0.1em] uppercase px-2 py-[3px] rounded-full ${TIME_STYLES[scene.timeOfDay.toUpperCase()] || "bg-white/[0.04] text-muted-foreground"}`}>
+                        <span className={`rounded-full px-2 py-[3px] font-mono text-[10px] font-medium uppercase tracking-[0.1em] ${TIME_STYLES[scene.timeOfDay.toUpperCase()] || "border border-border bg-white/[0.03] text-muted-foreground"}`}>
                           {scene.timeOfDay}
                         </span>
                       )}
                       {pages && (
-                        <span className="font-mono text-[11px] text-muted-foreground tabular-nums whitespace-nowrap tracking-tight">pp. {pages}</span>
+                        <span className="font-mono text-[11px] text-muted-foreground tabular-nums whitespace-nowrap tracking-normal">pp. {pages}</span>
                       )}
                     </button>
 
@@ -624,16 +602,16 @@ export function SceneBreakdownViewer({
 
                   <svg
                     width="16" height="16" viewBox="0 0 16 16" fill="none"
-                    className={`shrink-0 text-muted-foreground transition-transform ${isExpanded ? "rotate-180" : ""}`}
+                    className={`report-expand-icon shrink-0 text-muted-foreground ${isExpanded ? "rotate-180" : ""}`}
                   >
                     <path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                   </div>
 
                   {!isExpanded && (emotionalBeat || characters) && (
-                    <div className="flex items-center gap-2 pl-[42px] pt-0.5 pb-1">
+                    <div className="report-motion-content flex items-center gap-2 pl-[42px] pt-0.5 pb-1">
                       {emotionalBeat && (
-                        <span className="text-[12px] italic text-foreground/50 tracking-tight">
+                        <span className="text-[12px] italic text-foreground/50 tracking-normal">
                           {emotionalBeat}
                         </span>
                       )}
@@ -641,7 +619,7 @@ export function SceneBreakdownViewer({
                         <span className="text-muted-foreground/30">·</span>
                       )}
                       {characters && (
-                        <span className="text-[11px] text-muted-foreground/60 tracking-tight truncate">
+                        <span className="text-[11px] text-muted-foreground/60 tracking-normal truncate">
                           {characters}
                         </span>
                       )}
@@ -658,17 +636,17 @@ export function SceneBreakdownViewer({
                 )}
 
                 {isExpanded && !isEditing && (
-                  <div className="px-5 pb-6 pt-5 border-t border-border/60 space-y-5">
+                  <div className="report-motion-content px-5 pb-6 pt-5 border-t border-border/60 space-y-5">
                     {(location || characters) && (
                       <div className="flex flex-wrap gap-1.5">
                         {location && (
-                          <span className="inline-flex items-center gap-1.5 font-mono text-[11px] bg-white/[0.04] rounded-full px-2.5 py-1 text-foreground/85 shadow-pill tracking-tight">
+                          <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-white/[0.03] px-2.5 py-1 font-mono text-[11px] tracking-normal text-foreground/85">
                             <span className="text-muted-foreground">◉</span>
                             {location}
                           </span>
                         )}
                         {characters && characters.split(",").map((char) => (
-                          <span key={char.trim()} className="inline-flex items-center gap-1.5 font-mono text-[11px] bg-white/[0.04] rounded-full px-2.5 py-1 text-foreground/85 shadow-pill tracking-tight">
+                          <span key={char.trim()} className="inline-flex items-center gap-1.5 rounded-full border border-border bg-white/[0.03] px-2.5 py-1 font-mono text-[11px] tracking-normal text-foreground/85">
                             <span className="text-muted-foreground">◉</span>
                             {char.trim()}
                           </span>
@@ -697,7 +675,7 @@ export function SceneBreakdownViewer({
                               <div className="font-mono text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground mb-2">
                                 {field.label}
                               </div>
-                              <p className="text-[15px] leading-[1.6] text-foreground/85 tracking-tight">
+                              <p className="text-[15px] leading-[1.6] text-foreground/85 tracking-normal">
                                 {field.value}
                               </p>
                             </div>
@@ -710,7 +688,7 @@ export function SceneBreakdownViewer({
                                   <dt className="font-mono text-[9px] font-medium uppercase tracking-[0.18em] text-muted-foreground pt-0.5">
                                     {field.label}
                                   </dt>
-                                  <dd className="m-0 text-[13px] leading-[1.6] text-foreground/80 tracking-tight">
+                                  <dd className="m-0 text-[13px] leading-[1.6] text-foreground/80 tracking-normal">
                                     {field.value}
                                   </dd>
                                 </div>
@@ -814,12 +792,6 @@ function StoryboardSection({
   generatingAll,
 }: StoryboardSectionProps) {
   const [editText, setEditText] = useState(storyboard.prompt);
-  // Keep editText in sync if the prompt changes externally (e.g., rewrite)
-  // without fighting the textarea when the user is actively editing.
-  useMemo(() => {
-    if (!isEditingPrompt) setEditText(storyboard.prompt);
-  }, [storyboard.prompt, isEditingPrompt]);
-
   const promptVisible = isEditingPrompt || isShowingPrompt;
 
   return (
@@ -828,11 +800,11 @@ function StoryboardSection({
         Storyboard Frame
       </div>
 
-      <div className="grid grid-cols-[320px_1fr] gap-6 items-start">
+      <div className="grid gap-6 lg:grid-cols-[320px_1fr] lg:items-start">
         {/* Left: image or placeholder + action link row */}
         <div>
           {imageState.status === "done" && imageState.url ? (
-            <div className="relative group aspect-video rounded-[10px] overflow-hidden shadow-paper bg-muted/30">
+            <div className="group relative aspect-video overflow-hidden rounded-[10px] border border-border bg-muted/30">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={imageState.url}
@@ -844,19 +816,19 @@ function StoryboardSection({
                 download={`scene-${sceneNumber}.png`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="absolute top-1.5 right-1.5 opacity-0 group-hover:opacity-100 transition-opacity inline-flex items-center gap-1 font-mono text-[10px] px-2 py-1 rounded-full bg-[#0C0A09] text-white hover:bg-black shadow-pill"
+                className="absolute right-1.5 top-1.5 inline-flex items-center gap-1 rounded-full border border-white/10 bg-[#0C0A09] px-2 py-1 font-mono text-[10px] text-white opacity-0 transition-opacity hover:bg-black group-hover:opacity-100"
               >
                 <Download size={10} />
                 Save
               </a>
             </div>
           ) : imageState.status === "generating" ? (
-            <div className="aspect-video rounded-[10px] shadow-paper bg-muted/20 flex items-center justify-center gap-2 text-[11px] text-muted-foreground">
-              <Loader2 size={14} className="animate-spin" />
+            <div className="report-loading-surface report-motion-status flex aspect-video items-center justify-center gap-2 rounded-[10px] border border-border bg-muted/20 text-[11px] text-muted-foreground">
+              <Loader2 size={14} className="animate-spin motion-reduce:animate-none" />
               Generating frame…
             </div>
           ) : imageState.status === "error" ? (
-            <div className="aspect-video rounded-[10px] shadow-paper bg-destructive/5 flex flex-col items-center justify-center gap-1 text-[11px] text-destructive/80">
+            <div className="flex aspect-video flex-col items-center justify-center gap-1 rounded-[10px] border border-destructive/20 bg-destructive/5 text-[11px] text-destructive/80">
               <span>{imageState.error || "Generation failed"}</span>
               <button
                 onClick={onGenerate}
@@ -869,7 +841,7 @@ function StoryboardSection({
             <button
               onClick={onGenerate}
               disabled={generatingAll}
-              className="aspect-video w-full rounded-[10px] shadow-paper hover:shadow-paper-hover bg-muted/10 hover:bg-muted/20 flex flex-col items-center justify-center gap-1.5 text-[11px] text-muted-foreground hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed transition-all tracking-tight"
+              className="report-motion-card flex aspect-video w-full flex-col items-center justify-center gap-1.5 rounded-[10px] border border-dashed border-border bg-muted/10 text-[11px] tracking-normal text-muted-foreground hover:border-foreground/30 hover:bg-muted/20 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
             >
               <ImageIcon size={18} />
               Generate frame
@@ -881,14 +853,14 @@ function StoryboardSection({
             {imageState.status === "done" && (
               <FrameLink
                 icon={<RefreshCw size={11} />}
-                label="Regenerate image"
+                label="Regenerate frame"
                 onClick={onGenerate}
               />
             )}
             <FrameLink
               icon={
                 regenState === "loading" ? (
-                  <Loader2 size={11} className="animate-spin" />
+                  <Loader2 size={11} className="animate-spin motion-reduce:animate-none" />
                 ) : (
                   <RefreshCw size={11} />
                 )
@@ -897,12 +869,19 @@ function StoryboardSection({
               onClick={onRegenPrompt}
               disabled={regenState === "loading" || isEditingPrompt}
             />
-            <FrameLink
-              icon={<FileText size={11} />}
-              label={isEditingPrompt ? "Editing…" : "Edit prompt"}
-              onClick={isEditingPrompt ? onCancelEditPrompt : onStartEditPrompt}
-              active={isEditingPrompt}
-            />
+              <FrameLink
+                icon={<FileText size={11} />}
+                label={isEditingPrompt ? "Editing…" : "Edit prompt"}
+                onClick={() => {
+                  if (isEditingPrompt) {
+                    onCancelEditPrompt();
+                    return;
+                  }
+                  setEditText(storyboard.prompt);
+                  onStartEditPrompt();
+                }}
+                active={isEditingPrompt}
+              />
             <FrameLink
               icon={isCopied ? <Check size={11} /> : <Copy size={11} />}
               label={isCopied ? "Copied" : "Copy prompt"}
@@ -1016,4 +995,3 @@ function Meta({ label, value }: { label: string; value: string }) {
     </>
   );
 }
-

@@ -5,21 +5,29 @@ import { DemoContent } from "@/components/demo/demo-content";
 export const metadata: Metadata = {
   title: "The Red Balloon",
   description:
-    "A vision deck for Albert Lamorisse's 1956 short The Red Balloon — mood, scenes, cast, and poster concepts, built with Greenlight.",
+    "A Greenlight film deck for Albert Lamorisse's 1956 short The Red Balloon: mood, scenes, cast, and posters.",
   alternates: { canonical: "/demo/red-balloon" },
   openGraph: {
-    title: "The Red Balloon — Greenlight vision deck",
+    title: "The Red Balloon - Greenlight film deck",
     description:
-      "Mood, scenes, cast, and poster concepts for Albert Lamorisse's 1956 short film, built with Greenlight.",
+      "Mood, scenes, cast, and posters for Albert Lamorisse's 1956 short film.",
     url: "/demo/red-balloon",
     type: "article",
-    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
+    images: [
+      {
+        url: "/demo/red-balloon/og-image",
+        width: 1200,
+        height: 630,
+        alt: "The Red Balloon Greenlight film deck",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "The Red Balloon — Greenlight vision deck",
+    title: "The Red Balloon - Greenlight film deck",
     description:
       "Mood, scenes, cast, and poster concepts for Lamorisse's 1956 short film.",
+    images: ["/demo/red-balloon/og-image"],
   },
 };
 

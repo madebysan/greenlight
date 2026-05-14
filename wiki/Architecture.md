@@ -2,7 +2,7 @@
 
 Greenlight is a single-page Next.js application with a 4-step wizard flow. There is no database — all state lives in localStorage. The backend consists of API routes that proxy calls to Claude (document generation) and fal.ai (image generation).
 
-**Keys architecture:** On the public deployment (`greenlight-public.vercel.app`) no server-side API keys are set. Every paid route accepts `apiKey` in the body, with `process.env.X` as an optional local-dev fallback. The `ApiKeysProvider` wraps the app tree and exposes `ensureKeys({requireFal?})` which gates every user-triggered action — opening an onboarding modal if keys are missing and persisting them to localStorage once provided. Cached-project paths (title-matched demos) bypass the gate entirely.
+**Keys architecture:** Every paid route accepts `apiKey` in the body, with `process.env.X` as an optional local-dev or private-deployment fallback. The `ApiKeysProvider` wraps the app tree and exposes `ensureKeys({requireFal?})` which gates every user-triggered action, opening an onboarding modal if keys are missing and persisting them to localStorage once provided. Cached-project paths (title-matched demos) bypass the gate entirely.
 
 ## System Overview
 
