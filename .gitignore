@@ -61,11 +61,15 @@ DESIGN-PEEC.md
 CLAUDE.md
 
 # Internal dev docs (kept local, not shared)
+AGENTS.md
 how-it-works.md
 deep-refactor-report.md
 TIMELINE.md
 DESIGN.md
-CHANGELOG.md
+component-inventory.md
+wiki/
+prompt-tests/*.md
+prompt-tests/runs/
 
 # Internal assets / tooling
 qa-console.mjs

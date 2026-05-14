@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- Removed stale generated docs from the public repo until they can be rebuilt from the current product.
+- Stopped tracking local-only agent notes, component audit output, and generated prompt-test run artifacts.
+- Kept reusable prompt-test scripts while ignoring generated comparison reports and screenshots.
+
 ## v0.2.0 - 2026-05-14
 
 Private production checkpoint for the Greenlight report redesign and provider setup.
