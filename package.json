@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "prompt:compare": "node prompt-tests/scripts/compare-role-passes.mjs",
-    "prompt:compare:codex": "GREENLIGHT_PROMPT_PROVIDER=codex GREENLIGHT_HUMANIZER_PASS=1 node prompt-tests/scripts/compare-role-passes.mjs",
+    "prompt:compare:codex": "GREENLIGHT_PROMPT_PROVIDER=codex node prompt-tests/scripts/compare-role-passes.mjs",
+    "prompt:compare:codex:humanized": "GREENLIGHT_PROMPT_PROVIDER=codex GREENLIGHT_HUMANIZER_PASS=1 node prompt-tests/scripts/compare-role-passes.mjs",
     "prompt:compare:deepseek": "GREENLIGHT_PROMPT_PROVIDER=deepseek node prompt-tests/scripts/compare-role-passes.mjs",
     "prompt:compare:openai": "GREENLIGHT_PROMPT_PROVIDER=llm GREENLIGHT_HUMANIZER_PASS=1 node prompt-tests/scripts/compare-role-passes.mjs",
     "lint": "eslint"
