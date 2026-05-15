@@ -12,6 +12,7 @@
     "prompt:compare:deepseek": "GREENLIGHT_PROMPT_PROVIDER=deepseek node prompt-tests/scripts/compare-role-passes.mjs",
     "prompt:compare:openai": "GREENLIGHT_PROMPT_PROVIDER=llm GREENLIGHT_HUMANIZER_PASS=1 node prompt-tests/scripts/compare-role-passes.mjs",
     "prompt:tokens": "node prompt-tests/scripts/estimate-token-cost.mjs",
+    "audit:demos": "node prompt-tests/scripts/audit-demo-rendering.mjs",
     "lint": "eslint"
   },
   "dependencies": {
