@@ -36,6 +36,16 @@ type ResolvedFilm = {
   poster_url: string | null;
 };
 
+const LIST_SEPARATOR = "(?:\\s*(?:—|–)\\s*|\\s+-\\s+)";
+
+function parseTitleYear(rawTitle: string): { title: string; year?: number } {
+  const yearMatch = rawTitle.trim().match(/^(.+?)\s*\((\d{4})\)\s*$/);
+  return {
+    title: yearMatch ? yearMatch[1].trim() : rawTitle.trim(),
+    year: yearMatch ? Number(yearMatch[2]) : undefined,
+  };
+}
+
 export function parseMoodAndTone(md: string): ParsedMoodAndTone {
   const result: ParsedMoodAndTone = {
     atmosphere: "",
@@ -65,7 +75,9 @@ export function parseMoodAndTone(md: string): ParsedMoodAndTone {
     } else if (h.includes("color palette")) {
       const lines = body.split("\n").filter((l) => l.trim().startsWith("-"));
       for (const line of lines) {
-        const match = line.match(/-\s*\*\*([^*]+)\*\*\s*`(#[0-9a-fA-F]{3,8})`\s*—\s*(.+)/);
+        const match = line.match(
+          new RegExp(`-\\s*\\*\\*([^*]+)\\*\\*\\s*\`(#[0-9a-fA-F]{3,8})\`${LIST_SEPARATOR}(.+)`),
+        );
         if (match) {
           result.palette.push({
             name: match[1].trim(),
@@ -85,18 +97,21 @@ export function parseMoodAndTone(md: string): ParsedMoodAndTone {
           .split("\n")
           .filter((l) => l.trim().startsWith("-"));
         for (const line of refLines) {
+          // Accept both rich rows with a composer and compact local-fixture rows:
           // - **Title (Year)** — Composer — description
-          const match = line.match(/-\s*\*\*([^*]+)\*\*\s*—\s*([^—]+)\s*—\s*(.+)/);
+          // - **Title (Year)** - description
+          const match = line.match(
+            new RegExp(`-\\s*\\*\\*([^*]+)\\*\\*${LIST_SEPARATOR}(.+)`),
+          );
           if (!match) continue;
-          const rawTitle = match[1].trim();
-          const composer = match[2].trim();
-          const description = match[3].trim();
-          const yearMatch = rawTitle.match(/^(.+?)\s*\((\d{4})\)\s*$/);
+          const { title, year } = parseTitleYear(match[1]);
+          const parts = match[2].split(new RegExp(LIST_SEPARATOR)).map((part) => part.trim()).filter(Boolean);
+          const hasComposer = parts.length > 1;
           result.soundtracks.push({
-            title: yearMatch ? yearMatch[1].trim() : rawTitle,
-            year: yearMatch ? Number(yearMatch[2]) : undefined,
-            composer,
-            description,
+            title,
+            year,
+            composer: hasComposer ? parts[0] : "",
+            description: hasComposer ? parts.slice(1).join(" - ") : parts[0],
           });
         }
       }
@@ -106,28 +121,24 @@ export function parseMoodAndTone(md: string): ParsedMoodAndTone {
       // old cached content still parses.
       const lines = body.split("\n").filter((l) => l.trim().startsWith("-"));
       for (const line of lines) {
-        const match = line.match(/-\s*\*\*([^*]+)\*\*\s*—\s*(.+)/);
+        const match = line.match(
+          new RegExp(`-\\s*\\*\\*([^*]+)\\*\\*${LIST_SEPARATOR}(.+)`),
+        );
         if (!match) continue;
-        const rawTitle = match[1].trim();
+        const { title, year } = parseTitleYear(match[1]);
         const description = match[2].trim();
-        const yearMatch = rawTitle.match(/^(.+?)\s*\((\d{4})\)\s*$/);
-        if (yearMatch) {
-          result.similarMoods.push({
-            title: yearMatch[1].trim(),
-            year: Number(yearMatch[2]),
-            description,
-          });
-        } else {
-          result.similarMoods.push({ title: rawTitle, description });
-        }
+        result.similarMoods.push({ title, year, description });
       }
     } else if (h.includes("reference")) {
       const lines = body.split("\n").filter((l) => l.trim().startsWith("-"));
       for (const line of lines) {
-        const match = line.match(/-\s*\*\*([^*]+(?:\*[^*]+\*[^*]*)?)\*\*\s*—\s*(.+)/);
+        const match = line.match(
+          new RegExp(`-\\s*\\*\\*([^*]+(?:\\*[^*]+\\*[^*]*)?)\\*\\*${LIST_SEPARATOR}(.+)`),
+        );
         if (match) {
+          const { title } = parseTitleYear(match[1].replace(/\*/g, ""));
           result.references.push({
-            title: match[1].replace(/\*/g, "").trim(),
+            title,
             description: match[2].trim(),
           });
         }
@@ -568,7 +579,7 @@ function SoundtrackGrid({ tracks }: { tracks: SoundtrackEntry[] }) {
                 )}
               </div>
               <div className="mt-1 font-mono text-[10px] uppercase tracking-[0.1em] text-muted-foreground">
-                {t.composer}
+                {t.composer || "Soundtrack reference"}
               </div>
               <p className="mt-1.5 text-[13px] leading-[1.55] text-foreground/68">
                 {t.description}
