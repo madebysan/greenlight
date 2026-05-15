@@ -1,11 +1,16 @@
-<h1 align="center">Greenlight</h1>
-<p align="center">Script to vision deck in about ten minutes.<br>
+<h1>Greenlight</h1>
+
+<p>Script to vision deck in about ten minutes.<br>
 For the space between finishing a script and figuring out what the film actually looks like.</p>
-<p align="center"><code>Next.js</code> <code>React 19</code> <code>Tailwind CSS 4</code> <code>Claude API</code> <code>FLUX + Gesture Draw LoRA</code></p>
+
+<p>
+  <img src="https://img.shields.io/badge/Next.js-000000" alt="Next.js">
+  <img src="https://img.shields.io/badge/React-61dafb" alt="React">
+  <img src="https://img.shields.io/badge/Tailwind-38bdf8" alt="Tailwind">
+  <img src="https://img.shields.io/badge/Claude%20API-d97757" alt="Claude API">
+</p>
 
 https://github.com/user-attachments/assets/e5fbef69-2bd7-43b3-858a-e4ef32b0c419
-
----
 
 I have friends in the film industry who spend days, sometimes weeks, on the same manual work: turning a script into a deck they can show investors, pitch to potential collaborators, or use to make the film feel real before there's a crew. As a designer, I've designed a lot of decks for documentary films, so I have a feel for what the output usually looks like. Greenlight is me trying to reverse-engineer that output from a single source, a movie script.
 
