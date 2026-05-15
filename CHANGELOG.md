@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Added the `Dune: Part One` demo deck with a dedicated route, share source, OG image route, landing-card entry, generated report fixture, and 38 committed demo images.
+- Improved the demo fixture builder so local fallback reports no longer reuse film-specific Get Out language for new example scripts.
 - Removed stale generated docs from the public repo until they can be rebuilt from the current product.
 - Stopped tracking local-only agent notes, component audit output, and generated prompt-test run artifacts.
 - Kept reusable prompt-test scripts while ignoring generated comparison reports and screenshots.

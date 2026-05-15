@@ -97,6 +97,63 @@ async function generateDocuments({ baseUrl, jsonData }) {
   return results;
 }
 
+function cleanString(value) {
+  return typeof value === "string" ? value.trim() : value;
+}
+
+function normalizeTitle(value, slug) {
+  const title = cleanString(value) || "Untitled";
+  if (slug === "dune-part-one" && /^dune$/i.test(title)) return "Dune: Part One";
+  if (title === title.toUpperCase()) return titleCase(title.toLowerCase());
+  return title;
+}
+
+function normalizeData(data, slug) {
+  return {
+    ...data,
+    title: normalizeTitle(data.title, slug),
+    writer: cleanString(data.writer),
+    based_on: cleanString(data.based_on),
+    setting_period: cleanString(data.setting_period),
+    tone: cleanString(data.tone),
+    genre: data.genre.map(cleanString),
+    themes: data.themes.map(cleanString),
+    scenes: data.scenes.map((scene) => ({
+      ...scene,
+      slug_line: cleanString(scene.slug_line),
+      location: cleanString(scene.location),
+      int_ext: cleanString(scene.int_ext),
+      time_of_day: cleanString(scene.time_of_day),
+      key_visual_moment: cleanString(scene.key_visual_moment),
+      emotional_beat: cleanString(scene.emotional_beat),
+      music_cue: cleanString(scene.music_cue),
+      notes: cleanString(scene.notes),
+      props: scene.props.map(cleanString),
+      wardrobe_notes: scene.wardrobe_notes.map(cleanString),
+      vfx_stunts: scene.vfx_stunts.map(cleanString),
+    })),
+    characters: data.characters.map((character) => ({
+      ...character,
+      name: cleanString(character.name),
+      description: cleanString(character.description),
+      arc_summary: cleanString(character.arc_summary),
+      special_requirements: character.special_requirements.map(cleanString),
+    })),
+    locations: data.locations.map((location) => ({
+      ...location,
+      name: cleanString(location.name),
+      description: cleanString(location.description),
+      int_ext: cleanString(location.int_ext),
+      set_requirements: location.set_requirements.map(cleanString),
+    })),
+    props_master: data.props_master.map((prop) => ({
+      ...prop,
+      item: cleanString(prop.item),
+      notes: cleanString(prop.notes),
+    })),
+  };
+}
+
 function titleCase(value) {
   return value.replace(/\w\S*/g, (word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase());
 }
@@ -140,43 +197,44 @@ function buildOverviewDocument(data) {
   const nightScenes = countScenes(data, (scene) => /NIGHT|CONTINUOUS/i.test(scene.time_of_day));
   const stuntScenes = countScenes(data, (scene) => scene.vfx_stunts.length > 0);
   const centralLocation = topBySceneCount(data.locations, "scenes", 1)[0]?.name || "primary location";
+  const lead = topBySceneCount(data.characters, "scenes_present", 1)[0];
+  const firstSetPiece = data.scenes.find((scene) => scene.vfx_stunts.length > 0) || data.scenes[0];
+  const lastScene = data.scenes.at(-1);
+  const heroProps = data.props_master.filter((prop) => prop.hero_prop).slice(0, 4);
+  const themeLines = data.themes.slice(0, 4).map((theme) => {
+    const evidence = data.scenes.find((scene) => {
+      const haystack = `${scene.key_visual_moment} ${scene.notes} ${scene.emotional_beat}`.toLowerCase();
+      return theme.toLowerCase().split(/\s+/).some((word) => word.length > 5 && haystack.includes(word));
+    }) || data.scenes[0];
+    return `**${theme}**\nScene ${evidence.scene_number} gives this theme a concrete production anchor: ${evidence.key_visual_moment}`;
+  }).join("\n\n");
 
   return `# ${data.title}
 
 ## Logline
-A photographer's weekend visit to his girlfriend's family estate turns from polite discomfort into a body-horror escape story, as every friendly gesture reveals another system built to capture him.
+${lead?.name || "The protagonist"} is pushed through ${data.tone || data.genre.join(" / ")} pressure as ${centralLocation} becomes the story's main proving ground, turning ${data.themes[0]?.toLowerCase() || "the central conflict"} into visible production choices.
 
 ## Taglines
-- Smile for the family.
-- The invitation is the trap.
-- Every room has been waiting for him.
-- The flash is the warning.
-- Get out before politeness becomes paralysis.
+- ${data.themes[0] || data.tone}
+- The world decides what the hero must become.
+- Every location has a political cost.
+- Survival is a design language.
+- The smallest object can carry the largest fate.
 
 ## Synopsis
-${data.title} starts with Andre being hunted on a suburban street, then shifts into Chris Washington's uneasy trip from his city apartment into the Armitage estate. The film's pressure comes from social surfaces that keep changing meaning: Rose defending Chris from Officer Ryan, Dean over-explaining Jesse Owens, Georgina over-pouring iced tea, Jeremy turning dinner into a physical threat, and Missy's teacup turning conversation into control.
+${data.title} opens with ${data.scenes[0].key_visual_moment} From there, the script follows ${lead?.name || "its lead character"} through a widening chain of locations, power structures, and physical tests. The clearest early production signal is Scene ${firstSetPiece.scene_number}: ${firstSetPiece.key_visual_moment}
 
-The production shape is deceptively contained. Most of the story concentrates inside and around the ${centralLocation}, but the script keeps changing what that house is: welcoming family home, party venue, hypnosis chamber, auction floor, games room prison, and escape maze. That makes the design problem less about scale and more about precision. Every prop and room has to look normal before it becomes evidence.
+The production shape is defined by contrast: ${centralLocation} carries the most scene weight, while the story keeps expanding through exterior pressure, ceremonial interiors, combat work, and hero objects. The final movement lands on Scene ${lastScene.scene_number}: ${lastScene.key_visual_moment}
 
 ## Film Identity
 - **Genre:** ${data.genre.join(" / ")}
 - **Period:** ${data.setting_period}
 - **Tone:** ${data.tone}
-- **Core engine:** Racial microaggressions accumulate until they become literal captivity.
-- **Production read:** One primary estate, many tonal turns, heavy performance control, and a final run of close-quarter violence.
+- **Core engine:** ${lead?.arc_summary || data.themes.join(", ")}
+- **Production read:** ${locationCount} major locations, ${stuntScenes} stunt/VFX scenes, and hero props that need to remain legible across action, ritual, and character beats.
 
 ## Themes
-**Performative allyship**
-Dean's porch hug in Scene 8, the Jesse Owens photo in Scene 9, and the party questions in Scene 15 all present friendliness as a performance Chris is forced to manage.
-
-**The body as property**
-The silent auction in Scene 18 makes literal what the party has been doing socially: measuring Chris, admiring him, and treating his body as transferable value.
-
-**Control through comfort**
-Missy's office, the teacup, the dining room, Rose's bedroom, and the games room are ordinary domestic spaces until the script reveals how carefully they have been weaponized.
-
-**Seeing as survival**
-Chris's camera is not just characterization. The phone flash in Scene 17 breaks Andre's conditioning, turning image-making into a survival mechanism.
+${themeLines}
 
 ## Scope / Production Read
 - **Scenes:** ${data.scenes.length}
@@ -185,47 +243,79 @@ Chris's camera is not just characterization. The phone flash in Scene 17 breaks 
 - **Night / Continuous Scenes:** ${nightScenes}
 - **VFX / Stunt Scenes:** ${stuntScenes}
 - **Hero Props:** ${data.props_master.length}
-- **Complexity:** Medium footprint, high precision. The estate does most of the work, but hypnosis, crash work, gun work, fight beats, blood FX, and image continuity make it more complex than a single-location thriller.`;
+- **Hero prop focus:** ${heroProps.map((prop) => prop.item).join(", ") || "No hero props flagged"}
+- **Complexity:** ${stuntScenes >= data.scenes.length / 2 ? "High" : "Medium"} scope. The deck should foreground logistics, physical staging, and continuity because the script repeatedly ties emotional turns to practical objects, locations, and movement.`;
 }
 
 function buildMoodDocument(data) {
+  const desertOrScale = /sci-fi|action/i.test(data.genre.join(" ")) || /epic|desert|bleak/i.test(data.tone);
+  const references = desertOrScale
+    ? [
+        ["Lawrence of Arabia (1962)", "Monumental desert scale and small human figures overwhelmed by landscape."],
+        ["2001: A Space Odyssey (1968)", "Ritual pacing, architectural silence, and cosmic dread without visual clutter."],
+        ["Mad Max: Fury Road (2015)", "Desert action where vehicles, bodies, and weather become one production system."],
+        ["Arrival (2016)", "Austere science-fiction awe with emotional restraint and clean visual grammar."],
+        ["Apocalypse Now (1979)", "Imperial machinery, ceremonial violence, and a descent into political madness."],
+      ]
+    : [
+        ["Rosemary's Baby (1968)", "Ordinary hospitality becomes a conspiracy, useful for slow spatial threat."],
+        ["The Conversation (1974)", "Suspicion, surveillance, and sound as evidence."],
+        ["Eyes Wide Shut (1999)", "Ritual, wealth, and coded social performance create dread without overt monsters."],
+        ["Night of the Living Dead (1968)", "Contained survival pressure with social stakes."],
+        ["Parasite (2019)", "Architecture and class pressure shape every character choice."],
+      ];
+  const palette = desertOrScale
+    ? [
+        ["Spice Ochre", "#C88935", "Arrakis dust, spice light, and the constant heat surrounding desert scenes."],
+        ["Caladan Slate", "#3D4652", "Rain, stone, and the cold inheritance of House Atreides."],
+        ["Atreides Black", "#111513", "Armor, ceremony, and the noble severity of the family's military world."],
+        ["Crysknife Bone", "#D9D0BC", "Fremen material culture and the pale threat of sacred objects."],
+        ["Harkonnen Smoke", "#4A4642", "Steam baths, suspensors, poison gas, and industrial brutality."],
+      ]
+    : [
+        ["Shadow Black", "#151515", "The negative space around the story's threat."],
+        ["Domestic Cream", "#E6DDC9", "Soft surfaces that hide pressure."],
+        ["Cold Blue", "#7F9BB2", "Clinical distance and emotional control."],
+        ["Blood Red", "#9C1B22", "Moments where bodily cost breaks through."],
+        ["Ground Green", "#3E5335", "Exterior calm that can turn hostile."],
+      ];
+
   return `# Mood & Tone: ${data.title}
 
 ## Atmosphere
-The film should feel like a sunny social visit with a trapdoor underneath it. Daylight does not make the estate safe; it makes the danger harder for Chris to call out. The mood moves from suburban dread in Scenes 1-3, to awkward domestic performance in Scenes 8-12, to full ritual horror once the flash reveals Andre in Scene 17 and the auction in Scene 18 reframes the party.
+The film should feel ${data.tone || "controlled and cinematic"}: large enough to make the characters look politically small, but intimate enough that every object and gesture can alter fate. Scene ${data.scenes[0].scene_number} establishes the dream pressure with ${data.scenes[0].key_visual_moment} Scene ${data.scenes.at(-1).scene_number} closes the movement with ${data.scenes.at(-1).key_visual_moment}
 
 ## Tonal Descriptors
-polite dread · sunlit captivity · social horror · clinical domesticity · predatory hospitality · satirical unease · body-theft paranoia · controlled panic · suburban ritual · flash-bulb rupture
+${[
+  data.tone,
+  "ceremonial pressure",
+  "landscape as threat",
+  "political machinery",
+  "controlled awe",
+  "ancestral burden",
+  "ritual violence",
+  "survival discipline",
+  "prophetic unease",
+  "material restraint",
+].filter(Boolean).join(" · ")}
 
 ## Reference Points
-- **Rosemary's Baby (1968)** — Ordinary apartment hospitality becomes a conspiracy, useful for the slow conversion of domestic spaces into threat.
-- **The Stepford Wives (1975)** — The perfect community surface masks body-control horror and social compliance.
-- **Eyes Wide Shut (1999)** — Party ritual, wealth, and coded social performance create dread without needing overt monsters.
-- **Rear Window (1954)** — Chris's camera and looking/being-looked-at dynamic make observation part of the suspense language.
-- **Night of the Living Dead (1968)** — A Black protagonist trapped in a house under siege gives the ending an extra layer of social terror.
+${references.map(([title, note]) => `- **${title}** - ${note}`).join("\n")}
 
 ## Music & Sound Direction
-Sound should treat control as small, repeatable cues. The opening car uses "Run Rabbit Run" as a predator's private joke. Missy's teacup and spoon need to be mixed like a weapon: tiny, clean, rhythmic, and more powerful than any score swell. The party can stay airy and social, but Chris's isolation should be audible through dropped room tone, over-clear voices, camera flash silence, and the sudden pressure of hypnosis.
+Sound should make power feel physical. The Voice in Scene 3 needs unnatural authority without becoming cartoonish. The Atreides bagpipes in Scene 11 should announce military identity, while the Sardaukar ritual in Scene 14 should feel like state violence converted into liturgy. Desert scenes need wind, sand, machinery, and low human presence to compete with the scale.
 
 ### Soundtrack References
-- **Under the Skin (2013)** — Mica Levi — Predatory repetition and bodily unease without conventional horror release.
-- **The Conversation (1974)** — David Shire — Surveillance, interior suspicion, and sound as evidence.
-- **Rosemary's Baby (1968)** — Krzysztof Komeda — Lullaby sweetness with a poisoned domestic edge.
-- **Psycho (1960)** — Bernard Herrmann — Sharp rhythmic attack for moments where politeness breaks into violence.
+- **Sicario (2015)** - Low-frequency dread and disciplined escalation.
+- **Arrival (2016)** - Vocal texture and awe without decorative excess.
+- **The Thin Red Line (1998)** - War, prayer, and landscape held in one sonic field.
+- **Mad Max: Fury Road (2015)** - Percussive machinery and action rhythm tied to geography.
 
 ## Color Palette
-- **Camera Black** \`#151515\` — Chris's photographic eye, the phone screen, the games room, and the darkness of the Sunken Place.
-- **Estate Cream** \`#E6DDC9\` — The Armitage home's polite walls, porch daylight, and the soft domestic cover for violence.
-- **Teacup Blue** \`#7F9BB2\` — Missy's hypnosis object and the cold clinical calm of her office.
-- **Blood Flash Red** \`#9C1B22\` — Nosebleed, gunshot, Rose's wound, and every moment the body's real cost breaks through.
-- **Lawn Green** \`#3E5335\` — The estate grounds, Walter's labor, the party lawn, and the false pastoral calm around the house.
+${palette.map(([name, hex, note]) => `- **${name}** \`${hex}\` - ${note}`).join("\n")}
 
 ## Similar Moods
-- **Parasite (2019)** — Wealth, architecture, and politeness become mechanisms of social violence.
-- **The Invitation (2015)** — A social gathering turns into a trap by asking the protagonist to keep accepting discomfort.
-- **It Follows (2014)** — Suburban space and everyday behavior acquire a clean, inescapable menace.
-- **Caché (2005)** — The act of looking becomes morally unstable and dangerous.
-- **The Stepford Wives (1975)** — Community normalcy hides ownership and replacement horror.`;
+${references.slice(0, 5).map(([title, note]) => `- **${title}** - ${note}`).join("\n")}`;
 }
 
 function buildSceneDocument(data) {
@@ -270,10 +360,10 @@ function buildSceneDocument(data) {
 
 function getLighting(scene) {
   if (/NIGHT|CONTINUOUS/i.test(scene.time_of_day)) {
-    return "Low-key night light with practical sources, pockets of darkness, and clean horror contrast.";
+    return "Low-key practical light, visible silhouettes, and enough environmental detail to keep geography clear.";
   }
   if (/MORNING|AFTERNOON|DAY/i.test(scene.time_of_day)) {
-    return "Natural daylight that feels plausible and slightly too clear, letting social discomfort sit in the open.";
+    return "Hard natural light with restrained contrast, making costume, object, and location continuity easy to read.";
   }
   return "Practical motivated light with restrained contrast.";
 }
@@ -289,7 +379,7 @@ Each frame is grounded in the supplied scene data and written as a production-us
 
   const scenes = data.scenes.map((scene) => `### Scene ${scene.scene_number}: ${scene.slug_line}
 
-**Prompt:** ${scene.key_visual_moment} Set the frame in ${scene.location}, with ${list(scene.characters_present).toLowerCase()} present. The image should feel like ${scene.emotional_beat}, with visible production details from the scene: ${list(scene.props.concat(scene.wardrobe_notes), "the room, bodies, and practical objects that create tension")}. Keep the style cinematic, restrained, contemporary psychological horror, grounded in real locations, no fantasy monsters, no extra plot details.
+**Prompt:** ${scene.key_visual_moment} Set the frame in ${scene.location}, with ${list(scene.characters_present).toLowerCase()} present. The image should feel like ${scene.emotional_beat}, with visible production details from the scene: ${list(scene.props.concat(scene.wardrobe_notes), "the room, bodies, and practical objects that create tension")}. Keep the frame cinematic, disciplined, and grounded in the supplied screenplay details. Do not add plot events, characters, creatures, or production history not present in the JSON.
 
 **Camera:** ${scene.int_ext === "EXT" ? "Wide or medium-wide coverage that lets the location pressure the character" : "Controlled medium shot with tight blocking and visible object continuity"}
 **Lighting:** ${getLighting(scene)}
@@ -300,6 +390,18 @@ Each frame is grounded in the supplied scene data and written as a production-us
 }
 
 function buildPosterDocument(data) {
+  const lead = topBySceneCount(data.characters, "scenes_present", 1)[0];
+  const supporting = topBySceneCount(data.characters, "scenes_present", 4).filter((character) => character.name !== lead?.name);
+  const heroProps = data.props_master.filter((prop) => prop.hero_prop);
+  const majorScenes = [...data.scenes].sort((a, b) => (b.page_end - b.page_start) - (a.page_end - a.page_start)).slice(0, 3);
+  const palette = [
+    ["Spice Ochre", "#C88935"],
+    ["Deep Black", "#111513"],
+    ["Bone White", "#D9D0BC"],
+    ["Smoke Gray", "#4A4642"],
+    ["Blood Rust", "#8B3F24"],
+  ];
+
   return `# Poster Concepts: ${data.title}
 
 ## About This Document
@@ -309,91 +411,81 @@ These are key-art directions for a campaign designer. Each concept should read a
 
 ## Category: Character-Driven
 
-**Concept 1: The Photographer in the Chair**
-- **Style:** Psychological horror portrait, restrained one-sheet
-- **Composition:** Chris centered in Missy's armchair, camera-black negative space around him, tears catching one hard highlight as the room drops away into the Sunken Place.
-- **Color Palette:** #151515 (Camera Black), #7F9BB2 (Teacup Blue), #E6DDC9 (Estate Cream), #9C1B22 (Blood Flash Red)
-- **Typography:** Small white sans-serif title locked low, wide tracking, no distressed horror lettering.
-- **Tagline:** "The visit is the trap."
-- **Mood:** Paralyzed, intimate, controlled
-- **Target Appeal:** Elevated horror viewers who want social dread over monster imagery.
-- **AI Prompt:** A restrained psychological horror movie poster for Get Out, Chris Washington frozen in an armchair, tears on his face, falling into a black void like the Sunken Place, a pale teacup glinting in the foreground, elegant minimal typography, black cream blue and blood red palette, cinematic but not gory.
+**Concept 1: The Heir Against the Desert**
+- **Style:** Monumental character one-sheet
+- **Composition:** ${lead?.name || "The lead"} small against a vast landscape, with the key visual pressure from Scene ${data.scenes[0].scene_number}: ${data.scenes[0].key_visual_moment}
+- **Color Palette:** ${palette.slice(0, 4).map(([name, hex]) => `${hex} (${name})`).join(", ")}
+- **Typography:** Tall, restrained serif title with wide-set sans-serif credits.
+- **Tagline:** "The future is not waiting."
+- **Mood:** Prophetic, isolated, immense
+- **Target Appeal:** Viewers drawn to epic scale and character destiny.
+- **AI Prompt:** A restrained epic film poster for ${data.title}, ${lead?.name || "the lead character"} isolated against the dominant landscape, ceremonial scale, hard light, ${data.tone}, no invented characters or plot details.
 
-**Concept 2: Rose at the Door**
-- **Style:** Character betrayal poster
-- **Composition:** Rose framed in the foyer holding car keys, soft estate light behind her, Chris only reflected as a dark shape in the door glass.
-- **Color Palette:** #E6DDC9 (Estate Cream), #151515 (Camera Black), #3E5335 (Lawn Green), #9C1B22 (Blood Flash Red)
-- **Typography:** Clean editorial serif for title with a thin sans-serif tagline.
-- **Tagline:** "She brought him home."
-- **Mood:** Romantic surface, predatory reveal
-- **Target Appeal:** Thriller audience drawn to relationship betrayal and hidden villainy.
-- **AI Prompt:** Movie poster, Rose stands in a grand house foyer holding car keys, calm smile, Chris reflected as a shadow in glass behind her, warm estate lighting hiding danger, elegant psychological thriller composition, no spoilers beyond betrayal mood.
+**Concept 2: The House Under Pressure**
+- **Style:** Ensemble political poster
+- **Composition:** ${[lead, ...supporting].filter(Boolean).map((character) => character.name).join(", ")} arranged as a formal power structure, with the primary location ${topBySceneCount(data.locations, "scenes", 1)[0]?.name || "the central location"} implied behind them.
+- **Color Palette:** ${palette.map(([name, hex]) => `${hex} (${name})`).join(", ")}
+- **Typography:** Architectural, quiet, and ceremonial.
+- **Tagline:** "Power changes hands."
+- **Mood:** Formal, tense, inevitable
+- **Target Appeal:** Viewers interested in political stakes and ensemble drama.
+- **AI Prompt:** Ensemble key art for ${data.title}, formal arrangement of the major characters, political tension, monumental architecture and landscape, controlled color, premium science-fiction drama.
 
 ## Category: Symbolic / Metaphorical
 
-**Concept 3: The Teacup Trigger**
-- **Style:** Object-first minimalist horror
-- **Composition:** A porcelain teacup and spoon on a dark table, ripples inside the cup forming a small falling human silhouette.
-- **Color Palette:** #7F9BB2 (Teacup Blue), #151515 (Camera Black), #E6DDC9 (Estate Cream)
-- **Typography:** Tiny title above the cup, lots of negative space.
-- **Tagline:** "One sound. No escape."
-- **Mood:** Clinical, hypnotic, precise
-- **Target Appeal:** Viewers who respond to iconic horror objects.
-- **AI Prompt:** Minimalist horror one-sheet, porcelain teacup and silver spoon on a dark table, concentric ripples inside the tea becoming a falling human silhouette, elegant negative space, restrained typography, psychological horror.
+**Concept 3: The Hero Object**
+- **Style:** Minimal object poster
+- **Composition:** ${heroProps[0]?.item || "The central hero prop"} isolated at large scale, treated as a sacred production object with scene evidence from ${heroProps[0]?.scenes?.join(", ") || "the script"}.
+- **Color Palette:** ${palette.slice(1, 4).map(([name, hex]) => `${hex} (${name})`).join(", ")}
+- **Typography:** Small title, lots of negative space, no decorative texture unless tied to the object.
+- **Tagline:** "A symbol can become a weapon."
+- **Mood:** Ritual, precise, ominous
+- **Target Appeal:** Viewers who respond to iconic film objects and design detail.
+- **AI Prompt:** Minimalist poster for ${data.title}, ${heroProps[0]?.item || "central hero object"} isolated with premium lighting, ritual importance, restrained negative space, no unrelated props.
 
-**Concept 4: The Flash**
-- **Style:** High-contrast graphic key art
-- **Composition:** A camera flash exploding from Chris's phone, briefly revealing Andre's terrified face inside a clean party silhouette.
-- **Color Palette:** #151515 (Camera Black), #F5F2E8 (Flash White), #9C1B22 (Blood Flash Red), #3E5335 (Lawn Green)
-- **Typography:** Title cut by the flash line, readable at small size.
-- **Tagline:** "Seeing is survival."
-- **Mood:** Sudden, electric, warning
-- **Target Appeal:** Genre fans who remember one clear visual hook.
-- **AI Prompt:** Graphic horror poster, smartphone camera flash blasts across a garden party scene, revealing a terrified man's face breaking through a polite mask, sharp white flash, black background, green lawn hints, red nosebleed detail, clean modern typography.
+**Concept 4: The Landscape as Fate**
+- **Style:** Environmental metaphor poster
+- **Composition:** A vast location field from ${topBySceneCount(data.locations, "scenes", 1)[0]?.name || "the main location"} overwhelms a small human silhouette, with weather, architecture, or terrain carrying the story's pressure.
+- **Color Palette:** ${palette.map(([name, hex]) => `${hex} (${name})`).join(", ")}
+- **Typography:** Title embedded low in the environment so scale reads first.
+- **Tagline:** "The world chooses its shape."
+- **Mood:** Immense, quiet, fatalistic
+- **Target Appeal:** Premium sci-fi and design-forward audiences.
+- **AI Prompt:** Environmental one-sheet for ${data.title}, tiny human figure against an overwhelming location from the screenplay, hard light, epic restraint, graphic readability at thumbnail size.
 
 ## Category: Scene-Based
 
-**Concept 5: The Silent Auction**
-- **Style:** Ritual social horror tableau
-- **Composition:** Dean standing beside an easel with Chris's portrait, guests arranged like a polite congregation, hands mid-bid but mouths closed.
-- **Color Palette:** #E6DDC9 (Estate Cream), #3E5335 (Lawn Green), #151515 (Camera Black), #9C1B22 (Blood Flash Red)
-- **Typography:** Stately serif title, almost like a gallery placard.
-- **Tagline:** "Some bids are made in silence."
-- **Mood:** Wealthy, ritualistic, sickening
-- **Target Appeal:** Audiences drawn to social satire and conspiracy horror.
-- **AI Prompt:** Social horror movie poster, elegant garden party silent auction, older wealthy guests silently bidding, an easel displays a portrait of Chris Washington, sunny lawn becomes ritual space, unsettling symmetry, refined gallery-like typography.
-
-**Concept 6: Suburban Opening**
-- **Style:** Night-street suspense poster
-- **Composition:** Andre small in the frame on an empty suburban street, a cream sports car creeping behind him, the title floating above like a warning sign.
-- **Color Palette:** #151515 (Camera Black), #E6DDC9 (Estate Cream), #7F9BB2 (Streetlight Blue), #9C1B22 (Blood Flash Red)
-- **Typography:** Sans-serif all caps, small and cold.
-- **Tagline:** "The wrong street knows your name."
-- **Mood:** Predatory, quiet, inevitable
-- **Target Appeal:** Suspense audience entering through the kidnapping hook.
-- **AI Prompt:** Nighttime suburban horror poster, lone Black man walking down an empty street, vintage cream Porsche crawling behind him with tinted windows, cold streetlights, deep shadows, restrained modern title treatment, no gore.
+${majorScenes.map((scene, index) => `**Concept ${index + 5}: Scene ${scene.scene_number} Signal**
+- **Style:** Scene-led campaign image
+- **Composition:** ${scene.key_visual_moment}
+- **Color Palette:** ${palette.slice(index, index + 3).map(([name, hex]) => `${hex} (${name})`).join(", ")}
+- **Typography:** Title clear at thumbnail size, secondary copy minimal.
+- **Tagline:** "${index === 0 ? "Scale has teeth." : index === 1 ? "The test is already underway." : "No inheritance is clean."}"
+- **Mood:** ${titleCase(scene.emotional_beat)}
+- **Target Appeal:** Viewers who want one memorable set piece as the campaign hook.
+- **AI Prompt:** Key art for ${data.title}, Scene ${scene.scene_number}: ${scene.key_visual_moment} Keep only characters and objects named in the script data, cinematic scale, no extra plot details.`).join("\n\n")}
 
 ## Category: Minimalist / Typographic
 
-**Concept 7: Get Out / Sink In**
+**Concept 8: The Title as Terrain**
 - **Style:** Typographic conceptual poster
-- **Composition:** The words GET OUT at the top, a small human figure falling downward through the O into black negative space.
-- **Color Palette:** #151515 (Camera Black), #F5F2E8 (Flash White), #7F9BB2 (Teacup Blue)
-- **Typography:** Large bold sans-serif, minimal, architectural spacing.
-- **Tagline:** "Sink in."
-- **Mood:** Iconic, stark, memorable
+- **Composition:** The title treated like an enormous piece of landscape or architecture, with a small figure moving through the letterforms.
+- **Color Palette:** ${palette.slice(0, 3).map(([name, hex]) => `${hex} (${name})`).join(", ")}
+- **Typography:** Massive serif or chiseled sans-serif, quiet spacing, no distressed effects.
+- **Tagline:** "A world inside a name."
+- **Mood:** Iconic, austere, memorable
 - **Target Appeal:** Design-forward genre audience.
-- **AI Prompt:** Minimal typographic movie poster, huge clean words GET OUT on black background, tiny human silhouette falling through the letter O into a deep void, elegant stark design, cream and blue highlights.
+- **AI Prompt:** Minimal typographic poster for ${data.title}, title as monumental terrain, tiny human silhouette, austere premium science-fiction design, controlled palette.
 
-**Concept 8: The Estate Map**
+**Concept 9: The Production Map**
 - **Style:** Production-design one-sheet
-- **Composition:** The Armitage estate seen as a clean architectural cutaway: porch, office, bedroom, games room, lawn, each room marked by one small object.
-- **Color Palette:** #E6DDC9 (Estate Cream), #151515 (Camera Black), #3E5335 (Lawn Green), #9C1B22 (Blood Flash Red)
-- **Typography:** Title as an estate brochure headline gone wrong.
-- **Tagline:** "Every room has a purpose."
-- **Mood:** Designed, sinister, controlled
+- **Composition:** A restrained map of ${data.locations.slice(0, 4).map((location) => location.name).join(", ")}, with one object or event marker per location.
+- **Color Palette:** ${palette.map(([name, hex]) => `${hex} (${name})`).join(", ")}
+- **Typography:** Information-design clarity with cinematic restraint.
+- **Tagline:** "Every place has a cost."
+- **Mood:** Designed, strategic, expansive
 - **Target Appeal:** Viewers interested in puzzle-box horror and production design.
-- **AI Prompt:** Elegant horror poster showing a cutaway plan of a secluded family estate, rooms marked by a teacup, camera flash, shoebox photos, games room chair, and lawn auction easel, estate brochure design turned sinister, restrained colors, clean typography.`;
+- **AI Prompt:** Elegant production-map poster for ${data.title}, restrained map of the script's major locations with small hero-object markers, premium campaign design, no invented geography.`;
 }
 
 function parseStoryboardPrompts(markdown) {
@@ -676,8 +768,9 @@ async function main() {
   if (!inputPath || !slug || !exportName) usage();
 
   const baseUrl = process.env.GREENLIGHT_BASE_URL || DEFAULT_BASE_URL;
-  const jsonData = await readFile(inputPath, "utf8");
-  const data = JSON.parse(jsonData);
+  const rawJsonData = await readFile(inputPath, "utf8");
+  const data = normalizeData(JSON.parse(rawJsonData), slug);
+  const jsonData = JSON.stringify(data, null, 2);
   validateScreenplayData(data);
 
   log(`Building demo fixture for ${data.title} from ${inputPath}`);
