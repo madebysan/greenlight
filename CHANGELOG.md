@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Added `Past Lives` as a new diasporic-romance demo deck with generated fixture data, images, route, share source, sitemap entry, and landing-card entry.
+- Added `The Favourite` as a new period court-intrigue demo deck with generated fixture data, images, route, share source, sitemap entry, and landing-card entry.
 - Added explicit demo image generation modes so fixture builds refuse stale image folders by default, with opt-in `--force-images` and `--reuse-images` flags.
 - Added the `Dune: Part One` demo deck with a dedicated route, share source, OG image route, landing-card entry, generated report fixture, and 38 committed demo images.
 - Improved the demo fixture builder so local fallback reports no longer reuse film-specific Get Out language for new example scripts.

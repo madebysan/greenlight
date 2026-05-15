@@ -159,6 +159,68 @@ export function StepInstructions({ onSubmitJson }: StepInstructionsProps) {
           </div>
         </a>
 
+        {/* The Favourite — period court comedy */}
+        <a
+          href="/demo/the-favourite"
+          className="group block rounded-[12px] bg-card/40 shadow-paper hover:shadow-paper-hover transition-all overflow-hidden"
+        >
+          <div className="flex items-center gap-5 px-6 py-5">
+            <div className="shrink-0 w-[56px] rounded-lg overflow-hidden bg-muted/30" style={{ aspectRatio: "5/7" }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/demo-images/the-favourite/poster-1.jpg"
+                alt="The Favourite poster sketch"
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-[10px] font-mono uppercase tracking-[0.15em] text-muted-foreground mb-1">
+                Feature · Period drama
+              </div>
+              <h3 className="text-[15px] font-medium tracking-normal group-hover:text-foreground transition-colors">
+                The Favourite
+              </h3>
+              <p className="text-[12px] text-muted-foreground mt-0.5">
+                Davis & McNamara · Black comedy · 44 scenes · court intrigue
+              </p>
+            </div>
+            <span className="text-[13px] text-muted-foreground group-hover:text-foreground transition-colors shrink-0">
+              View deck →
+            </span>
+          </div>
+        </a>
+
+        {/* Past Lives — diasporic romance */}
+        <a
+          href="/demo/past-lives"
+          className="group block rounded-[12px] bg-card/40 shadow-paper hover:shadow-paper-hover transition-all overflow-hidden"
+        >
+          <div className="flex items-center gap-5 px-6 py-5">
+            <div className="shrink-0 w-[56px] rounded-lg overflow-hidden bg-muted/30" style={{ aspectRatio: "5/7" }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/demo-images/past-lives/poster-1.jpg"
+                alt="Past Lives poster sketch"
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-[10px] font-mono uppercase tracking-[0.15em] text-muted-foreground mb-1">
+                Feature · 2023
+              </div>
+              <h3 className="text-[15px] font-medium tracking-normal group-hover:text-foreground transition-colors">
+                Past Lives
+              </h3>
+              <p className="text-[12px] text-muted-foreground mt-0.5">
+                Celine Song · Drama · 16 scenes · Seoul, NYC, Montauk
+              </p>
+            </div>
+            <span className="text-[13px] text-muted-foreground group-hover:text-foreground transition-colors shrink-0">
+              View deck →
+            </span>
+          </div>
+        </a>
+
         {/* The Red Balloon — short film */}
         <a
           href="/demo/red-balloon"

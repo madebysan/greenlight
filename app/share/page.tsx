@@ -7,13 +7,17 @@ import { loadProject, type SavedProject } from "@/lib/reports";
 import { DEMO_PROJECT } from "@/lib/demo-project";
 import { DUNE_PART_ONE_PROJECT } from "@/lib/demos/dune-part-one";
 import { GET_OUT_PROJECT } from "@/lib/demos/get-out";
+import { PAST_LIVES_PROJECT } from "@/lib/demos/past-lives";
 import { RED_BALLOON_PROJECT } from "@/lib/demos/red-balloon";
+import { THE_FAVOURITE_PROJECT } from "@/lib/demos/the-favourite";
 
 const DEMO_SHARE_SOURCES: Partial<Record<string, SavedProject | null>> = {
   demo: DEMO_PROJECT,
   "dune-part-one": DUNE_PART_ONE_PROJECT,
   "get-out": GET_OUT_PROJECT,
+  "past-lives": PAST_LIVES_PROJECT,
   "red-balloon": RED_BALLOON_PROJECT,
+  "the-favourite": THE_FAVOURITE_PROJECT,
 };
 
 const SHARE_PAGE_CLASS = "share-light min-h-screen bg-background text-foreground";

@@ -182,6 +182,147 @@ function topBySceneCount(items, sceneKey = "scenes", limit = 3) {
   return [...items].sort((a, b) => (b[sceneKey]?.length || 0) - (a[sceneKey]?.length || 0)).slice(0, limit);
 }
 
+function textProfile(data) {
+  const genre = data.genre.join(" ").toLowerCase();
+  const tone = (data.tone || "").toLowerCase();
+  const period = (data.setting_period || "").toLowerCase();
+  const profileText = `${genre} ${tone} ${period}`;
+
+  if (/historical|period|royal|court|queen|king|palace|18th|17th|19th/.test(profileText)) {
+    return {
+      descriptors: [
+        "court ritual",
+        "powdered elegance",
+        "class pressure",
+        "weaponized intimacy",
+        /comedy|comic|satire|satirical|absurd|dark comedic/.test(profileText) ? "acid comedy" : "social menace",
+        "opulent decay",
+        "ceremonial cruelty",
+      ],
+      references: [
+        ["Barry Lyndon (1975)", "Candlelit period formality where power is embedded in composition and gesture."],
+        ["Dangerous Liaisons (1988)", "Private manipulation staged through etiquette, costume, and rooms built for performance."],
+        ["Orlando (1992)", "Period imagery with wit, theatricality, and a self-aware relationship to history."],
+        ["Marie Antoinette (2006)", "Courtly excess, pastel surfaces, and emotional isolation inside decorative abundance."],
+        ["Amadeus (1984)", "Lavish interiors, rivalry, humiliation, and the comedy of public status games."],
+      ],
+      palette: [
+        ["Candle Gold", "#C49A47", "Firelight, gilt interiors, and rank made visible through surfaces."],
+        ["Powdered Ivory", "#E6DDC9", "Pale makeup, linen, letters, and fragile aristocratic restraint."],
+        ["Velvet Crimson", "#8B1E2D", "Rivalry, blood, wine, and private violence under polished ceremony."],
+        ["Gout Blue", "#536B85", "Illness, damp rooms, and the Queen's emotional distance."],
+        ["Ink Black", "#171513", "Secret passages, formal dress, and power moves hidden in shadow."],
+      ],
+      soundtrackReferences: [
+        ["Barry Lyndon (1975)", "Formal classical weight and candlelit restraint."],
+        ["The Draughtsman's Contract (1982)", "Baroque repetition, wit, and controlled mischief."],
+        ["Amadeus (1984)", "Court spectacle with rivalry under the surface."],
+        ["The Piano (1993)", "Intimate touch, withheld feeling, and room-scale tension."],
+      ],
+      campaignAudience: "period drama, black comedy, and performance-led arthouse audiences",
+    };
+  }
+
+  if (/horror|thriller|suspense|mystery/.test(profileText)) {
+    return {
+      descriptors: [
+        "slow dread",
+        "social pressure",
+        "spatial unease",
+        "controlled suspicion",
+        "domestic threat",
+        "ritual behavior",
+      ],
+      references: [
+        ["Rosemary's Baby (1968)", "Ordinary hospitality becomes conspiracy through space, manners, and proximity."],
+        ["The Conversation (1974)", "Suspicion, surveillance, and sound as evidence."],
+        ["Eyes Wide Shut (1999)", "Ritual, wealth, and coded social performance create dread without overt monsters."],
+        ["Night of the Living Dead (1968)", "Contained survival pressure with social stakes."],
+        ["Parasite (2019)", "Architecture and class pressure shape every character choice."],
+      ],
+      palette: [
+        ["Shadow Black", "#151515", "The negative space around the story's threat."],
+        ["Domestic Cream", "#E6DDC9", "Soft surfaces that hide pressure."],
+        ["Cold Blue", "#7F9BB2", "Clinical distance and emotional control."],
+        ["Blood Red", "#9C1B22", "Moments where bodily cost breaks through."],
+        ["Ground Green", "#3E5335", "Exterior calm that can turn hostile."],
+      ],
+      soundtrackReferences: [
+        ["Sicario (2015)", "Low-frequency dread and disciplined escalation."],
+        ["The Conversation (1974)", "Sound as clue, pressure, and emotional distance."],
+        ["Under the Skin (2013)", "Minimal texture and bodily unease."],
+        ["Birth (2004)", "Elegant restraint with a destabilizing emotional charge."],
+      ],
+      campaignAudience: "psychological thriller and prestige horror audiences",
+    };
+  }
+
+  if (/sci-fi|science fiction|action|epic/.test(profileText)) {
+    return {
+      descriptors: [
+        "monumental scale",
+        "political machinery",
+        "controlled awe",
+        "survival discipline",
+        "material restraint",
+      ],
+      references: [
+        ["Lawrence of Arabia (1962)", "Monumental landscape scale and small human figures overwhelmed by place."],
+        ["2001: A Space Odyssey (1968)", "Ritual pacing, architectural silence, and cosmic dread without visual clutter."],
+        ["Mad Max: Fury Road (2015)", "Action where vehicles, bodies, weather, and geography become one production system."],
+        ["Arrival (2016)", "Austere science-fiction awe with emotional restraint and clean visual grammar."],
+        ["Apocalypse Now (1979)", "Imperial machinery, ceremonial violence, and political madness."],
+      ],
+      palette: [
+        ["Weathered Ochre", "#C88935", "Heat, dust, age, and harsh environmental exposure."],
+        ["Slate Blue", "#3D4652", "Stone, rain, metal, and institutional coldness."],
+        ["Ceremonial Black", "#111513", "Armor, ritual, and military severity."],
+        ["Bone White", "#D9D0BC", "Sacred objects, dry light, and fragile human scale."],
+        ["Smoke Gray", "#4A4642", "Industrial spaces, machinery, and exhausted atmosphere."],
+      ],
+      soundtrackReferences: [
+        ["Sicario (2015)", "Low-frequency dread and disciplined escalation."],
+        ["Arrival (2016)", "Vocal texture and awe without decorative excess."],
+        ["The Thin Red Line (1998)", "War, prayer, and landscape held in one sonic field."],
+        ["Mad Max: Fury Road (2015)", "Percussive machinery and action rhythm tied to geography."],
+      ],
+      campaignAudience: "large-scale genre and design-forward audiences",
+    };
+  }
+
+  return {
+    descriptors: [
+      "character pressure",
+      "visual restraint",
+      "location-driven stakes",
+      "object-led storytelling",
+      "emotional precision",
+      "cinematic economy",
+    ],
+    references: [
+      ["Parasite (2019)", "Architecture and class pressure shape every character choice."],
+      ["The Social Network (2010)", "Clean dramatic momentum and status battles made visual."],
+      ["Phantom Thread (2017)", "Control, intimacy, and production design as emotional language."],
+      ["Michael Clayton (2007)", "Institutional pressure rendered through restrained, precise images."],
+      ["Carol (2015)", "Period detail and withheld emotion carried through color, texture, and blocking."],
+    ],
+    palette: [
+      ["Deep Ink", "#151515", "The negative space around the central conflict."],
+      ["Paper Warmth", "#E6DDC9", "Documents, rooms, and practical objects that hold story pressure."],
+      ["Steel Blue", "#6F8396", "Emotional control and institutional distance."],
+      ["Signal Red", "#9C1B22", "Moments where consequence breaks the surface."],
+      ["Ground Green", "#3E5335", "Exterior calm and practical material texture."],
+    ],
+    soundtrackReferences: [
+      ["Phantom Thread (2017)", "Elegant surface with pressure underneath."],
+      ["Carol (2015)", "Interior emotion carried through restrained orchestration."],
+      ["Michael Clayton (2007)", "Low-key tension with clean dramatic control."],
+      ["The Social Network (2010)", "Rhythm and status conflict without clutter."],
+    ],
+    campaignAudience: "prestige drama and design-forward audiences",
+  };
+}
+
 function buildLocalDocuments(data) {
   const documents = [
     { name: "Overview", slug: "overview", content: buildOverviewDocument(data) },
@@ -255,37 +396,12 @@ ${themeLines}
 }
 
 function buildMoodDocument(data) {
-  const desertOrScale = /sci-fi|action/i.test(data.genre.join(" ")) || /epic|desert|bleak/i.test(data.tone);
-  const references = desertOrScale
-    ? [
-        ["Lawrence of Arabia (1962)", "Monumental desert scale and small human figures overwhelmed by landscape."],
-        ["2001: A Space Odyssey (1968)", "Ritual pacing, architectural silence, and cosmic dread without visual clutter."],
-        ["Mad Max: Fury Road (2015)", "Desert action where vehicles, bodies, and weather become one production system."],
-        ["Arrival (2016)", "Austere science-fiction awe with emotional restraint and clean visual grammar."],
-        ["Apocalypse Now (1979)", "Imperial machinery, ceremonial violence, and a descent into political madness."],
-      ]
-    : [
-        ["Rosemary's Baby (1968)", "Ordinary hospitality becomes a conspiracy, useful for slow spatial threat."],
-        ["The Conversation (1974)", "Suspicion, surveillance, and sound as evidence."],
-        ["Eyes Wide Shut (1999)", "Ritual, wealth, and coded social performance create dread without overt monsters."],
-        ["Night of the Living Dead (1968)", "Contained survival pressure with social stakes."],
-        ["Parasite (2019)", "Architecture and class pressure shape every character choice."],
-      ];
-  const palette = desertOrScale
-    ? [
-        ["Spice Ochre", "#C88935", "Arrakis dust, spice light, and the constant heat surrounding desert scenes."],
-        ["Caladan Slate", "#3D4652", "Rain, stone, and the cold inheritance of House Atreides."],
-        ["Atreides Black", "#111513", "Armor, ceremony, and the noble severity of the family's military world."],
-        ["Crysknife Bone", "#D9D0BC", "Fremen material culture and the pale threat of sacred objects."],
-        ["Harkonnen Smoke", "#4A4642", "Steam baths, suspensors, poison gas, and industrial brutality."],
-      ]
-    : [
-        ["Shadow Black", "#151515", "The negative space around the story's threat."],
-        ["Domestic Cream", "#E6DDC9", "Soft surfaces that hide pressure."],
-        ["Cold Blue", "#7F9BB2", "Clinical distance and emotional control."],
-        ["Blood Red", "#9C1B22", "Moments where bodily cost breaks through."],
-        ["Ground Green", "#3E5335", "Exterior calm that can turn hostile."],
-      ];
+  const profile = textProfile(data);
+  const recurringLocations = topBySceneCount(data.locations, "scenes", 3).map((location) => location.name);
+  const musicCues = data.scenes.filter((scene) => scene.music_cue).slice(0, 3);
+  const soundAnchors = data.scenes
+    .filter((scene) => scene.music_cue || scene.props.length || scene.vfx_stunts.length)
+    .slice(0, 4);
 
   return `# Mood & Tone: ${data.title}
 
@@ -293,36 +409,22 @@ function buildMoodDocument(data) {
 The film should feel ${data.tone || "controlled and cinematic"}: large enough to make the characters look politically small, but intimate enough that every object and gesture can alter fate. Scene ${data.scenes[0].scene_number} establishes the dream pressure with ${data.scenes[0].key_visual_moment} Scene ${data.scenes.at(-1).scene_number} closes the movement with ${data.scenes.at(-1).key_visual_moment}
 
 ## Tonal Descriptors
-${[
-  data.tone,
-  "ceremonial pressure",
-  "landscape as threat",
-  "political machinery",
-  "controlled awe",
-  "ancestral burden",
-  "ritual violence",
-  "survival discipline",
-  "prophetic unease",
-  "material restraint",
-].filter(Boolean).join(" · ")}
+${[data.tone, ...profile.descriptors].filter(Boolean).join(" · ")}
 
 ## Reference Points
-${references.map(([title, note]) => `- **${title}** - ${note}`).join("\n")}
+${profile.references.map(([title, note]) => `- **${title}** - ${note}`).join("\n")}
 
 ## Music & Sound Direction
-Sound should make power feel physical. The Voice in Scene 3 needs unnatural authority without becoming cartoonish. The Atreides bagpipes in Scene 11 should announce military identity, while the Sardaukar ritual in Scene 14 should feel like state violence converted into liturgy. Desert scenes need wind, sand, machinery, and low human presence to compete with the scale.
+Sound should make power feel physical without adding story details beyond the supplied JSON. The recurring spaces (${list(recurringLocations, "the primary locations")}) need distinct room tones so shifts in status can be heard before they are explained. ${musicCues.length ? `The explicit cue${musicCues.length === 1 ? "" : "s"} should anchor ${musicCues.map((scene) => `Scene ${scene.scene_number} (${scene.music_cue})`).join(", ")}.` : "No explicit music cues are supplied, so the score should stay restrained and let movement, fabric, objects, and room tone carry pressure."} ${soundAnchors.length ? `Priority sound anchors: ${soundAnchors.map((scene) => `Scene ${scene.scene_number} (${list(scene.props.concat(scene.vfx_stunts), "movement and room tone")})`).join("; ")}.` : ""}
 
 ### Soundtrack References
-- **Sicario (2015)** - Low-frequency dread and disciplined escalation.
-- **Arrival (2016)** - Vocal texture and awe without decorative excess.
-- **The Thin Red Line (1998)** - War, prayer, and landscape held in one sonic field.
-- **Mad Max: Fury Road (2015)** - Percussive machinery and action rhythm tied to geography.
+${profile.soundtrackReferences.map(([title, note]) => `- **${title}** - ${note}`).join("\n")}
 
 ## Color Palette
-${palette.map(([name, hex, note]) => `- **${name}** \`${hex}\` - ${note}`).join("\n")}
+${profile.palette.map(([name, hex, note]) => `- **${name}** \`${hex}\` - ${note}`).join("\n")}
 
 ## Similar Moods
-${references.slice(0, 5).map(([title, note]) => `- **${title}** - ${note}`).join("\n")}`;
+${profile.references.slice(0, 5).map(([title, note]) => `- **${title}** - ${note}`).join("\n")}`;
 }
 
 function buildSceneDocument(data) {
@@ -397,17 +499,13 @@ Each frame is grounded in the supplied scene data and written as a production-us
 }
 
 function buildPosterDocument(data) {
+  const profile = textProfile(data);
   const lead = topBySceneCount(data.characters, "scenes_present", 1)[0];
   const supporting = topBySceneCount(data.characters, "scenes_present", 4).filter((character) => character.name !== lead?.name);
   const heroProps = data.props_master.filter((prop) => prop.hero_prop);
   const majorScenes = [...data.scenes].sort((a, b) => (b.page_end - b.page_start) - (a.page_end - a.page_start)).slice(0, 3);
-  const palette = [
-    ["Spice Ochre", "#C88935"],
-    ["Deep Black", "#111513"],
-    ["Bone White", "#D9D0BC"],
-    ["Smoke Gray", "#4A4642"],
-    ["Blood Rust", "#8B3F24"],
-  ];
+  const palette = profile.palette.map(([name, hex]) => [name, hex]);
+  const primaryLocation = topBySceneCount(data.locations, "scenes", 1)[0]?.name || "the central location";
 
   return `# Poster Concepts: ${data.title}
 
@@ -418,25 +516,25 @@ These are key-art directions for a campaign designer. Each concept should read a
 
 ## Category: Character-Driven
 
-**Concept 1: The Heir Against the Desert**
-- **Style:** Monumental character one-sheet
-- **Composition:** ${lead?.name || "The lead"} small against a vast landscape, with the key visual pressure from Scene ${data.scenes[0].scene_number}: ${data.scenes[0].key_visual_moment}
+**Concept 1: ${lead?.name || "The Lead"} Under Pressure**
+- **Style:** Character one-sheet
+- **Composition:** ${lead?.name || "The lead"} framed by ${primaryLocation}, with the key visual pressure from Scene ${data.scenes[0].scene_number}: ${data.scenes[0].key_visual_moment}
 - **Color Palette:** ${palette.slice(0, 4).map(([name, hex]) => `${hex} (${name})`).join(", ")}
 - **Typography:** Tall, restrained serif title with wide-set sans-serif credits.
-- **Tagline:** "The future is not waiting."
-- **Mood:** Prophetic, isolated, immense
-- **Target Appeal:** Viewers drawn to epic scale and character destiny.
-- **AI Prompt:** A restrained epic film poster for ${data.title}, ${lead?.name || "the lead character"} isolated against the dominant landscape, ceremonial scale, hard light, ${data.tone}, no invented characters or plot details.
+- **Tagline:** "Power changes the room."
+- **Mood:** ${titleCase(data.scenes[0].emotional_beat || "pressurized")}
+- **Target Appeal:** Viewers drawn to character transformation and visual status games.
+- **AI Prompt:** A restrained film poster for ${data.title}, ${lead?.name || "the lead character"} framed by ${primaryLocation}, ${data.tone}, visible details only from the supplied screenplay JSON, no invented characters or plot events.
 
-**Concept 2: The House Under Pressure**
+**Concept 2: The Power Structure**
 - **Style:** Ensemble political poster
-- **Composition:** ${[lead, ...supporting].filter(Boolean).map((character) => character.name).join(", ")} arranged as a formal power structure, with the primary location ${topBySceneCount(data.locations, "scenes", 1)[0]?.name || "the central location"} implied behind them.
+- **Composition:** ${[lead, ...supporting].filter(Boolean).map((character) => character.name).join(", ")} arranged as a formal power structure, with ${primaryLocation} implied behind them.
 - **Color Palette:** ${palette.map(([name, hex]) => `${hex} (${name})`).join(", ")}
 - **Typography:** Architectural, quiet, and ceremonial.
 - **Tagline:** "Power changes hands."
 - **Mood:** Formal, tense, inevitable
 - **Target Appeal:** Viewers interested in political stakes and ensemble drama.
-- **AI Prompt:** Ensemble key art for ${data.title}, formal arrangement of the major characters, political tension, monumental architecture and landscape, controlled color, premium science-fiction drama.
+- **AI Prompt:** Ensemble key art for ${data.title}, formal arrangement of the major characters named in the JSON, political tension, ${primaryLocation}, controlled color, ${data.tone}, no unrelated genre details.
 
 ## Category: Symbolic / Metaphorical
 
@@ -450,15 +548,15 @@ These are key-art directions for a campaign designer. Each concept should read a
 - **Target Appeal:** Viewers who respond to iconic film objects and design detail.
 - **AI Prompt:** Minimalist poster for ${data.title}, ${heroProps[0]?.item || "central hero object"} isolated with premium lighting, ritual importance, restrained negative space, no unrelated props.
 
-**Concept 4: The Landscape as Fate**
+**Concept 4: The Main Location as Pressure**
 - **Style:** Environmental metaphor poster
-- **Composition:** A vast location field from ${topBySceneCount(data.locations, "scenes", 1)[0]?.name || "the main location"} overwhelms a small human silhouette, with weather, architecture, or terrain carrying the story's pressure.
+- **Composition:** ${titleCase(primaryLocation)} becomes the campaign image, with one small figure or hero object showing how the place controls behavior.
 - **Color Palette:** ${palette.map(([name, hex]) => `${hex} (${name})`).join(", ")}
 - **Typography:** Title embedded low in the environment so scale reads first.
 - **Tagline:** "The world chooses its shape."
-- **Mood:** Immense, quiet, fatalistic
-- **Target Appeal:** Premium sci-fi and design-forward audiences.
-- **AI Prompt:** Environmental one-sheet for ${data.title}, tiny human figure against an overwhelming location from the screenplay, hard light, epic restraint, graphic readability at thumbnail size.
+- **Mood:** Controlled, quiet, fatalistic
+- **Target Appeal:** ${profile.campaignAudience}.
+- **AI Prompt:** Environmental one-sheet for ${data.title}, ${primaryLocation} as the dominant production space, one small figure or hero object from the JSON, graphic readability at thumbnail size, no invented geography.
 
 ## Category: Scene-Based
 
@@ -467,7 +565,7 @@ ${majorScenes.map((scene, index) => `**Concept ${index + 5}: Scene ${scene.scene
 - **Composition:** ${scene.key_visual_moment}
 - **Color Palette:** ${palette.slice(index, index + 3).map(([name, hex]) => `${hex} (${name})`).join(", ")}
 - **Typography:** Title clear at thumbnail size, secondary copy minimal.
-- **Tagline:** "${index === 0 ? "Scale has teeth." : index === 1 ? "The test is already underway." : "No inheritance is clean."}"
+- **Tagline:** "${index === 0 ? "Every room has a cost." : index === 1 ? "The test is already underway." : "No victory is clean."}"
 - **Mood:** ${titleCase(scene.emotional_beat)}
 - **Target Appeal:** Viewers who want one memorable set piece as the campaign hook.
 - **AI Prompt:** Key art for ${data.title}, Scene ${scene.scene_number}: ${scene.key_visual_moment} Keep only characters and objects named in the script data, cinematic scale, no extra plot details.`).join("\n\n")}
@@ -476,13 +574,13 @@ ${majorScenes.map((scene, index) => `**Concept ${index + 5}: Scene ${scene.scene
 
 **Concept 8: The Title as Terrain**
 - **Style:** Typographic conceptual poster
-- **Composition:** The title treated like an enormous piece of landscape or architecture, with a small figure moving through the letterforms.
+- **Composition:** The title treated like a physical space from the screenplay, with one figure or hero prop moving through the letterforms.
 - **Color Palette:** ${palette.slice(0, 3).map(([name, hex]) => `${hex} (${name})`).join(", ")}
 - **Typography:** Massive serif or chiseled sans-serif, quiet spacing, no distressed effects.
 - **Tagline:** "A world inside a name."
 - **Mood:** Iconic, austere, memorable
-- **Target Appeal:** Design-forward genre audience.
-- **AI Prompt:** Minimal typographic poster for ${data.title}, title as monumental terrain, tiny human silhouette, austere premium science-fiction design, controlled palette.
+- **Target Appeal:** ${profile.campaignAudience}.
+- **AI Prompt:** Minimal typographic poster for ${data.title}, title as a physical space tied to the screenplay, one small character silhouette or hero prop from the JSON, controlled palette, no unrelated genre language.
 
 **Concept 9: The Production Map**
 - **Style:** Production-design one-sheet
@@ -491,7 +589,7 @@ ${majorScenes.map((scene, index) => `**Concept ${index + 5}: Scene ${scene.scene
 - **Typography:** Information-design clarity with cinematic restraint.
 - **Tagline:** "Every place has a cost."
 - **Mood:** Designed, strategic, expansive
-- **Target Appeal:** Viewers interested in puzzle-box horror and production design.
+- **Target Appeal:** Viewers interested in production design and story structure.
 - **AI Prompt:** Elegant production-map poster for ${data.title}, restrained map of the script's major locations with small hero-object markers, premium campaign design, no invented geography.`;
 }
 

@@ -948,12 +948,12 @@ function SceneFull({
               f.value &&
               f.value !== "None",
           )
-          .map((field) => {
+          .map((field, fieldIndex) => {
             const isEmphasis =
               field.label === "Key Visual Moment" || field.label === "Emotional Beat";
             if (isEmphasis) {
               return (
-                <div key={field.label} className="mb-3">
+                <div key={`${scene.number}-${fieldIndex}-${field.label}`} className="mb-3">
                   <div className="text-[9px] uppercase tracking-widest text-muted-foreground font-semibold mb-1">
                     {field.label}
                   </div>
@@ -964,7 +964,7 @@ function SceneFull({
               );
             }
             return (
-              <div key={field.label} className="flex gap-3 mb-1.5">
+              <div key={`${scene.number}-${fieldIndex}-${field.label}`} className="flex gap-3 mb-1.5">
                 <span className="text-[9px] uppercase tracking-widest text-muted-foreground font-semibold shrink-0 w-24 pt-0.5">
                   {field.label}
                 </span>
