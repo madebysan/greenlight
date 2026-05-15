@@ -103,6 +103,17 @@ type OverviewViewerProps = {
   onNavigateToPosters?: () => void;
 };
 
+function getLeadingNumber(value: string): string | null {
+  return value.match(/^(\d[\d.,]*)/)?.[1] ?? null;
+}
+
+function splitCommaList(value: string): string[] {
+  return value
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
 export function OverviewViewer({
   content,
   jsonData,
@@ -116,6 +127,8 @@ export function OverviewViewer({
   const synopsisShuffle = useShuffleState();
   const themesShuffle = useShuffleState();
   const { ensureKeys } = useApiKeys();
+  const numericStats = parsed.stats.filter((stat) => getLeadingNumber(stat.value));
+  const textStats = parsed.stats.filter((stat) => !getLeadingNumber(stat.value));
 
   // Each shuffle uses its own state so they can run independently.
   async function shuffleSection(
@@ -327,11 +340,10 @@ export function OverviewViewer({
           <SectionHead index={3} label="Scope" labelIcon={<BarChart3 size={10} />}>
             Production footprint
           </SectionHead>
-          {parsed.stats.length > 0 && (
+          {numericStats.length > 0 && (
             <div className="mb-6 grid max-w-[760px] grid-cols-2 overflow-hidden rounded-[12px] border border-border md:grid-cols-3 xl:grid-cols-6">
-              {parsed.stats.map((s) => {
-                const leadingNum = s.value.match(/^(\d[\d.,]*)/);
-                const shortValue = leadingNum ? leadingNum[1] : s.value;
+              {numericStats.map((s) => {
+                const shortValue = getLeadingNumber(s.value);
                 return (
                   <div
                     key={s.label}
@@ -343,6 +355,40 @@ export function OverviewViewer({
                     <div className="mt-2 min-h-[1.8em] font-mono text-[10px] font-semibold uppercase leading-[1.35] tracking-[0.1em] text-muted-foreground">
                       {s.label}
                     </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+          {textStats.length > 0 && (
+            <div className="mb-6 grid max-w-[760px] gap-3 md:grid-cols-2">
+              {textStats.map((s) => {
+                const items = splitCommaList(s.value);
+                const showAsList = items.length > 1 && items.length <= 8;
+                return (
+                  <div
+                    key={s.label}
+                    className="rounded-[12px] border border-border bg-card/35 p-4"
+                  >
+                    <div className="font-mono text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                      {s.label}
+                    </div>
+                    {showAsList ? (
+                      <div className="mt-3 flex flex-wrap gap-1.5">
+                        {items.map((item) => (
+                          <span
+                            key={item}
+                            className="rounded-full border border-border bg-white/[0.03] px-2.5 py-1 text-[12px] leading-none text-foreground/72"
+                          >
+                            {item}
+                          </span>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="mt-2 text-[14px] leading-[1.65] text-foreground/72">
+                        {s.value}
+                      </p>
+                    )}
                   </div>
                 );
               })}
