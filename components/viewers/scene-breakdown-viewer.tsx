@@ -118,6 +118,10 @@ const TIME_STYLES: Record<string, string> = {
 const EMPHASIS_FIELDS = new Set(["Key Visual Moment", "Emotional Beat"]);
 const SKIP_FIELDS = new Set(["Location", "Time"]);
 
+function getLeadingNumber(value: string): string | null {
+  return value.match(/^(\d[\d.,]*)/)?.[1] ?? null;
+}
+
 function SceneEditForm({
   scene,
   onSave,
@@ -387,6 +391,7 @@ export function SceneBreakdownViewer({
   };
 
   const { title, overview, scenes } = parsed;
+  const numericOverview = overview.filter((item) => getLeadingNumber(item.value));
 
   const toggleScene = (num: number) => {
     setExpandedScenes((prev) => {
@@ -447,17 +452,16 @@ export function SceneBreakdownViewer({
         </p>
       </header>
 
-      {overview.length > 0 && (
+      {numericOverview.length > 0 && (
         <section>
           <SectionHead index={1} label="Breakdown" labelIcon={<BarChart3 size={10} />}>
             At a Glance
           </SectionHead>
           <div className="grid grid-cols-2 overflow-hidden rounded-[12px] border border-border md:grid-cols-3">
-            {overview.map((item) => {
+            {numericOverview.map((item) => {
               // Stats may come in as "5 unique locations" — strip to leading number
               // so the big display numeral doesn't overflow.
-              const leadingNum = item.value.match(/^(\d[\d.,]*)/);
-              const shortValue = leadingNum ? leadingNum[1] : item.value;
+              const shortValue = getLeadingNumber(item.value);
               return (
                 <div
                   key={item.label}
