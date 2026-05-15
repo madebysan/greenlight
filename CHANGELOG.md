@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Added explicit demo image generation modes so fixture builds refuse stale image folders by default, with opt-in `--force-images` and `--reuse-images` flags.
 - Added the `Dune: Part One` demo deck with a dedicated route, share source, OG image route, landing-card entry, generated report fixture, and 38 committed demo images.
 - Improved the demo fixture builder so local fallback reports no longer reuse film-specific Get Out language for new example scripts.
 - Removed stale generated docs from the public repo until they can be rebuilt from the current product.

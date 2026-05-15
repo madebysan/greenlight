@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { access, mkdir, readFile, writeFile } from "node:fs/promises";
+import { access, mkdir, readFile, readdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 const DOCUMENTS = [
@@ -16,7 +16,14 @@ const MAX_IMAGE_CONCURRENCY = Number(process.env.GREENLIGHT_IMAGE_CONCURRENCY ||
 
 function usage() {
   console.error(
-    "Usage: node prompt-tests/scripts/build-demo-fixture.mjs <input-json> <slug> <export-name>",
+    [
+      "Usage: node prompt-tests/scripts/build-demo-fixture.mjs <input-json> <slug> <export-name> [--force-images|--reuse-images]",
+      "",
+      "Image behavior:",
+      "  default         Refuse a non-empty public/demo-images/<slug>/ folder.",
+      "  --force-images  Regenerate and overwrite existing images for this slug.",
+      "  --reuse-images  Reuse existing images and only generate missing files.",
+    ].join("\n"),
   );
   process.exit(1);
 }
@@ -603,6 +610,16 @@ async function fileExists(filePath) {
   }
 }
 
+async function directoryHasFiles(directory) {
+  try {
+    const entries = await readdir(directory);
+    return entries.length > 0;
+  } catch (error) {
+    if (error?.code === "ENOENT") return false;
+    throw error;
+  }
+}
+
 async function runWithConcurrency(items, concurrency, runner) {
   const results = [];
   let index = 0;
@@ -642,8 +659,18 @@ async function generateImageWithRetry(baseUrl, route, body, attempts = 3) {
   throw lastError;
 }
 
-async function generateImages({ baseUrl, data, documents, slug }) {
+async function generateImages({ baseUrl, data, documents, slug, imageMode }) {
   const publicDir = path.join(process.cwd(), "public", "demo-images", slug);
+
+  if (imageMode === "fresh" && await directoryHasFiles(publicDir)) {
+    throw new Error(
+      [
+        `Image folder already has files: ${publicDir}`,
+        "Move it into _archived/ first, or rerun with --force-images to overwrite, or --reuse-images to resume.",
+      ].join("\n"),
+    );
+  }
+
   await mkdir(publicDir, { recursive: true });
 
   const storyboardDoc = documents.find((document) => document.slug === "storyboard-prompts");
@@ -709,7 +736,7 @@ async function generateImages({ baseUrl, data, documents, slug }) {
     const destination = path.join(publicDir, task.file);
     const localUrl = `/demo-images/${slug}/${task.file}`;
 
-    if (await fileExists(destination)) {
+    if (imageMode === "reuse" && await fileExists(destination)) {
       return {
         ...task,
         url: localUrl,
@@ -764,8 +791,18 @@ export const ${exportName}: SavedProject = ${JSON.stringify(project, null, 2)};
 }
 
 async function main() {
-  const [inputPath, slug, exportName] = process.argv.slice(2);
+  const args = process.argv.slice(2);
+  const flags = new Set(args.filter((arg) => arg.startsWith("--")));
+  const positional = args.filter((arg) => !arg.startsWith("--"));
+  const [inputPath, slug, exportName] = positional;
   if (!inputPath || !slug || !exportName) usage();
+  if (positional.length !== 3) usage();
+  if (flags.has("--force-images") && flags.has("--reuse-images")) usage();
+
+  const unknownFlags = [...flags].filter((flag) => !["--force-images", "--reuse-images"].includes(flag));
+  if (unknownFlags.length > 0) usage();
+
+  const imageMode = flags.has("--force-images") ? "force" : flags.has("--reuse-images") ? "reuse" : "fresh";
 
   const baseUrl = process.env.GREENLIGHT_BASE_URL || DEFAULT_BASE_URL;
   const rawJsonData = await readFile(inputPath, "utf8");
@@ -775,9 +812,10 @@ async function main() {
 
   log(`Building demo fixture for ${data.title} from ${inputPath}`);
   log(`Using ${baseUrl}`);
+  log(`Image mode: ${imageMode}`);
 
   const documents = await generateDocuments({ baseUrl, jsonData });
-  const images = await generateImages({ baseUrl, data, documents, slug });
+  const images = await generateImages({ baseUrl, data, documents, slug, imageMode });
   await writeDemoModule({ data, jsonData, documents, images, slug, exportName });
 
   log(`Done: lib/demos/${slug}.ts`);
