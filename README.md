@@ -4,10 +4,7 @@
 For the space between finishing a script and figuring out what the film actually looks like.</p>
 
 <p>
-  <img src="https://img.shields.io/badge/Next.js-000000" alt="Next.js">
-  <img src="https://img.shields.io/badge/React-61dafb" alt="React">
-  <img src="https://img.shields.io/badge/Tailwind-38bdf8" alt="Tailwind">
-  <img src="https://img.shields.io/badge/Claude%20API-d97757" alt="Claude API">
+  <code>Next.js</code> <code>React 19</code> <code>Tailwind CSS 4</code> <code>Selected text providers</code> <code>FLUX + Gesture Draw LoRA</code>
 </p>
 
 https://github.com/user-attachments/assets/e5fbef69-2bd7-43b3-858a-e4ef32b0c419
@@ -35,7 +32,7 @@ It's best for students, first-time filmmakers, or anyone who struggles with movi
 
 You'll need structured screenplay JSON to start. I use [Gemini Pro](https://gemini.google.com/app) for this: upload your script, paste the extraction prompt that Greenlight provides, Gemini hands back JSON that matches Greenlight's schema.
 
-Paste that JSON into Greenlight. On first use the app asks for your Claude API key and (optionally) your fal.ai and TMDB keys. They're stored in your browser's `localStorage` and sent to Greenlight's Vercel functions only when the app needs to call the selected provider. Greenlight does not intentionally save those keys server-side.
+Paste that JSON into Greenlight. On first use the app asks for your selected text provider API key and (optionally) your fal.ai and TMDB keys. They're stored in your browser's `localStorage` and sent to Greenlight's Vercel functions only when the app needs to call the selected provider. Greenlight does not intentionally save those keys server-side.
 
 The deck generates automatically. Your selected text provider does the writing, fal.ai generates the images. Both run in parallel, so most of a deck is ready in a couple minutes. You can edit, regenerate, or swap out sections as you go.
 
