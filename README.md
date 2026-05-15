@@ -37,7 +37,9 @@ You'll need structured screenplay JSON to start. I use [Gemini Pro](https://gemi
 
 Paste that JSON into Greenlight. On first use the app asks for your Claude API key and (optionally) your fal.ai and TMDB keys. They're stored in your browser's `localStorage` and sent to Greenlight's Vercel functions only when the app needs to call the selected provider. Greenlight does not intentionally save those keys server-side.
 
-The deck generates automatically. Claude does the writing, fal.ai generates the images. Both run in parallel, so most of a deck is ready in a couple minutes. You can edit, regenerate, or swap out sections as you go.
+The deck generates automatically. Your selected text provider does the writing, fal.ai generates the images. Both run in parallel, so most of a deck is ready in a couple minutes. You can edit, regenerate, or swap out sections as you go.
+
+The report-writing pass first reads the script's genre, tone, period, locations, themes, and props, then adapts the deck language to that lane. A quiet romance should not get the same poster concepts or mood references as a siege horror film, a period court comedy, or a science-fiction epic.
 
 PDF upload is wired in the backend but disabled in the UI. Serverless function timeouts made it unreliable for feature-length scripts, so paste-JSON is the working path today.
 
@@ -75,7 +77,7 @@ Every API call is keyed by the end user. On first use the app pops a modal that 
 
 | Key | Purpose | Required? | Get one at |
 |-----|---------|-----------|-----------|
-| Claude API key | Document generation (Overview, Mood & Tone, Scenes, Storyboards, Poster Concepts) | **Required** | [console.anthropic.com](https://console.anthropic.com/settings/keys) |
+| Text provider API key | Document generation (Overview, Mood & Tone, Scenes, Storyboards, Poster Concepts) | **Required** | Claude, OpenAI-compatible, DeepSeek, or Gemini provider console |
 | fal.ai API key | Image generation (storyboards, portraits, props, posters) | Optional (text-only deck without it) | [fal.ai/dashboard](https://fal.ai/dashboard/keys) |
 | TMDB API key | Poster thumbnails on Mood & Tone (Similar Moods, Soundtrack References) | Optional (tab works without it, just without poster thumbs) | [themoviedb.org/settings/api](https://www.themoviedb.org/settings/api) |
 
@@ -92,7 +94,7 @@ These server-side env vars are used as a fallback when a user hasn't entered a k
 ## Tech stack
 
 - **Framework:** Next.js 16, React 19, Tailwind CSS 4, shadcn/ui
-- **AI:** Claude Haiku 4.5 (Anthropic), FLUX dev plus Gesture Draw LoRA (fal.ai)
+- **AI:** Claude, OpenAI-compatible, DeepSeek, or Gemini for text; FLUX dev plus Gesture Draw LoRA (fal.ai) for images
 - **Data:** TMDB REST API for film reference lookups
 - **Fonts:** Space Grotesk and Space Mono (UI), full Google Fonts catalog for title treatment
 - **Theme:** Dark default with light mode toggle

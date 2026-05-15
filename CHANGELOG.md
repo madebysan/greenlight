@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Reworked the local demo report pipeline so generated text is driven by genre/tone lanes instead of a single generic template.
+- Regenerated the six demo report fixtures through the new text pipeline while preserving existing image maps.
+- Added text-only fixture builder options for safer demo iteration: `--preserve-images-from` and `--output-file`.
+- Added old-vs-new report comparison artifacts for validating whether prompt changes improve user-visible output without regenerating images.
+- Validated Claude Code `sonnet` against `opus` for report-quality review and chose Sonnet as the default routine delegation model for Greenlight.
 - Added `Past Lives` as a new diasporic-romance demo deck with generated fixture data, images, route, share source, sitemap entry, and landing-card entry.
 - Added `The Favourite` as a new period court-intrigue demo deck with generated fixture data, images, route, share source, sitemap entry, and landing-card entry.
 - Added explicit demo image generation modes so fixture builds refuse stale image folders by default, with opt-in `--force-images` and `--reuse-images` flags.
