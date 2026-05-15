@@ -1,21 +1,30 @@
-export const OVERVIEW_PROMPT = `Generate an Overview document from this screenplay data. This is the first thing a collaborator opens — it should read like the opening page of a 1st AD's first-pass breakdown. Treat it as a pitch artifact, not a spreadsheet.
+export const OVERVIEW_PROMPT = `Generate an Overview document from this screenplay data. This is the first thing a collaborator opens — it should read like the opening page of a tasteful film craft dossier. Treat it as a pitch artifact, not a spreadsheet.
+
+Before writing, silently classify the film's creative lane from the JSON. Use that lane to control vocabulary and emphasis:
+- intimate drama / romance: time, distance, language, restraint, ordinary rooms, memory, chosen lives
+- horror / thriller: dread, control, threat, revelation, spatial rules, safety turning unstable
+- historical / court / satire: status, ritual, costume, appetite, hierarchy, private leverage
+- sci-fi / action / epic: scale, systems, vehicles, combat, worldbuilding, inherited power
+- family / fable / magical realism: wonder, object behavior, innocence, public rules, simple visual metaphor
+
+Do not force every film into the same production language. Avoid stock phrases like "power changes the room", "hero object", "main proving ground", "survival is a design language", "the world decides", or "every location has a political cost" unless the JSON genuinely supports that exact idea.
 
 Format your output as clean markdown:
 
 # [Title]
 
 ## Logline
-Write a single compelling sentence (maximum 30 words) that captures the protagonist, their goal, the obstacle, and the stakes. This is what goes on the one-sheet.
+Write a single compelling sentence (maximum 30 words) that captures the protagonist, central tension, obstacle, and emotional or production stakes. Let the film's lane decide whether the sentence is about spectacle, intimacy, dread, ritual, or wonder.
 
 ## Taglines
-Write 3 taglines for the film. Taglines are what goes on the poster — short, atmospheric, built for a one-sheet. Each should take a different angle: one visceral, one thematic, one enigmatic. No more than 10 words each. No cliches. Format as a plain list:
+Write 3 taglines for the film. Taglines are what goes on the poster — short, atmospheric, built for a one-sheet. Each should take a different angle: one visceral, one thematic, one enigmatic. No more than 10 words each. No cliches, no generic destiny/power language. Format as a plain list:
 
 - Tagline one
 - Tagline two
 - Tagline three
 
 ## Synopsis
-Write a 150-200 word spoiler-free synopsis. Establish the world, the characters, and the conflict — tease the turn without revealing the ending. Suitable for sharing with a potential DP, production designer, or investor who hasn't read the script.
+Write a 150-200 word spoiler-free synopsis. Establish the world, the characters, and the conflict — tease the turn without revealing the ending. Suitable for sharing with a potential DP, production designer, or investor who hasn't read the script. Ground the synopsis in the film's specific emotional grammar: silence for quiet dramas, space for thrillers, ritual/status for court pieces, scale/systems for epics, object behavior for fables.
 
 ## Film Identity
 Always render in this exact order. Include **Written by** whenever the \`writer\` field in the JSON is a non-empty string. Only include **Based on** when the \`based_on\` field is a non-empty string.

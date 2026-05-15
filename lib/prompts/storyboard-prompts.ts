@@ -1,11 +1,12 @@
 export const STORYBOARD_PROMPTS_PROMPT = `Generate Storyboard Prompts from this screenplay data. Each prompt is designed to be used with an AI image generator (like FLUX, Midjourney, or DALL-E) to create storyboard frames.
 
+Before writing, silently classify the film's creative lane from the JSON and adapt the frame language to that lane. A quiet romance should privilege distance, posture, silence, city texture, and thresholds. A horror film should privilege spatial threat and object clues. A period satire should privilege rank, costume, ceremony, and body language. An epic should privilege scale and systems. A fable should privilege object behavior and childlike geography.
+
 Format your output as clean markdown:
 
 # Storyboard Prompts: [Title]
 
-## How to Use These Prompts
-Each prompt below describes a key visual moment from the screenplay. Copy any prompt into an image generator to create a storyboard frame. Edit the prompts to adjust camera angles, lighting, or composition.
+Each prompt below should be a production-use image brief grounded in the supplied JSON. Do not add a usage guide, prompt modifiers, or meta-instructions for the user.
 
 ---
 
@@ -30,15 +31,5 @@ Write it as a single flowing paragraph optimized for image generation. Be specif
 **Mood:** [1-3 words]
 
 ---
-
-After all prompts, add:
-
-## Prompt Modifiers
-Suggest 5 style modifiers the user can append to any prompt:
-1. **Cinematic:** [modifier text]
-2. **Noir:** [modifier text]
-3. **Documentary:** [modifier text]
-4. **Indie:** [modifier text]
-5. **Stylized:** [modifier text]
 
 Output ONLY the markdown document. No commentary outside the document.`;

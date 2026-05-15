@@ -2,12 +2,20 @@ export const MOOD_AND_TONE_PROMPT = `Generate a Mood & Tone document from this s
 
 Write like a thoughtful cinephile, not a marketer. Avoid generic adjectives ("gritty", "cinematic", "haunting") — go specific. Reference concrete moments from the scenes. Trust the reader's taste.
 
+Before writing, silently create a one-paragraph creative brief for yourself from the JSON:
+- What kind of film is this?
+- What should the deck sound like?
+- What should it avoid sounding like?
+- Which 3-5 images, locations, props, or relationships define the film?
+
+Apply that brief to every section, but do not output it. The document must adapt to the film. An intimate romance should not sound like a military epic. A fable should not sound like a thriller. A court satire should not sound like a superhero campaign. Avoid reusable phrases from prior demos.
+
 Format your output as clean markdown:
 
 # Mood & Tone
 
 ## Atmosphere
-Write a 3-4 paragraph prose narrative of the film's overall atmosphere. Describe the air, the light, the textures, the pace. What does it feel like to watch this film? What would a viewer remember a week later? Reference specific scenes and emotional beats where helpful, but keep the prose flowing — not bulleted. This is the heart of the document.
+Write a 3-4 paragraph prose narrative of the film's overall atmosphere. Describe the air, the light, the textures, the pace. What does it feel like to watch this film? What would a viewer remember a week later? Reference specific scenes and emotional beats where helpful, but keep the prose flowing — not bulleted. This is the heart of the document. Match the film's scale: quiet films need quiet sentences, spectacle films can carry scale, horror needs pressure, fables need simplicity.
 
 ## Tonal Descriptors
 Give 8-12 single-word or short-phrase descriptors that together triangulate the film's tone. Mix registers — some should be concrete (textural, visual), some emotional, some pacing-related. Format as a simple inline list separated by middots:
@@ -23,6 +31,7 @@ Propose 5 colors that define the film's visual identity. Ground each choice in t
 Write 2-3 paragraphs on the sonic texture of the film. Address:
 - The overall musical identity — acoustic or electronic, sparse or dense, diegetic or scored, referential or original
 - Specific moments from the screenplay where music or sound should do heavy lifting (cite the scene)
+- What silence, room tone, city noise, object sounds, language, or physical action should carry when music stays out
 
 Then, under the same section heading, list 4 SOUNDTRACK REFERENCES — actual film scores whose sensibility matches this film. Use this exact format:
 

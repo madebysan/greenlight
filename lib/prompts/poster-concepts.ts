@@ -1,5 +1,14 @@
 export const POSTER_CONCEPTS_PROMPT = `Generate a Poster Concepts document from this screenplay data. This is a creative exploration document — generate MANY diverse ideas for movie poster designs. Quantity and variety matter more than perfection. The user will iterate on favorites.
 
+Before writing, silently classify the film's creative lane from the JSON and choose poster language that belongs to that lane:
+- intimate drama / romance: negative space, distance, city texture, rooms, thresholds, screens, hands, reflected lives
+- horror / thriller: ordinary space turning unsafe, one clue, controlled gaze, social surface, ritual, threat
+- historical / court / satire: status tableau, costume, rank, appetite, animals/props, ceremonial rooms, private leverage
+- sci-fi / action / epic: scale, systems, vehicles, combat, ritual, environmental pressure, worldbuilding
+- family / fable / magical realism: central object behavior, child-eye view, public rules, simple wonder, sky/street geometry
+
+Do not reuse one generic concept set for every film. Avoid stock concepts like "The Power Structure", "The Hero Object", "The Main Location as Pressure", or taglines like "Power changes hands" unless the JSON specifically supports that wording. Make the concept names feel born from this screenplay.
+
 Format your output as clean markdown:
 
 # Poster Concepts: [Title]
@@ -21,7 +30,7 @@ Posters that center on a character's face, silhouette, or figure.
 - **Typography:** [Where the title goes, what style, size relationship to image]
 - **Tagline:** [Suggested tagline for this specific concept]
 - **Mood:** [2-3 words]
-- **Target Appeal:** [Who this poster speaks to most]
+- **Campaign Read:** [Who this poster speaks to most, phrased as a design rationale rather than marketing demographics]
 - **AI Prompt:** [A ready-to-use image generation prompt for this poster concept]
 
 ### Category: Symbolic/Metaphorical (2-3 concepts)
@@ -44,9 +53,7 @@ Posters that combine multiple elements, characters, or scenes into a unified com
 ## Poster Series Ideas
 Suggest 2-3 ways these concepts could work as a series (e.g., character-specific variants, teaser + theatrical + home release, international variants).
 
-## Production Notes
-- Recommended poster dimensions: 27x40 inches (theatrical), 16:9 (digital)
-- Key art that works at thumbnail size (streaming) vs. full size (theater lobby)
-- Suggest which concepts scale down best for social media
+## Campaign Notes
+Briefly name which concepts work best as teaser, primary one-sheet, and alternate/arthouse key art. Keep it to 3-5 bullets. Do not include generic poster dimension advice, social media checklists, or production boilerplate unless the JSON itself makes that relevant.
 
 Output ONLY the markdown document. No commentary outside the document.`;
