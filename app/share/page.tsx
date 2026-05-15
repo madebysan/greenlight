@@ -5,10 +5,12 @@ import Link from "next/link";
 import { ShareableView } from "@/components/share/shareable-view";
 import { loadProject, type SavedProject } from "@/lib/reports";
 import { DEMO_PROJECT } from "@/lib/demo-project";
+import { GET_OUT_PROJECT } from "@/lib/demos/get-out";
 import { RED_BALLOON_PROJECT } from "@/lib/demos/red-balloon";
 
 const DEMO_SHARE_SOURCES: Partial<Record<string, SavedProject | null>> = {
   demo: DEMO_PROJECT,
+  "get-out": GET_OUT_PROJECT,
   "red-balloon": RED_BALLOON_PROJECT,
 };
 

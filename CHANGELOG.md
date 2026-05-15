@@ -5,6 +5,7 @@
 - Removed stale generated docs from the public repo until they can be rebuilt from the current product.
 - Stopped tracking local-only agent notes, component audit output, and generated prompt-test run artifacts.
 - Kept reusable prompt-test scripts while ignoring generated comparison reports and screenshots.
+- Added a managed `_archived/` ignore rule so local cleanup batches stay reviewable but never ship to GitHub.
 
 ## v0.2.0 - 2026-05-14
 

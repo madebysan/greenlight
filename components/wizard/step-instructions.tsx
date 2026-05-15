@@ -97,6 +97,37 @@ export function StepInstructions({ onSubmitJson }: StepInstructionsProps) {
           </div>
         </a>
 
+        {/* Get Out — contemporary horror */}
+        <a
+          href="/demo/get-out"
+          className="group block rounded-[12px] bg-card/40 shadow-paper hover:shadow-paper-hover transition-all overflow-hidden"
+        >
+          <div className="flex items-center gap-5 px-6 py-5">
+            <div className="shrink-0 w-[56px] rounded-lg overflow-hidden bg-muted/30" style={{ aspectRatio: "5/7" }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/demo-images/get-out/poster-1.jpg"
+                alt="Get Out poster sketch"
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-[10px] font-mono uppercase tracking-[0.15em] text-muted-foreground mb-1">
+                Feature · 2017
+              </div>
+              <h3 className="text-[15px] font-medium tracking-normal group-hover:text-foreground transition-colors">
+                Get Out
+              </h3>
+              <p className="text-[12px] text-muted-foreground mt-0.5">
+                Jordan Peele · Horror · 24 scenes · 6 locations · 9 cast
+              </p>
+            </div>
+            <span className="text-[13px] text-muted-foreground group-hover:text-foreground transition-colors shrink-0">
+              View deck →
+            </span>
+          </div>
+        </a>
+
         {/* The Red Balloon — short film */}
         <a
           href="/demo/red-balloon"

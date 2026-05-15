@@ -46,6 +46,7 @@ next-env.d.ts
 # Test artifacts
 test-results/
 test-output/
+playwright-report/
 test-e2e.mjs
 test-screenplay.json
 
@@ -70,9 +71,14 @@ component-inventory.md
 wiki/
 prompt-tests/*.md
 prompt-tests/runs/
+prompt-tests/inputs/
 
 # Internal assets / tooling
 qa-console.mjs
 visual-qa.mjs
-archived/
 screenshots/
+
+# project-cleanup:start
+_archived/
+archived/
+# project-cleanup:end
